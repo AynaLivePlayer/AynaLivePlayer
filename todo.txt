@@ -1,0 +1,10 @@
+- long text wrap in list
+- went idle and insert new item race condition
+- @3 fix handler execution (maybe priority)
+- @4 list refresh
+
+- 歌词来源
+- 设置界面
+- 文本输出
+- web输出
+- 进入beta版本
