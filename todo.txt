@@ -5,7 +5,7 @@
 - @5 delete optimization
 
 - 歌词来源
-- kuwo歌单
+
 - 文本输出
 - web输出
 - 进入beta版本
@@ -14,6 +14,7 @@
 ----
 
 Finished
+- 2022.6.25: kuwo歌单
 - 2022.6.25: 设置界面
 - 2022.6.25: @6 bug, race condition, playlist size changed during playlist update.
 - 2022.6.23: 用户歌单操作

@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/logger"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -29,7 +30,7 @@ func l() *logrus.Entry {
 func Initialize() {
 	os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
-	MainWindow = App.NewWindow("AynaLivePlayer")
+	MainWindow = App.NewWindow(fmt.Sprintf("AynaLivePlayer Ver.%s", config.VERSION))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Player",
