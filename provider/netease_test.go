@@ -61,12 +61,14 @@ func TestNetease_GetPlaylist(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
 	playlist, err := api.GetPlaylist(Meta{
 		Name: api.GetName(),
-		Id:   "2520739691",
+		//Id:   "2520739691",
+		Id: "2382819181",
 	})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println(len(playlist))
 	for _, media := range playlist {
 		fmt.Println(media.Title, media.Artist, media.Album)
 	}

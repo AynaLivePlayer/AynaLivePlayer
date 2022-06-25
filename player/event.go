@@ -23,6 +23,12 @@ type PlaylistUpdateEvent struct {
 	Playlist *Playlist
 }
 
+func newPlaylistUpdateEvent(playlist *Playlist) PlaylistUpdateEvent {
+	return PlaylistUpdateEvent{
+		Playlist: playlist,
+	}
+}
+
 type PlayEvent struct {
 	Media *Media
 }

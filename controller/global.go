@@ -14,14 +14,21 @@ var SystemPlaylist *player.Playlist
 var LiveClient liveclient.LiveClient
 var PlaylistManager []*player.Playlist
 var CurrentLyric *player.Lyric
+var CurrentMedia *player.Media
 
-func init() {
+func Initialize() {
+
 	MainPlayer = player.NewPlayer()
 	UserPlaylist = player.NewPlaylist("user", player.PlaylistConfig{RandomNext: false})
 	SystemPlaylist = player.NewPlaylist("system", player.PlaylistConfig{RandomNext: config.Player.PlaylistRandom})
 	PlaylistManager = make([]*player.Playlist, 0)
 	CurrentLyric = player.NewLyric("")
 	loadPlaylists()
+
+	MainPlayer.ObserveProperty("idle-active", handleMpvIdlePlayNext)
+	UserPlaylist.Handler.RegisterA(player.EventPlaylistInsert, "controller.playnextwhenadd", handlePlaylistAdd)
+	MainPlayer.ObserveProperty("time-pos", handleLyricUpdate)
+	MainPlayer.Start()
 }
 
 func loadPlaylists() {

@@ -51,7 +51,7 @@ func createPlayController() fyne.CanvasObject {
 	buttonsBox := container.NewCenter(
 		container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext))
 
-	PlayController.Progress = widget.NewSlider(0, 10000)
+	PlayController.Progress = widget.NewSlider(0, 1000)
 	PlayController.CurrentTime = widget.NewLabel("0:00")
 	PlayController.TotalTime = widget.NewLabel("0:00")
 	progressItem := container.NewBorder(nil, nil, PlayController.CurrentTime, PlayController.TotalTime, PlayController.Progress)
@@ -113,10 +113,10 @@ func registerPlayControllerHandler() {
 
 	if controller.MainPlayer.ObserveProperty("percent-pos", func(property *mpv.EventProperty) {
 		if property.Data == nil {
-			PlayController.Progress.SetValue(0)
-			return
+			PlayController.Progress.Value = 0
+		} else {
+			PlayController.Progress.Value = property.Data.(mpv.Node).Value.(float64) * 10
 		}
-		PlayController.Progress.Value = property.Data.(mpv.Node).Value.(float64) * 100
 		PlayController.Progress.Refresh()
 	}) != nil {
 		l().Error("fail to register handler for progress bar with property percent-pos")
@@ -134,14 +134,14 @@ func registerPlayControllerHandler() {
 			//PlayController.Username.SetText("Username")
 			//PlayController.SetDefaultCover()
 		} else {
-			PlayController.Progress.Max = 10000
+			PlayController.Progress.Max = 1000
 		}
 	}) != nil {
 		l().Error("fail to register handler for progress bar with property idle-active")
 	}
 
 	PlayController.Progress.OnChanged = func(f float64) {
-		controller.Seek(f/100, false)
+		controller.Seek(f/10, false)
 	}
 
 	if controller.MainPlayer.ObserveProperty("time-pos", func(property *mpv.EventProperty) {

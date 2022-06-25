@@ -31,3 +31,46 @@ func createAsyncButton(btn *widget.Button, tapped func()) *widget.Button {
 	btn.OnTapped = createAsyncOnTapped(btn, tapped)
 	return btn
 }
+
+type ContextMenuButton struct {
+	widget.Button
+	menu *fyne.Menu
+}
+
+func (b *ContextMenuButton) Tapped(e *fyne.PointEvent) {
+	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
+}
+
+func newContextMenuButton(label string, menu *fyne.Menu) *ContextMenuButton {
+	b := &ContextMenuButton{menu: menu}
+	b.Text = label
+
+	b.ExtendBaseWidget(b)
+	return b
+}
+
+type FixedSplitContainer struct {
+	*container.Split
+}
+
+func (f *FixedSplitContainer) Dragged(event *fyne.DragEvent) {
+	// do nothing
+}
+
+func (f *FixedSplitContainer) DragEnd() {
+	// do nothing
+}
+
+func newFixedSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *FixedSplitContainer {
+	s := &container.Split{
+		Offset:     0.5, // Sensible default, can be overridden with SetOffset
+		Horizontal: horizontal,
+		Leading:    leading,
+		Trailing:   trailing,
+	}
+	fs := &FixedSplitContainer{
+		s,
+	}
+	fs.Split.BaseWidget.ExtendBaseWidget(s)
+	return fs
+}

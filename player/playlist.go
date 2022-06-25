@@ -26,7 +26,7 @@ type Playlist struct {
 	Playlist []*Media
 	Handler  *event.Handler
 	Meta     interface{}
-	lock     sync.RWMutex
+	Lock     sync.RWMutex
 }
 
 func NewPlaylist(name string, config PlaylistConfig) *Playlist {
@@ -57,33 +57,32 @@ func (p *Playlist) Pop() *Media {
 		p.l().Warn("pop first media failed, no media left in the playlist")
 		return nil
 	}
-	p.lock.Lock()
+	p.Lock.Lock()
 	media := p.Playlist[0]
 	p.Playlist = p.Playlist[1:]
-	p.lock.Unlock()
+	p.Lock.Unlock()
 	defer p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
 	return media
 }
 
 func (p *Playlist) Replace(medias []*Media) {
-	p.lock.Lock()
+	p.Lock.Lock()
 	p.Playlist = medias
 	p.Index = 0
-	p.lock.Unlock()
+	p.Lock.Unlock()
 	p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
 	return
 }
 
 func (p *Playlist) Push(media *Media) {
 	p.Insert(-1, media)
-	defer p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
 	return
 }
 
 // Insert runtime in O(n) but i don't care
 func (p *Playlist) Insert(index int, media *Media) {
 	p.l().Infof("insert new meida to index %d", index)
-	p.l().Debug("media=", *media)
+	p.l().Debugf("media= %s", media.Title)
 	e := event.Event{
 		Id:        EventPlaylistPreInsert,
 		Cancelled: false,
@@ -98,7 +97,7 @@ func (p *Playlist) Insert(index int, media *Media) {
 		p.l().Info("insert new media has been cancelled by handler")
 		return
 	}
-	p.lock.Lock()
+	p.Lock.Lock()
 	if index > p.Size() {
 		index = p.Size()
 	}
@@ -110,7 +109,7 @@ func (p *Playlist) Insert(index int, media *Media) {
 		p.Playlist[i] = p.Playlist[i-1]
 	}
 	p.Playlist[index] = media
-	p.lock.Unlock()
+	p.Lock.Unlock()
 	defer func() {
 		p.Handler.Call(&event.Event{
 			Id:        EventPlaylistInsert,
@@ -123,6 +122,52 @@ func (p *Playlist) Insert(index int, media *Media) {
 		})
 		p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
 	}()
+}
+
+func (p *Playlist) Delete(index int) {
+	p.l().Infof("from media at index %d", index)
+	p.Lock.Lock()
+	if index >= p.Size() || index < 0 {
+		p.l().Warnf("media at index %d does not exist", index)
+		p.Lock.Unlock()
+		return
+	}
+	// todo: @5 delete optimization
+	p.Playlist = append(p.Playlist[:index], p.Playlist[index+1:]...)
+	p.Lock.Unlock()
+	defer p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
+}
+
+func (p *Playlist) Move(src int, dest int) {
+	p.l().Infof("from media from index %d to %d", src, dest)
+	p.Lock.Lock()
+	if src >= p.Size() || src < 0 {
+		p.l().Warnf("media at index %d does not exist", src)
+		p.Lock.Unlock()
+		return
+	}
+	if dest >= p.Size() {
+		dest = p.Size() - 1
+	}
+	if dest < 0 {
+		dest = 0
+	}
+	if dest == src {
+		p.l().Warn("src and dest are same, operation not perform")
+		p.Lock.Unlock()
+		return
+	}
+	step := 1
+	if dest < src {
+		step = -1
+	}
+	tmp := p.Playlist[src]
+	for i := src; i != dest; i += step {
+		p.Playlist[i] = p.Playlist[i+step]
+	}
+	p.Playlist[dest] = tmp
+	p.Lock.Unlock()
+	defer p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})
 }
 
 func (p *Playlist) Next() *Media {

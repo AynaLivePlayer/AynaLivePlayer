@@ -90,7 +90,7 @@ func (p *Player) Play(media *Media) error {
 			return err
 		}
 	}
-	p.l().Debug("mpv command load file", media)
+	p.l().Debugf("mpv command load file %s %s", media.Title, media.Url)
 	if err := p.libmpv.Command([]string{"loadfile", media.Url}); err != nil {
 		p.l().Warn("mpv load media failed", media)
 		return err

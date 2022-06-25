@@ -11,4 +11,5 @@ func TestCreate(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	fmt.Println(Log.Path)
+	fmt.Println(Player.Playlists)
 }

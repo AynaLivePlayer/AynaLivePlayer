@@ -2,9 +2,18 @@
 - went idle and insert new item race condition
 - @3 fix handler execution (maybe priority)
 - @4 list refresh
+- @5 delete optimization
 
 - 歌词来源
-- 设置界面
+- kuwo歌单
 - 文本输出
 - web输出
 - 进入beta版本
+
+
+----
+
+Finished
+- 2022.6.25: 设置界面
+- 2022.6.25: @6 bug, race condition, playlist size changed during playlist update.
+- 2022.6.23: 用户歌单操作

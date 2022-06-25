@@ -68,3 +68,21 @@ func TestKuwo_UpdateMediaLyric(t *testing.T) {
 	fmt.Println(err)
 	fmt.Println(media.Lyric)
 }
+
+func TestKuwo_GetPlaylist(t *testing.T) {
+	var api MediaProvider = KuwoAPI
+	playlist, err := api.GetPlaylist(Meta{
+		Name: api.GetName(),
+		//Id:   "1082685104",
+		Id: "2959147566",
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(len(playlist))
+	for _, media := range playlist {
+		fmt.Println(media.Title, media.Artist, media.Album)
+	}
+
+}

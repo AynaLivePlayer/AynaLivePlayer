@@ -26,6 +26,7 @@ func createRoomController() fyne.CanvasObject {
 		controller.SetDanmuClient(RoomController.Input.Text)
 		if controller.LiveClient == nil {
 			RoomController.Status.SetText("Set Failed")
+			RoomController.ConnectBtn.Enable()
 			RoomController.Status.Refresh()
 			return
 		}

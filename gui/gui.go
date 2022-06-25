@@ -12,8 +12,15 @@ import (
 
 const MODULE_GUI = "GUI"
 
+type ConfigLayout interface {
+	Title() string
+	Description() string
+	CreatePanel() fyne.CanvasObject
+}
+
 var App fyne.App
 var MainWindow fyne.Window
+var ConfigList = []ConfigLayout{}
 
 func l() *logrus.Entry {
 	return logger.Logger.WithField("Module", MODULE_GUI)
@@ -37,6 +44,9 @@ func Initialize() {
 		container.NewTabItem("Playlist",
 			newPaddedBoarder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
 		),
+		container.NewTabItem("Config",
+			newPaddedBoarder(nil, nil, nil, nil, createConfigLayout()),
+		),
 	)
 
 	tabs.SetTabLocation(container.TabLocationTop)
@@ -45,4 +55,8 @@ func Initialize() {
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(960, 480))
 	//MainWindow.SetFixedSize(true)
+}
+
+func AddConfigLayout(cfgs ...ConfigLayout) {
+	ConfigList = append(ConfigList, cfgs...)
 }

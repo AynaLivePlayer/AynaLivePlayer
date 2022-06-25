@@ -75,35 +75,41 @@ func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
 	if cnt == 0 {
 		return nil, ErrorExternalApi
 	}
+
 	ids := make([]int, len(result.Playlist.TrackIds))
 	for i := 0; i < cnt; i++ {
 		ids[i] = result.Playlist.TrackIds[i].Id
 	}
-	result2, err := neteaseApi.GetSongDetail(
-		n.ReqData,
-		ids)
-	if err != nil || result.Code != 200 {
-		return nil, ErrorExternalApi
-	}
-	cnt = len(result2.Songs)
-	if cnt == 0 {
-		return nil, ErrorExternalApi
-	}
-	medias := make([]*player.Media, cnt)
-	for i := 0; i < cnt; i++ {
-		medias[i] = &player.Media{
-			Title:  result2.Songs[i].Name,
-			Artist: _neteaseGetArtistNames(result2.Songs[i]),
-			Cover:  result2.Songs[i].Al.PicUrl,
-			Album:  result2.Songs[i].Al.Name,
-			Url:    "",
-			Header: nil,
-			User:   nil,
-			Meta: Meta{
-				Name: n.GetName(),
-				Id:   strconv.Itoa(result2.Songs[i].Id),
-			},
+	medias := make([]*player.Media, 0, cnt)
+	for index := 0; index < len(ids); index += 1000 {
+		result2, err := neteaseApi.GetSongDetail(
+			n.ReqData,
+			ids[index:util.IntMin(index+1000, len(ids))])
+		if err != nil || result2.Code != 200 {
+			break
 		}
+		cnt = len(result2.Songs)
+		if cnt == 0 {
+			break
+		}
+		for i := 0; i < cnt; i++ {
+			medias = append(medias, &player.Media{
+				Title:  result2.Songs[i].Name,
+				Artist: _neteaseGetArtistNames(result2.Songs[i]),
+				Cover:  result2.Songs[i].Al.PicUrl,
+				Album:  result2.Songs[i].Al.Name,
+				Url:    "",
+				Header: nil,
+				User:   nil,
+				Meta: Meta{
+					Name: n.GetName(),
+					Id:   strconv.Itoa(result2.Songs[i].Id),
+				},
+			})
+		}
+	}
+	if len(medias) == 0 {
+		return nil, ErrorExternalApi
 	}
 	return medias, nil
 }

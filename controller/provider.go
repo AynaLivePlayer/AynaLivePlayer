@@ -65,6 +65,7 @@ func ApplyUser(medias []*player.Media, user interface{}) {
 }
 
 func PreparePlaylist(playlist *player.Playlist) error {
+	l().Debug("Prepare playlist ", playlist.Meta.(provider.Meta))
 	medias, err := provider.GetPlaylist(playlist.Meta.(provider.Meta))
 	if err != nil {
 		l().Warn("prepare playlist failed ", err)
