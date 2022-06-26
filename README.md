@@ -10,4 +10,5 @@ QQ group: 621035845
 
 ```
 go build -ldflags -H=windowsgui app/gui/main.go
+
 ```

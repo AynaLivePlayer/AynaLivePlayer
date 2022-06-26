@@ -6,7 +6,7 @@ import (
 	"path"
 )
 
-const VERSION = "alpha 0.6.3"
+const VERSION = "alpha 0.6.5"
 
 const CONFIG_PATH = "./config.ini"
 const Assests_PATH = "./assets"
@@ -38,7 +38,7 @@ func init() {
 		fmt.Println("config not found, using default config")
 		ConfigFile = ini.Empty()
 	}
-	for _, cfg := range []Config{Log, LiveRoom, Player, Provider} {
+	for _, cfg := range []Config{Log, LiveRoom, Player, Provider, General} {
 		LoadConfig(cfg)
 	}
 }

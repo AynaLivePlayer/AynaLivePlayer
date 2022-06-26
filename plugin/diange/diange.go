@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/liveclient"
 	"AynaLivePlayer/logger"
 	"fyne.io/fyne/v2"
@@ -91,11 +92,11 @@ func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuM
 }
 
 func (d *Diange) Title() string {
-	return "Diange"
+	return i18n.T("plugin.diange.title")
 }
 
 func (d *Diange) Description() string {
-	return "Basic diange configuration"
+	return i18n.T("plugin.diange.description")
 }
 
 func (d *Diange) CreatePanel() fyne.CanvasObject {
@@ -103,21 +104,21 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		return d.panel
 	}
 	dgPerm := container.NewHBox(
-		widget.NewLabel("点歌权限"),
-		widget.NewCheckWithData("用户", binding.BindBool(&d.UserPermission)),
-		widget.NewCheckWithData("舰长", binding.BindBool(&d.PrivilegePermission)),
-		widget.NewCheckWithData("管理员", binding.BindBool(&d.AdminPermission)),
+		widget.NewLabel(i18n.T("plugin.diange.permission")),
+		widget.NewCheckWithData(i18n.T("plugin.diange.user"), binding.BindBool(&d.UserPermission)),
+		widget.NewCheckWithData(i18n.T("plugin.diange.privilege"), binding.BindBool(&d.PrivilegePermission)),
+		widget.NewCheckWithData(i18n.T("plugin.diange.admin"), binding.BindBool(&d.AdminPermission)),
 	)
 	dgQueue := container.NewBorder(nil, nil,
-		widget.NewLabel("最大点歌数"), nil,
+		widget.NewLabel(i18n.T("plugin.diange.queue_max")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.QueueMax))),
 	)
 	dgCoolDown := container.NewBorder(nil, nil,
-		widget.NewLabel("点歌冷却时间"), nil,
+		widget.NewLabel(i18n.T("plugin.diange.cooldown")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserCoolDown))),
 	)
 	dgShortCut := container.NewBorder(nil, nil,
-		widget.NewLabel("自定义命令 (默认的依然可用)"), nil,
+		widget.NewLabel(i18n.T("plugin.diange.custom_cmd")), nil,
 		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
 	)
 	d.panel = container.NewVBox(dgPerm, dgQueue, dgCoolDown, dgShortCut)

@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/liveclient"
 	"AynaLivePlayer/logger"
 	"fyne.io/fyne/v2"
@@ -74,26 +75,25 @@ func (d *Qiege) Execute(command string, args []string, danmu *liveclient.DanmuMe
 }
 
 func (d *Qiege) Title() string {
-	return "Qiege"
+	return i18n.T("plugin.qiege.title")
 }
 
 func (d *Qiege) Description() string {
-	return "Basic Qiege configuration"
+	return i18n.T("plugin.qiege.description")
 }
 
 func (d *Qiege) CreatePanel() fyne.CanvasObject {
 	if d.panel != nil {
 		return d.panel
 	}
-
 	dgPerm := container.NewHBox(
-		widget.NewLabel("切歌权限"),
-		widget.NewCheckWithData("切自己", binding.BindBool(&d.UserPermission)),
-		widget.NewCheckWithData("舰长", binding.BindBool(&d.PrivilegePermission)),
-		widget.NewCheckWithData("管理员", binding.BindBool(&d.AdminPermission)),
+		widget.NewLabel(i18n.T("plugin.qiege.permission")),
+		widget.NewCheckWithData(i18n.T("plugin.qiege.user"), binding.BindBool(&d.UserPermission)),
+		widget.NewCheckWithData(i18n.T("plugin.qiege.privilege"), binding.BindBool(&d.PrivilegePermission)),
+		widget.NewCheckWithData(i18n.T("plugin.qiege.admin"), binding.BindBool(&d.AdminPermission)),
 	)
 	qgShortCut := container.NewBorder(nil, nil,
-		widget.NewLabel("自定义命令 (默认的依然可用)"), nil,
+		widget.NewLabel(i18n.T("plugin.qiege.custom_cmd")), nil,
 		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
 	)
 	d.panel = container.NewVBox(dgPerm, qgShortCut)

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"AynaLivePlayer/config"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/logger"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -33,19 +34,19 @@ func Initialize() {
 	MainWindow = App.NewWindow(fmt.Sprintf("AynaLivePlayer Ver.%s", config.VERSION))
 
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Player",
+		container.NewTabItem(i18n.T("gui.tab.player"),
 			newPaddedBoarder(nil, createPlayController(), nil, nil, createPlaylist()),
 		),
-		container.NewTabItem("Search",
+		container.NewTabItem(i18n.T("gui.tab.search"),
 			newPaddedBoarder(createSearchBar(), nil, nil, nil, createSearchList()),
 		),
-		container.NewTabItem("Room",
+		container.NewTabItem(i18n.T("gui.tab.room"),
 			newPaddedBoarder(createRoomController(), nil, nil, nil, createRoomLogger()),
 		),
-		container.NewTabItem("Playlist",
+		container.NewTabItem(i18n.T("gui.tab.playlist"),
 			newPaddedBoarder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
 		),
-		container.NewTabItem("Config",
+		container.NewTabItem(i18n.T("gui.tab.config"),
 			newPaddedBoarder(nil, nil, nil, nil, createConfigLayout()),
 		),
 	)

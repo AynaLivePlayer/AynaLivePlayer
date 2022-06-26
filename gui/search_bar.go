@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/player"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -20,8 +21,8 @@ var SearchBar = &SearchBarContainer{}
 
 func createSearchBar() fyne.CanvasObject {
 	SearchBar.Input = widget.NewEntry()
-	SearchBar.Input.SetPlaceHolder("Keyword")
-	SearchBar.Button = widget.NewButton("Search", nil)
+	SearchBar.Input.SetPlaceHolder(i18n.T("gui.search.placeholder"))
+	SearchBar.Button = widget.NewButton(i18n.T("gui.search.search"), nil)
 	SearchBar.Button.OnTapped = createAsyncOnTapped(SearchBar.Button, func() {
 		keyword := SearchBar.Input.Text
 		s := make([]string, len(SearchBar.UseSource.Selected))
@@ -44,10 +45,10 @@ func createSearchBar() fyne.CanvasObject {
 	SearchBar.UseSource.Horizontal = true
 	SearchBar.UseSource.SetSelected(s)
 	searchInput := container.NewBorder(
-		nil, nil, widget.NewLabel("Search"), SearchBar.Button,
+		nil, nil, widget.NewLabel(i18n.T("gui.search.search")), SearchBar.Button,
 		SearchBar.Input)
 	return container.NewVBox(
 		searchInput,
-		container.NewHBox(widget.NewLabel("Source filter: "), SearchBar.UseSource),
+		container.NewHBox(widget.NewLabel(i18n.T("gui.search.filter")), SearchBar.UseSource),
 		widget.NewSeparator())
 }

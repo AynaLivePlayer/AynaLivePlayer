@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
+	"AynaLivePlayer/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -25,9 +26,9 @@ type PlaylistManagerContainer struct {
 
 func (p *PlaylistManagerContainer) UpdateCurrentSystemPlaylist() {
 	if config.Player.PlaylistIndex >= len(controller.PlaylistManager) {
-		p.CurrentSystemPlaylist.SetText("Current: None")
+		p.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current.none"))
 	}
-	p.CurrentSystemPlaylist.SetText("Current: " + controller.PlaylistManager[config.Player.PlaylistIndex].Name)
+	p.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current") + controller.PlaylistManager[config.Player.PlaylistIndex].Name)
 }
 
 var PlaylistManager = &PlaylistManagerContainer{}
@@ -44,22 +45,22 @@ func createPlaylists() fyne.CanvasObject {
 			object.(*widget.Label).SetText(
 				controller.PlaylistManager[id].Name)
 		})
-	PlaylistManager.AddBtn = widget.NewButton("Add", func() {
+	PlaylistManager.AddBtn = widget.NewButton(i18n.T("gui.playlist.button.add"), func() {
 		providerEntry := widget.NewSelect(config.Provider.Priority, nil)
 		idEntry := widget.NewEntry()
 		dia := dialog.NewCustomConfirm(
-			"Add Playlist",
-			"Add",
-			"Cancel",
+			i18n.T("gui.playlist.add.title"),
+			i18n.T("gui.playlist.add.confirm"),
+			i18n.T("gui.playlist.add.cancel"),
 			container.NewVBox(
 				container.New(
 					layout.NewFormLayout(),
-					widget.NewLabel("Provider"),
+					widget.NewLabel(i18n.T("gui.playlist.add.confirm")),
 					providerEntry,
-					widget.NewLabel("ID/URL"),
+					widget.NewLabel(i18n.T("gui.playlist.add.id_url")),
 					idEntry,
 				),
-				widget.NewLabel("Please Enter playlist id or playlist url"),
+				widget.NewLabel(i18n.T("gui.playlist.add.prompt")),
 			),
 			func(b bool) {
 				if b && len(providerEntry.Selected) > 0 && len(idEntry.Text) > 0 {
@@ -73,7 +74,7 @@ func createPlaylists() fyne.CanvasObject {
 		dia.Resize(fyne.NewSize(512, 256))
 		dia.Show()
 	})
-	PlaylistManager.RemoveBtn = widget.NewButton("Remove", func() {
+	PlaylistManager.RemoveBtn = widget.NewButton(i18n.T("gui.playlist.button.remove"), func() {
 		controller.RemovePlaylist(PlaylistManager.Index)
 		//PlaylistManager.Index = 0
 		PlaylistManager.Playlists.Select(0)
@@ -95,13 +96,13 @@ func createPlaylists() fyne.CanvasObject {
 
 func createPlaylistMedias() fyne.CanvasObject {
 	PlaylistManager.RefreshBtn = createAsyncButton(
-		widget.NewButtonWithIcon("Refresh", theme.ViewRefreshIcon(), nil),
+		widget.NewButtonWithIcon(i18n.T("gui.playlist.button.refresh"), theme.ViewRefreshIcon(), nil),
 		func() {
 			controller.PreparePlaylistByIndex(PlaylistManager.Index)
 			PlaylistManager.PlaylistMedia.Refresh()
 		})
 	PlaylistManager.SetAsSystemBtn = createAsyncButton(
-		widget.NewButton("SetAsSystem", nil),
+		widget.NewButton(i18n.T("gui.playlist.button.set_as_system"), nil),
 		func() {
 			controller.SetSystemPlaylist(PlaylistManager.Index)
 			PlaylistManager.PlaylistMedia.Refresh()
@@ -143,7 +144,7 @@ func createPlaylistMedias() fyne.CanvasObject {
 			}
 		})
 	return container.NewBorder(
-		container.NewHBox(PlaylistManager.RefreshBtn, PlaylistManager.SetAsSystemBtn), nil,
+		container.NewHBox(PlaylistManager.RefreshBtn, PlaylistManager.SetAsSystemBtn, PlaylistManager.CurrentSystemPlaylist), nil,
 		nil, nil,
 		PlaylistManager.PlaylistMedia)
 }

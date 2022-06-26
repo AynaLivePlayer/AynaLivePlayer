@@ -2,6 +2,7 @@ package gui
 
 import (
 	"AynaLivePlayer/controller"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/player"
 	"AynaLivePlayer/provider"
 	"fmt"
@@ -53,11 +54,11 @@ func createSearchList() fyne.CanvasObject {
 		})
 	return container.NewBorder(
 		container.NewBorder(nil, nil,
-			widget.NewLabel("#"), widget.NewLabel("Operation"),
+			widget.NewLabel("#"), widget.NewLabel(i18n.T("gui.search.operation")),
 			container.NewGridWithColumns(3,
-				widget.NewLabel("title"),
-				widget.NewLabel("artist"),
-				widget.NewLabel("source"))),
+				widget.NewLabel(i18n.T("gui.search.title")),
+				widget.NewLabel(i18n.T("gui.search.artist")),
+				widget.NewLabel(i18n.T("gui.search.source")))),
 		nil, nil, nil,
 		SearchResult.List,
 	)

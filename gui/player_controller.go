@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/event"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/player"
 	"AynaLivePlayer/util"
 	"fyne.io/fyne/v2"
@@ -64,7 +65,7 @@ func createPlayController() fyne.CanvasObject {
 
 	PlayController.Volume = widget.NewSlider(0, 100)
 	volumeIcon := widget.NewIcon(theme.VolumeMuteIcon())
-	PlayController.ButtonLrc = widget.NewButton("lrc", func() {})
+	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
 
 	volumeControl := container.NewBorder(nil, nil, container.NewHBox(widget.NewLabel(" "), volumeIcon), nil,
 		container.NewGridWithColumns(3, container.NewMax(PlayController.Volume), PlayController.ButtonLrc))

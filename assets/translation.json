@@ -1,0 +1,220 @@
+{
+  "Languages": [
+    "en",
+    "zh-CN"
+  ],
+  "Messages": {
+    "gui.player.button.lrc": {
+      "en": "lrc",
+      "zh-CN": "歌词"
+    },
+    "gui.player.playlist.artist": {
+      "en": "Artist",
+      "zh-CN": "歌手"
+    },
+    "gui.player.playlist.op.delete": {
+      "en": "Delete",
+      "zh-CN": "删除"
+    },
+    "gui.player.playlist.op.top": {
+      "en": "Top",
+      "zh-CN": "置顶"
+    },
+    "gui.player.playlist.ops": {
+      "en": "OPs",
+      "zh-CN": "操作"
+    },
+    "gui.player.playlist.title": {
+      "en": "Title",
+      "zh-CN": "歌名"
+    },
+    "gui.player.playlist.user": {
+      "en": "User",
+      "zh-CN": "用户"
+    },
+    "gui.playlist.add.cancel": {
+      "en": "Cancel",
+      "zh-CN": "取消"
+    },
+    "gui.playlist.add.confirm": {
+      "en": "Confirm",
+      "zh-CN": "确认"
+    },
+    "gui.playlist.add.id_url": {
+      "en": "ID/URL",
+      "zh-CN": "ID/网址"
+    },
+    "gui.playlist.add.prompt": {
+      "en": "Please enter the ID or URL of the song you want to add.",
+      "zh-CN": "输入歌单ID或者歌单网址。"
+    },
+    "gui.playlist.add.title": {
+      "en": "Add Playlist",
+      "zh-CN": "添加歌单"
+    },
+    "gui.playlist.button.add": {
+      "en": "Add",
+      "zh-CN": "添加"
+    },
+    "gui.playlist.button.refresh": {
+      "en": "Refresh",
+      "zh-CN": "刷新"
+    },
+    "gui.playlist.button.remove": {
+      "en": "Remove",
+      "zh-CN": "移除"
+    },
+    "gui.playlist.button.set_as_system": {
+      "en": "SetAsSystem",
+      "zh-CN": "设为默认歌单"
+    },
+    "gui.playlist.current": {
+      "en": "Current: ",
+      "zh-CN": "当前为: "
+    },
+    "gui.playlist.current.none": {
+      "en": "Current: None",
+      "zh-CN": "当前为: 无"
+    },
+    "gui.room.btn.connect": {
+      "en": "Connect",
+      "zh-CN": "连接"
+    },
+    "gui.room.btn.disconnect": {
+      "en": "Disconnect",
+      "zh-CN": "断开"
+    },
+    "gui.room.id": {
+      "en": "Room ID: ",
+      "zh-CN": "房间号: "
+    },
+    "gui.room.status.connected": {
+      "en": "Connected",
+      "zh-CN": "已连接"
+    },
+    "gui.room.status.disconnected": {
+      "en": "Disconnected",
+      "zh-CN": "已断开"
+    },
+    "gui.room.status.failed": {
+      "en": "Set Failed",
+      "zh-CN": "设置失败"
+    },
+    "gui.room.waiting": {
+      "en": "Waiting",
+      "zh-CN": "等待连接"
+    },
+    "gui.search.artist": {
+      "en": "Artist",
+      "zh-CN": "歌手"
+    },
+    "gui.search.filter": {
+      "en": "Source Filter: ",
+      "zh-CN": "选择源: "
+    },
+    "gui.search.operation": {
+      "en": "Operation",
+      "zh-CN": "操作 "
+    },
+    "gui.search.placeholder": {
+      "en": "Keyword",
+      "zh-CN": "Keyword"
+    },
+    "gui.search.search": {
+      "en": "Search",
+      "zh-CN": "搜索"
+    },
+    "gui.search.source": {
+      "en": "Source",
+      "zh-CN": "歌源"
+    },
+    "gui.search.title": {
+      "en": "Title",
+      "zh-CN": "歌名"
+    },
+    "gui.tab.config": {
+      "en": "Config",
+      "zh-CN": "设置"
+    },
+    "gui.tab.player": {
+      "en": "Player",
+      "zh-CN": "播放器"
+    },
+    "gui.tab.playlist": {
+      "en": "Playlist",
+      "zh-CN": "播放列表"
+    },
+    "gui.tab.room": {
+      "en": "Room",
+      "zh-CN": "直播间"
+    },
+    "gui.tab.search": {
+      "en": "Search",
+      "zh-CN": "搜索"
+    },
+    "plugin.diange.admin": {
+      "en": "Admin",
+      "zh-CN": "管理员"
+    },
+    "plugin.diange.cooldown": {
+      "en": "Cooldown",
+      "zh-CN": "点歌冷却"
+    },
+    "plugin.diange.custom_cmd": {
+      "en": "Custom Command (Default one still works)",
+      "zh-CN": "自定义命令 (默认的依然可用)"
+    },
+    "plugin.diange.description": {
+      "en": "Basic Diange Configuration",
+      "zh-CN": "点歌基本设置"
+    },
+    "plugin.diange.permission": {
+      "en": "Permission",
+      "zh-CN": "点歌权限"
+    },
+    "plugin.diange.privilege": {
+      "en": "Privilege",
+      "zh-CN": "舰长"
+    },
+    "plugin.diange.queue_max": {
+      "en": "Max Queue",
+      "zh-CN": "最大点歌数"
+    },
+    "plugin.diange.title": {
+      "en": "Diange",
+      "zh-CN": "点歌"
+    },
+    "plugin.diange.user": {
+      "en": "User",
+      "zh-CN": "普通用户"
+    },
+    "plugin.qiege.admin": {
+      "en": "Admin",
+      "zh-CN": "管理员"
+    },
+    "plugin.qiege.custom_cmd": {
+      "en": "Custom Command (Default one still works)",
+      "zh-CN": "自定义命令 (默认的依然可用)"
+    },
+    "plugin.qiege.description": {
+      "en": "Basic Qiege configuration",
+      "zh-CN": "基础切歌设置"
+    },
+    "plugin.qiege.permission": {
+      "en": "Permission",
+      "zh-CN": "切歌权限"
+    },
+    "plugin.qiege.privilege": {
+      "en": "Privilege",
+      "zh-CN": "舰长"
+    },
+    "plugin.qiege.title": {
+      "en": "Qiege",
+      "zh-CN": "切歌"
+    },
+    "plugin.qiege.user": {
+      "en": "User",
+      "zh-CN": "切自己"
+    }
+  }
+}

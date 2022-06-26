@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/logger"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
@@ -32,6 +33,7 @@ func main() {
 	defer func() {
 		controller.Destroy()
 		config.SaveToConfigFile(config.CONFIG_PATH)
+		i18n.SaveTranslation()
 	}()
 	gui.Initialize()
 	gui.MainWindow.ShowAndRun()

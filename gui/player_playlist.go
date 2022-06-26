@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/event"
+	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/player"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -23,10 +24,10 @@ func (b *playlistOperationButton) Tapped(e *fyne.PointEvent) {
 
 func newPlaylistOperationButton() *playlistOperationButton {
 	b := &playlistOperationButton{Index: 0}
-	deleteItem := fyne.NewMenuItem("Delete", func() {
+	deleteItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.delete"), func() {
 		fmt.Println("delete", b.Index)
 	})
-	topItem := fyne.NewMenuItem("Top", func() {
+	topItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.top"), func() {
 		controller.UserPlaylist.Move(b.Index, 0)
 	})
 	m := fyne.NewMenu("", deleteItem, topItem)
@@ -72,8 +73,11 @@ func createPlaylist() fyne.CanvasObject {
 	registerPlaylistHandler()
 	return container.NewBorder(
 		container.NewBorder(nil, nil,
-			widget.NewLabel("#"), widget.NewLabel("OPs"),
-			container.NewGridWithColumns(3, widget.NewLabel("Title"), widget.NewLabel("Artist"), widget.NewLabel("User"))),
+			widget.NewLabel("#"), widget.NewLabel(i18n.T("gui.player.playlist.ops")),
+			container.NewGridWithColumns(3,
+				widget.NewLabel(i18n.T("gui.player.playlist.title")),
+				widget.NewLabel(i18n.T("gui.player.playlist.artist")),
+				widget.NewLabel(i18n.T("gui.player.playlist.user")))),
 		widget.NewSeparator(),
 		nil, nil,
 		UserPlaylist.List,
