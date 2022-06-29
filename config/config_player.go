@@ -5,6 +5,8 @@ type _PlayerConfig struct {
 	PlaylistsProvider []string
 	PlaylistIndex     int
 	PlaylistRandom    bool
+	AudioDevice       string
+	Volume            float64
 }
 
 func (c *_PlayerConfig) Name() string {
@@ -16,4 +18,6 @@ var Player = &_PlayerConfig{
 	PlaylistsProvider: []string{"netease", "netease", "netease"},
 	PlaylistIndex:     0,
 	PlaylistRandom:    true,
+	AudioDevice:       "auto",
+	Volume:            100,
 }

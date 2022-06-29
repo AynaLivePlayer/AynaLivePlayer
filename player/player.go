@@ -6,6 +6,7 @@ import (
 	"AynaLivePlayer/util"
 	"github.com/aynakeya/go-mpv"
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 )
 
 const MODULE_PLAYER = "Player.Player"
@@ -153,4 +154,33 @@ func (p *Player) ObserveProperty(property string, handler ...PropertyHandlerFunc
 		return p.libmpv.ObserveProperty(util.Hash64(property), property, mpv.FORMAT_NODE)
 	}
 	return nil
+}
+
+type AudioDevice struct {
+	Name        string
+	Description string
+}
+
+// GetAudioDeviceList get output device for mpv
+// return format is []AudioDevice
+func (p *Player) GetAudioDeviceList() ([]AudioDevice, error) {
+	p.l().Trace("getting audio device list for mpv")
+	property, err := p.libmpv.GetProperty("audio-device-list", mpv.FORMAT_STRING)
+	if err != nil {
+		return nil, err
+	}
+	dl := make([]AudioDevice, 0)
+	gjson.Parse(property.(string)).ForEach(func(key, value gjson.Result) bool {
+		dl = append(dl, AudioDevice{
+			Name:        value.Get("name").String(),
+			Description: value.Get("description").String(),
+		})
+		return true
+	})
+	return dl, nil
+}
+
+func (p *Player) SetAudioDevice(device string) error {
+	p.l().Tracef("set audio device %s for mpv", device)
+	return p.libmpv.SetPropertyString("audio-device", device)
 }

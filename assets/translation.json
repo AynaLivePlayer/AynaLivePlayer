@@ -4,6 +4,30 @@
     "zh-CN"
   ],
   "Messages": {
+    "gui.config.basic.audio_device": {
+      "en": "Audio Device",
+      "zh-CN": "音频输出设备"
+    },
+    "gui.config.basic.description": {
+      "en": "Basic Configuration",
+      "zh-CN": "基础设置"
+    },
+    "gui.config.basic.random_playlist": {
+      "en": "Playlist Random",
+      "zh-CN": "播放列表随机设置(打勾表示随机播放)"
+    },
+    "gui.config.basic.random_playlist.system": {
+      "en": "System Playlist",
+      "zh-CN": "闲置歌单"
+    },
+    "gui.config.basic.random_playlist.user": {
+      "en": "User Playlist",
+      "zh-CN": "用户歌单"
+    },
+    "gui.config.basic.title": {
+      "en": "Basic",
+      "zh-CN": "基础设置"
+    },
     "gui.player.button.lrc": {
       "en": "lrc",
       "zh-CN": "歌词"

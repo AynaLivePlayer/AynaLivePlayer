@@ -58,7 +58,14 @@ func (p *Playlist) Pop() *Media {
 		return nil
 	}
 	p.Lock.Lock()
-	media := p.Playlist[0]
+	index := 0
+	if p.Config.RandomNext {
+		index = rand.Intn(p.Size())
+	}
+	media := p.Playlist[index]
+	for i := index; i > 0; i-- {
+		p.Playlist[i] = p.Playlist[i-1]
+	}
 	p.Playlist = p.Playlist[1:]
 	p.Lock.Unlock()
 	defer p.Handler.CallA(EventPlaylistUpdate, PlaylistUpdateEvent{Playlist: p})

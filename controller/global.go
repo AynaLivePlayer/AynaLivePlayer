@@ -19,6 +19,8 @@ var CurrentMedia *player.Media
 func Initialize() {
 
 	MainPlayer = player.NewPlayer()
+	SetAudioDevice(config.Player.AudioDevice)
+	SetVolume(config.Player.Volume)
 	UserPlaylist = player.NewPlaylist("user", player.PlaylistConfig{RandomNext: false})
 	SystemPlaylist = player.NewPlaylist("system", player.PlaylistConfig{RandomNext: config.Player.PlaylistRandom})
 	PlaylistManager = make([]*player.Playlist, 0)
@@ -29,6 +31,7 @@ func Initialize() {
 	UserPlaylist.Handler.RegisterA(player.EventPlaylistInsert, "controller.playnextwhenadd", handlePlaylistAdd)
 	MainPlayer.ObserveProperty("time-pos", handleLyricUpdate)
 	MainPlayer.Start()
+
 }
 
 func loadPlaylists() {

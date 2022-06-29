@@ -25,7 +25,7 @@ func (b *playlistOperationButton) Tapped(e *fyne.PointEvent) {
 func newPlaylistOperationButton() *playlistOperationButton {
 	b := &playlistOperationButton{Index: 0}
 	deleteItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.delete"), func() {
-		fmt.Println("delete", b.Index)
+		controller.UserPlaylist.Delete(b.Index)
 	})
 	topItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.top"), func() {
 		controller.UserPlaylist.Move(b.Index, 0)

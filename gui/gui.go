@@ -22,7 +22,7 @@ type ConfigLayout interface {
 
 var App fyne.App
 var MainWindow fyne.Window
-var ConfigList = []ConfigLayout{}
+var ConfigList = []ConfigLayout{&bascicConfig{}}
 
 func l() *logrus.Entry {
 	return logger.Logger.WithField("Module", MODULE_GUI)

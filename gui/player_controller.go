@@ -141,6 +141,7 @@ func registerPlayControllerHandler() {
 		l().Error("fail to register handler for progress bar with property idle-active")
 	}
 
+	PlayController.Progress.Max = 0
 	PlayController.Progress.OnChanged = func(f float64) {
 		controller.Seek(f/10, false)
 	}
