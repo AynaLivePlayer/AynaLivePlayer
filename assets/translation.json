@@ -24,6 +24,14 @@
       "en": "User Playlist",
       "zh-CN": "用户歌单"
     },
+    "gui.config.basic.skip_playlist": {
+      "en": "Skip Media From System Playlist",
+      "zh-CN": "跳过闲置歌单"
+    },
+    "gui.config.basic.skip_playlist.prompt": {
+      "en": "Skip",
+      "zh-CN": "跳过"
+    },
     "gui.config.basic.title": {
       "en": "Basic",
       "zh-CN": "基础设置"

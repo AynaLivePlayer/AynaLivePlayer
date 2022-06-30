@@ -7,6 +7,7 @@ type _PlayerConfig struct {
 	PlaylistRandom    bool
 	AudioDevice       string
 	Volume            float64
+	SkipPlaylist      bool
 }
 
 func (c *_PlayerConfig) Name() string {
@@ -14,10 +15,11 @@ func (c *_PlayerConfig) Name() string {
 }
 
 var Player = &_PlayerConfig{
-	Playlists:         []string{"2382819181", "116746576", "646548465"},
+	Playlists:         []string{"2382819181", "4987059624", "646548465"},
 	PlaylistsProvider: []string{"netease", "netease", "netease"},
 	PlaylistIndex:     0,
 	PlaylistRandom:    true,
 	AudioDevice:       "auto",
 	Volume:            100,
+	SkipPlaylist:      false,
 }

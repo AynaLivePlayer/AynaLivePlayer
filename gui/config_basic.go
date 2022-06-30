@@ -49,6 +49,13 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	outputDevice := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("gui.config.basic.audio_device")), nil,
 		deviceSel)
-	b.panel = container.NewVBox(randomPlaylist, outputDevice)
+	skipPlaylist := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.skip_playlist")),
+		widget.NewCheckWithData(
+			i18n.T("gui.config.basic.skip_playlist.prompt"),
+			binding.BindBool(&config.Player.SkipPlaylist),
+		),
+	)
+	b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist)
 	return b.panel
 }
