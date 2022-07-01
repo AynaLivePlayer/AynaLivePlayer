@@ -1,6 +1,9 @@
 package player
 
-import "AynaLivePlayer/liveclient"
+import (
+	"AynaLivePlayer/liveclient"
+	"github.com/jinzhu/copier"
+)
 
 type Media struct {
 	Title  string
@@ -33,4 +36,10 @@ func (m *Media) DanmuUser() *liveclient.DanmuUser {
 		return u
 	}
 	return nil
+}
+
+func (m *Media) Copy() *Media {
+	newMedia := &Media{}
+	copier.Copy(newMedia, m)
+	return newMedia
 }

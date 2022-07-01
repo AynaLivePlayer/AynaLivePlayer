@@ -36,6 +36,22 @@
       "en": "Basic",
       "zh-CN": "基础设置"
     },
+    "gui.history.artist": {
+      "en": "Artist",
+      "zh-CN": "歌手"
+    },
+    "gui.history.operation": {
+      "en": "Operation",
+      "zh-CN": "操作"
+    },
+    "gui.history.title": {
+      "en": "Title",
+      "zh-CN": "歌名"
+    },
+    "gui.history.user": {
+      "en": "User",
+      "zh-CN": "用户"
+    },
     "gui.player.button.lrc": {
       "en": "lrc",
       "zh-CN": "歌词"
@@ -167,6 +183,10 @@
     "gui.tab.config": {
       "en": "Config",
       "zh-CN": "设置"
+    },
+    "gui.tab.history": {
+      "en": "History",
+      "zh-CN": "播放历史"
     },
     "gui.tab.player": {
       "en": "Player",

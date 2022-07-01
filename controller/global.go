@@ -10,6 +10,8 @@ import (
 
 var MainPlayer *player.Player
 var UserPlaylist *player.Playlist
+var History *player.Playlist
+var HistoryUser *player.User
 var SystemPlaylist *player.Playlist
 var LiveClient liveclient.LiveClient
 var PlaylistManager []*player.Playlist
@@ -26,6 +28,9 @@ func Initialize() {
 	PlaylistManager = make([]*player.Playlist, 0)
 	CurrentLyric = player.NewLyric("")
 	loadPlaylists()
+
+	History = player.NewPlaylist("history", player.PlaylistConfig{RandomNext: false})
+	HistoryUser = &player.User{Name: "History"}
 
 	MainPlayer.ObserveProperty("idle-active", handleMpvIdlePlayNext)
 	UserPlaylist.Handler.RegisterA(player.EventPlaylistInsert, "controller.playnextwhenadd", handlePlaylistAdd)

@@ -29,6 +29,7 @@ func Play(media *player.Media) {
 		return
 	}
 	CurrentMedia = media
+	AddToHistory(media)
 	if err := MainPlayer.Play(media); err != nil {
 		l().Warn("play failed", err)
 	}

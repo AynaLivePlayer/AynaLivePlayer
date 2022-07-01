@@ -13,6 +13,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
+	github.com/jinzhu/copier v0.3.5
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20210802170112-c078a2b0f08b
 	github.com/mitchellh/panicwrap v1.0.0
