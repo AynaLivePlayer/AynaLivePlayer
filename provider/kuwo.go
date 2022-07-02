@@ -19,6 +19,8 @@ type Kuwo struct {
 	PlaylistApi    string
 	PlaylistRegex0 *regexp.Regexp
 	PlaylistRegex1 *regexp.Regexp
+	IdRegex0       *regexp.Regexp
+	IdRegex1       *regexp.Regexp
 }
 
 func _newKuwo() *Kuwo {
@@ -32,6 +34,8 @@ func _newKuwo() *Kuwo {
 		PlaylistApi:    "http://www.kuwo.cn/api/www/playlist/playListInfo?pid=%s&pn=%d&rn=%d&httpsStatus=1",
 		PlaylistRegex0: regexp.MustCompile("[0-9]+"),
 		PlaylistRegex1: regexp.MustCompile("playlist/[0-9]+"),
+		IdRegex0:       regexp.MustCompile("^[0-9]+"),
+		IdRegex1:       regexp.MustCompile("^kw[0-9]+"),
 	}
 }
 
@@ -44,6 +48,26 @@ func init() {
 
 func (k *Kuwo) GetName() string {
 	return "kuwo"
+}
+
+func (k *Kuwo) MatchMedia(keyword string) *player.Media {
+	if id := k.IdRegex0.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: k.GetName(),
+				Id:   id,
+			},
+		}
+	}
+	if id := k.IdRegex1.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: k.GetName(),
+				Id:   id[2:],
+			},
+		}
+	}
+	return nil
 }
 
 func (k *Kuwo) FormatPlaylistUrl(uri string) string {

@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/tidwall/gjson"
 	"net/url"
+	"regexp"
 )
 
 type Bilibili struct {
 	InfoApi   string
 	FileApi   string
 	SearchApi string
+	IdRegex0  *regexp.Regexp
+	IdRegex1  *regexp.Regexp
 }
 
 func _newBilibili() *Bilibili {
@@ -18,6 +21,8 @@ func _newBilibili() *Bilibili {
 		InfoApi:   "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=%s",
 		FileApi:   "https://api.bilibili.com/audio/music-service-c/url?device=phone&mid=8047632&mobi_app=iphone&platform=ios&privilege=2&songid=%s&quality=2",
 		SearchApi: "https://api.bilibili.com/audio/music-service-c/s?search_type=music&keyword=%s&page=1&pagesize=100",
+		IdRegex0:  regexp.MustCompile("^[0-9]+"),
+		IdRegex1:  regexp.MustCompile("^au[0-9]+"),
 	}
 }
 
@@ -30,6 +35,26 @@ func init() {
 
 func (b *Bilibili) GetName() string {
 	return "bilibili"
+}
+
+func (b *Bilibili) MatchMedia(keyword string) *player.Media {
+	if id := b.IdRegex0.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: b.GetName(),
+				Id:   id,
+			},
+		}
+	}
+	if id := b.IdRegex1.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: b.GetName(),
+				Id:   id[2:],
+			},
+		}
+	}
+	return nil
 }
 
 func (b *Bilibili) FormatPlaylistUrl(uri string) string {

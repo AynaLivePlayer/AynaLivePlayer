@@ -19,6 +19,7 @@ type Meta struct {
 
 type MediaProvider interface {
 	GetName() string
+	MatchMedia(keyword string) *player.Media
 	GetPlaylist(playlist Meta) ([]*player.Media, error)
 	FormatPlaylistUrl(uri string) string
 	Search(keyword string) ([]*player.Media, error)

@@ -24,8 +24,8 @@ func Play(media *player.Media) {
 	l().Info("prepare media")
 	err := PrepareMedia(media)
 	if err != nil {
-		l().Warn("prepare media failed. try play next")
-		PlayNext()
+		l().Warn("prepare media failed.")
+		//PlayNext()
 		return
 	}
 	CurrentMedia = media
@@ -39,16 +39,19 @@ func Play(media *player.Media) {
 }
 
 func Add(keyword string, user interface{}) {
-	medias, err := Search(keyword)
-	if err != nil {
-		l().Warnf("search for %s, got error %s", keyword, err)
-		return
+	media := MediaMatch(keyword)
+	if media == nil {
+		medias, err := Search(keyword)
+		if err != nil {
+			l().Warnf("search for %s, got error %s", keyword, err)
+			return
+		}
+		if len(medias) == 0 {
+			l().Info("search for %s, got no result", keyword)
+			return
+		}
+		media = medias[0]
 	}
-	if len(medias) == 0 {
-		l().Info("search for %s, got no result", keyword)
-		return
-	}
-	media := medias[0]
 	media.User = user
 	l().Infof("add media %s (%s)", media.Title, media.Artist)
 	UserPlaylist.Insert(-1, media)

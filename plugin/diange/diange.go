@@ -66,6 +66,7 @@ func (d *Diange) Match(command string) bool {
 }
 
 func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuMessage) {
+	l().Infof("%s(%s) Execute command: %s %s", danmu.User.Username, danmu.User.Uid, command, args)
 	// if queue is full, return
 	if controller.UserPlaylist.Size() >= d.QueueMax {
 		l().Info("Queue is full, ignore diange")

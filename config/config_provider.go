@@ -10,6 +10,6 @@ func (c *_ProviderConfig) Name() string {
 }
 
 var Provider = &_ProviderConfig{
-	Priority: []string{"local", "netease", "kuwo", "bilibili"},
+	Priority: []string{"netease", "kuwo", "bilibili"},
 	LocalDir: "./music",
 }

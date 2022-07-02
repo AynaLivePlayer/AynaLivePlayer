@@ -15,6 +15,8 @@ type Netease struct {
 	PlaylistRegex0 *regexp.Regexp
 	PlaylistRegex1 *regexp.Regexp
 	ReqData        neteaseUtil.RequestData
+	IdRegex0       *regexp.Regexp
+	IdRegex1       *regexp.Regexp
 }
 
 func _newNetease() *Netease {
@@ -30,6 +32,8 @@ func _newNetease() *Netease {
 				},
 			},
 		},
+		IdRegex0: regexp.MustCompile("^[0-9]+"),
+		IdRegex1: regexp.MustCompile("^wy[0-9]+"),
 	}
 }
 
@@ -50,6 +54,26 @@ func _neteaseGetArtistNames(data types.SongDetailData) string {
 
 func (n *Netease) GetName() string {
 	return "netease"
+}
+
+func (n *Netease) MatchMedia(keyword string) *player.Media {
+	if id := n.IdRegex0.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: n.GetName(),
+				Id:   id,
+			},
+		}
+	}
+	if id := n.IdRegex1.FindString(keyword); id != "" {
+		return &player.Media{
+			Meta: Meta{
+				Name: n.GetName(),
+				Id:   id[2:],
+			},
+		}
+	}
+	return nil
 }
 
 func (n *Netease) FormatPlaylistUrl(uri string) string {

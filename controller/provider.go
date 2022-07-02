@@ -12,23 +12,41 @@ func PrepareMedia(media *player.Media) error {
 		l().Trace("fetching media info")
 		if err = provider.UpdateMedia(media); err != nil {
 			l().Warn("fail to prepare media when fetch info", err)
+			return err
 		}
 	}
 	if media.Url == "" {
 		l().Trace("fetching media url")
 		if err = provider.UpdateMediaUrl(media); err != nil {
 			l().Warn("fail to prepare media when url", err)
+			return err
 		}
-
 	}
 	if media.Lyric == "" {
 		l().Trace("fetching media lyric")
 		if err = provider.UpdateMediaLyric(media); err != nil {
 			l().Warn("fail to prepare media when lyric", err)
 		}
-
 	}
-	return err
+	return nil
+}
+
+func MediaMatch(keyword string) *player.Media {
+	l().Infof("Match media for %s", keyword)
+	for _, p := range config.Provider.Priority {
+		if pr, ok := provider.Providers[p]; ok {
+			m := pr.MatchMedia(keyword)
+			if m == nil {
+				continue
+			}
+			if err := provider.UpdateMedia(m); err == nil {
+				return m
+			}
+		} else {
+			l().Warnf("Provider %s not exist", p)
+		}
+	}
+	return nil
 }
 
 func Search(keyword string) ([]*player.Media, error) {

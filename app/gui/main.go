@@ -4,14 +4,12 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/logger"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/textinfo"
 	"fmt"
 	"github.com/mitchellh/panicwrap"
-	"github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -28,13 +26,13 @@ func init() {
 
 func main() {
 	fmt.Printf("BiliAudioBot Revive %s\n", config.VERSION)
-	logger.Logger.SetLevel(logrus.DebugLevel)
+	//logger.Logger.SetLevel(logrus.DebugLevel)
 	controller.Initialize()
 	controller.LoadPlugins(diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo())
 	defer func() {
 		controller.Destroy()
 		config.SaveToConfigFile(config.CONFIG_PATH)
-		i18n.SaveTranslation()
+		//i18n.SaveTranslation()
 	}()
 	gui.Initialize()
 	gui.MainWindow.ShowAndRun()

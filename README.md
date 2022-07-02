@@ -9,6 +9,6 @@ QQ group: 621035845
 ## build
 
 ```
-go build -ldflags -H=windowsgui app/gui/main.go
+go build -o AynaLivePlayer.exe -ldflags -H=windowsgui app/gui/main.go
 
 ```
