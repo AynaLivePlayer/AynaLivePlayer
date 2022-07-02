@@ -267,6 +267,22 @@
     "plugin.qiege.user": {
       "en": "User",
       "zh-CN": "切自己"
+    },
+    "plugin.textinfo.checkbox": {
+      "en": "Enable",
+      "zh-CN": "开启"
+    },
+    "plugin.textinfo.description": {
+      "en": "text output configuration",
+      "zh-CN": "文本输出设置"
+    },
+    "plugin.textinfo.prompt": {
+      "en": "Enable Text Output",
+      "zh-CN": "开启文本输出"
+    },
+    "plugin.textinfo.title": {
+      "en": "Text Output",
+      "zh-CN": "文本输出"
     }
   }
 }

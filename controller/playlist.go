@@ -14,3 +14,9 @@ func ToHistoryMedia(media *player.Media) *player.Media {
 	media.User = HistoryUser
 	return media
 }
+
+func ToSystemMedia(media *player.Media) *player.Media {
+	media = media.Copy()
+	media.User = player.SystemUser
+	return media
+}

@@ -1,0 +1,7 @@
+{{range .Playlist}}
+Index: # {{ .Index}}
+Title: {{ .Title }}
+Artist: {{ .Artist }}
+Album: {{ .Album}}
+Username: {{ .Username }}
+{{end}}

@@ -137,10 +137,10 @@ func createPlaylistMedias() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			btns[0].(*widget.Button).OnTapped = func() {
-				controller.Play(m)
+				controller.Play(controller.ToSystemMedia(m))
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.UserPlaylist.Push(m)
+				controller.UserPlaylist.Push(controller.ToSystemMedia(m))
 			}
 		})
 	return container.NewBorder(

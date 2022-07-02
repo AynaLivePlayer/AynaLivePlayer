@@ -18,6 +18,7 @@ type LyricLine struct {
 type Lyric struct {
 	Lyrics  []LyricLine
 	Handler *event.Handler
+	prev    float64
 }
 
 func (l *Lyric) Reload(lyric string) {
@@ -50,10 +51,18 @@ func (l *Lyric) Reload(lyric string) {
 }
 
 func (l *Lyric) Update(time float64) {
+	lrc := l.Find(time)
+	if lrc == nil {
+		return
+	}
+	if l.prev == lrc.Time {
+		return
+	}
+	l.prev = lrc.Time
 	l.Handler.CallA(EventLyricUpdate, LyricUpdateEvent{
 		Lyrics: l,
 		Time:   time,
-		Lyric:  l.Find(time),
+		Lyric:  lrc,
 	})
 	return
 }
@@ -83,7 +92,7 @@ func (l *Lyric) FindContext(time float64, prev int, next int) []LyricLine {
 }
 
 func NewLyric(lyric string) *Lyric {
-	l := &Lyric{Handler: event.NewHandler()}
+	l := &Lyric{Handler: event.NewHandler(), prev: -1}
 	l.Reload(lyric)
 	return l
 }

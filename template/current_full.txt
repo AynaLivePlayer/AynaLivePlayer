@@ -1,0 +1,7 @@
+Title: {{ .Current.Title }}
+Artist: {{ .Current.Artist }}
+Album: {{ .Current.Album}}
+Username: {{ .Current.Username }}
+Progress(in seconds):  {{.CurrentTime}} / {{.TotalTime}}
+Progress(in minutes:seconds):  {{ GetMinutes .CurrentTime}}:{{ GetSeconds .CurrentTime}} / {{ GetMinutes .TotalTime}}:{{ GetSeconds .TotalTime}}
+Lyric: {{.Lyric}}
