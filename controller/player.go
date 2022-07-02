@@ -21,17 +21,18 @@ func PlayNext() {
 }
 
 func Play(media *player.Media) {
-	l().Info("prepare media")
+	l().Infof("prepare media %s", media.Title)
 	err := PrepareMedia(media)
 	if err != nil {
-		l().Warn("prepare media failed.")
-		//PlayNext()
+		l().Warn("prepare media failed. try play next")
+		PlayNext()
 		return
 	}
 	CurrentMedia = media
 	AddToHistory(media)
 	if err := MainPlayer.Play(media); err != nil {
 		l().Warn("play failed", err)
+		return
 	}
 	CurrentLyric.Reload(media.Lyric)
 	// reset

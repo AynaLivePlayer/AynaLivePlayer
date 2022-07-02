@@ -5,9 +5,8 @@
 - @5 delete optimization
 
 
-- id点歌
-- 多来源点歌
 
+- 多来源点歌
 - web输出
 - 黑名单
 - 进入beta版本
