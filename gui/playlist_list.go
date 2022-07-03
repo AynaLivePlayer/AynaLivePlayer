@@ -55,7 +55,7 @@ func createPlaylists() fyne.CanvasObject {
 			container.NewVBox(
 				container.New(
 					layout.NewFormLayout(),
-					widget.NewLabel(i18n.T("gui.playlist.add.confirm")),
+					widget.NewLabel(i18n.T("gui.playlist.add.source")),
 					providerEntry,
 					widget.NewLabel(i18n.T("gui.playlist.add.id_url")),
 					idEntry,

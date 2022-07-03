@@ -92,6 +92,10 @@
       "en": "ID/URL",
       "zh-CN": "ID/网址"
     },
+    "gui.playlist.add.source": {
+      "en": "Source",
+      "zh-CN": "来源"
+    },
     "gui.playlist.add.prompt": {
       "en": "Please enter the ID or URL of the song you want to add.",
       "zh-CN": "输入歌单ID或者歌单网址。"
