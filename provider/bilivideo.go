@@ -82,7 +82,7 @@ func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
 }
 
 func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.InfoApi, media.Meta.(Meta).Id), nil)
+	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(Meta).Id)), nil)
 	if resp == "" {
 		return ErrorExternalApi
 	}
@@ -98,12 +98,12 @@ func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
 }
 
 func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.InfoApi, media.Meta.(Meta).Id), nil)
+	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(Meta).Id)), nil)
 	if resp == "" {
 		return ErrorExternalApi
 	}
 	jresp := gjson.Parse(resp)
-	page := b.getPage(media.Meta.(Meta).Id)
+	page := b.getPage(media.Meta.(Meta).Id) - 1
 	cid := jresp.Get(fmt.Sprintf("data.View.pages.%d.cid", page)).String()
 	if cid == "" {
 		cid = jresp.Get("data.View.cid").String()

@@ -44,6 +44,13 @@ func FormatPlaylistUrl(pname, uri string) (string, error) {
 	return "", ErrorNoSuchProvider
 }
 
+func MatchMedia(provider string, keyword string) *player.Media {
+	if v, ok := Providers[provider]; ok {
+		return v.MatchMedia(keyword)
+	}
+	return nil
+}
+
 func Search(provider string, keyword string) ([]*player.Media, error) {
 	if v, ok := Providers[provider]; ok {
 		return v.Search(keyword)

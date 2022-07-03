@@ -38,3 +38,9 @@ func StringToInt(s string) int {
 	i, _ := strconv.Atoi(s)
 	return i
 }
+
+func StringSliceCopy(src []string) []string {
+	x := make([]string, len(src))
+	copy(x, src)
+	return x
+}

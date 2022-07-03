@@ -116,7 +116,6 @@ func (b *Bilibili) UpdateMediaUrl(media *player.Media) error {
 	media.Header = map[string]string{
 		"user-agent": "BiliMusic/2.233.3",
 	}
-	fmt.Println(fmt.Sprintf(b.InfoApi, media.Meta.(Meta).Id))
 	uri := gjson.Get(resp, "data.cdns.0").String()
 	if uri == "" {
 		return ErrorExternalApi

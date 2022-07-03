@@ -220,6 +220,10 @@
       "en": "Custom Command (Default one still works)",
       "zh-CN": "自定义命令 (默认的依然可用)"
     },
+    "plugin.diange.source_cmd": {
+      "en": "Source Command",
+      "zh-CN": "来源点歌命令"
+    },
     "plugin.diange.description": {
       "en": "Basic Diange Configuration",
       "zh-CN": "点歌基本设置"

@@ -59,17 +59,21 @@ func Add(keyword string, user interface{}) {
 }
 
 func AddWithProvider(keyword string, pname string, user interface{}) {
-	medias, err := provider.Search(pname, keyword)
-	if err != nil {
-		l().Warnf("search for %s, got error %s", keyword, err)
-		return
+	media := provider.MatchMedia(pname, keyword)
+	if media == nil {
+		medias, err := provider.Search(pname, keyword)
+		if err != nil {
+			l().Warnf("search for %s, got error %s", keyword, err)
+			return
+		}
+		if len(medias) == 0 {
+			l().Infof("search for %s, got no result", keyword)
+			return
+		}
+		media = medias[0]
 	}
-	if len(medias) == 0 {
-		l().Info("search for %s, got no result", keyword)
-	}
-	media := medias[0]
 	media.User = user
-	l().Info("add media %s (%s)", media.Title, media.Artist)
+	l().Infof("add media %s (%s)", media.Title, media.Artist)
 	UserPlaylist.Insert(-1, media)
 }
 
