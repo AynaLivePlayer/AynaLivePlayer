@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/player"
 	"AynaLivePlayer/util"
 	"fmt"
+	"github.com/jinzhu/copier"
 	"github.com/tidwall/gjson"
 	"regexp"
 )
@@ -27,8 +28,9 @@ func _newBilibiliVideo() *BilibiliVideo {
 		IdRegex:   regexp.MustCompile("^BV[0-9A-Za-z]+(\\?p=[0-9]+)?"),
 		PageRegex: regexp.MustCompile("p=[0-9]+"),
 		header: map[string]string{
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0",
 			"Referer":    "https://www.bilibili.com/",
+			"Origin":     "https://www.bilibili.com",
 		},
 	}
 }
@@ -119,6 +121,9 @@ func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
 		return ErrorExternalApi
 	}
 	media.Url = url
+	header := make(map[string]string)
+	_ = copier.Copy(&header, &b.header)
+	header["Referer"] = fmt.Sprintf("https://www.bilibili.com/video/%s", b.getBv(media.Meta.(Meta).Id))
 	media.Header = b.header
 	return nil
 }

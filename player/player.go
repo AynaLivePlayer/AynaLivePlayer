@@ -75,16 +75,17 @@ func (p *Player) l() *logrus.Entry {
 
 func (p *Player) Play(media *Media) error {
 	p.l().Infof("Play media %s", media.Url)
-	p.l().Trace("set user-agent for mpv player")
-	if val, ok := media.Header["user-agent"]; ok {
+	if val, ok := media.Header["User-Agent"]; ok {
+		p.l().Debug("set user-agent for mpv player")
 		err := p.libmpv.SetPropertyString("user-agent", val)
 		if err != nil {
 			p.l().Warn("set player user-agent failed", err)
 			return err
 		}
 	}
-	p.l().Trace("set referrer for mpv player")
-	if val, ok := media.Header["referrer"]; ok {
+
+	if val, ok := media.Header["Referer"]; ok {
+		p.l().Debug("set referrer for mpv player")
 		err := p.libmpv.SetPropertyString("referrer", val)
 		if err != nil {
 			p.l().Warn("set player referrer failed", err)
