@@ -213,3 +213,42 @@ func registerPlayControllerHandler() {
 	})
 	return
 }
+
+func createPlayControllerV2() fyne.CanvasObject {
+	PlayController.Cover = canvas.NewImageFromFile(config.GetAssetPath("empty.png"))
+	PlayController.Cover.SetMinSize(fyne.NewSize(128, 128))
+	PlayController.Cover.FillMode = canvas.ImageFillContain
+
+	PlayController.ButtonPrev = widget.NewButtonWithIcon("", theme.MediaSkipPreviousIcon(), func() {})
+	PlayController.ButtonSwitch = widget.NewButtonWithIcon("", theme.MediaPlayIcon(), func() {})
+	PlayController.ButtonNext = widget.NewButtonWithIcon("", theme.MediaSkipNextIcon(), func() {})
+
+	buttonsBox := container.NewCenter(
+		container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext))
+
+	PlayController.Progress = widget.NewSlider(0, 1000)
+	PlayController.CurrentTime = widget.NewLabel("0:00")
+	PlayController.TotalTime = widget.NewLabel("0:00")
+	progressItem := container.NewBorder(nil, nil, PlayController.CurrentTime, PlayController.TotalTime, PlayController.Progress)
+
+	PlayController.Title = widget.NewLabel("Title")
+	PlayController.Title.TextStyle.Bold = true
+	//a := canvas.NewText("asdf", color.Black)
+	//a.TextSize = 12
+	PlayController.Artist = widget.NewLabel("Artist")
+	PlayController.Username = widget.NewLabel("Username")
+
+	playInfo := container.NewBorder(PlayController.Username, nil, nil, PlayController.Artist, PlayController.Title)
+
+	PlayController.Volume = widget.NewSlider(0, 100)
+	volumeIcon := widget.NewIcon(theme.VolumeMuteIcon())
+	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
+
+	volumeControl := container.NewBorder(nil, nil, container.NewHBox(widget.NewLabel(" "), volumeIcon), nil,
+		container.NewGridWithColumns(3, container.NewMax(PlayController.Volume), PlayController.ButtonLrc))
+
+	registerPlayControllerHandler()
+
+	return container.NewBorder(nil, nil, container.NewHBox(PlayController.Cover, widget.NewSeparator()), nil,
+		container.NewVBox(playInfo, buttonsBox, progressItem, volumeControl))
+}
