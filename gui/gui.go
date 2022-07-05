@@ -35,7 +35,7 @@ func Initialize() {
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
-			newPaddedBoarder(nil, createPlayController(), nil, nil, createPlaylist()),
+			newPaddedBoarder(nil, createPlayControllerV2(), nil, nil, createPlaylist()),
 		),
 		container.NewTabItem(i18n.T("gui.tab.search"),
 			newPaddedBoarder(createSearchBar(), nil, nil, nil, createSearchList()),

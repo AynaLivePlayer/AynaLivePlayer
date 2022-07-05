@@ -186,10 +186,14 @@ func registerPlayControllerHandler() {
 	controller.MainPlayer.EventHandler.RegisterA(player.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
 		l().Debug("receive EventPlay update player info")
 		media := event.Data.(player.PlayEvent).Media
+		//PlayController.Title.SetText(
+		//	util.StringNormalize(media.Title, 16, 16))
+		//PlayController.Artist.SetText(
+		//	util.StringNormalize(media.Artist, 16, 16))
 		PlayController.Title.SetText(
-			util.StringNormalize(media.Title, 16, 16))
+			media.Title)
 		PlayController.Artist.SetText(
-			util.StringNormalize(media.Artist, 16, 16))
+			media.Artist)
 		PlayController.Username.SetText(media.ToUser().Name)
 		if media.Cover == "" {
 			PlayController.SetDefaultCover()
@@ -223,32 +227,37 @@ func createPlayControllerV2() fyne.CanvasObject {
 	PlayController.ButtonSwitch = widget.NewButtonWithIcon("", theme.MediaPlayIcon(), func() {})
 	PlayController.ButtonNext = widget.NewButtonWithIcon("", theme.MediaSkipNextIcon(), func() {})
 
-	buttonsBox := container.NewCenter(
-		container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext))
+	buttonsBox := container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext)
+
+	PlayController.Volume = widget.NewSlider(0, 100)
+	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
+
+	controls := container.NewPadded(container.NewBorder(nil, nil,
+		buttonsBox, nil,
+		container.NewGridWithColumns(
+			2,
+			container.NewMax(),
+			container.NewBorder(nil, nil, widget.NewIcon(theme.VolumeMuteIcon()), PlayController.ButtonLrc,
+				PlayController.Volume)),
+	))
 
 	PlayController.Progress = widget.NewSlider(0, 1000)
 	PlayController.CurrentTime = widget.NewLabel("0:00")
 	PlayController.TotalTime = widget.NewLabel("0:00")
-	progressItem := container.NewBorder(nil, nil, PlayController.CurrentTime, PlayController.TotalTime, PlayController.Progress)
+	progressItem := container.NewBorder(nil, nil,
+		PlayController.CurrentTime,
+		PlayController.TotalTime,
+		PlayController.Progress)
 
 	PlayController.Title = widget.NewLabel("Title")
-	PlayController.Title.TextStyle.Bold = true
-	//a := canvas.NewText("asdf", color.Black)
-	//a.TextSize = 12
 	PlayController.Artist = widget.NewLabel("Artist")
 	PlayController.Username = widget.NewLabel("Username")
 
-	playInfo := container.NewBorder(PlayController.Username, nil, nil, PlayController.Artist, PlayController.Title)
-
-	PlayController.Volume = widget.NewSlider(0, 100)
-	volumeIcon := widget.NewIcon(theme.VolumeMuteIcon())
-	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
-
-	volumeControl := container.NewBorder(nil, nil, container.NewHBox(widget.NewLabel(" "), volumeIcon), nil,
-		container.NewGridWithColumns(3, container.NewMax(PlayController.Volume), PlayController.ButtonLrc))
+	playInfo := container.NewBorder(nil, nil, nil, PlayController.Username,
+		container.NewHBox(PlayController.Title, PlayController.Artist))
 
 	registerPlayControllerHandler()
 
 	return container.NewBorder(nil, nil, container.NewHBox(PlayController.Cover, widget.NewSeparator()), nil,
-		container.NewVBox(playInfo, buttonsBox, progressItem, volumeControl))
+		container.NewVBox(playInfo, progressItem, controls))
 }
