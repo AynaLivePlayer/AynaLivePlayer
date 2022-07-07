@@ -199,7 +199,7 @@ func registerPlayControllerHandler() {
 			PlayController.SetDefaultCover()
 		} else {
 			uri, err := storage.ParseURI(media.Cover)
-			if err != nil {
+			if err != nil || uri == nil {
 				l().Warn("fail to load parse cover url", media.Cover)
 			}
 			// async update

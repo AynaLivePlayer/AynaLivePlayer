@@ -1,8 +1,18 @@
 package provider
 
-import "AynaLivePlayer/player"
+import (
+	"AynaLivePlayer/config"
+	"AynaLivePlayer/player"
+	"os"
+)
+
+type _LocalPlaylist struct {
+	Name   string
+	Medias []*player.Media
+}
 
 type Local struct {
+	Playlists []_LocalPlaylist
 }
 
 var LocalAPI *Local
@@ -13,11 +23,25 @@ func init() {
 }
 
 func _newLocal() *Local {
-	return &Local{}
+	l := &Local{Playlists: make([]_LocalPlaylist, 0)}
+	if err := os.MkdirAll(config.Provider.LocalDir, 0755); err != nil {
+		return l
+	}
+
+	return l
 }
 
 func (l *Local) GetName() string {
 	return "local"
+}
+func (l *Local) MatchMedia(keyword string) *player.Media {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *Local) UpdateMediaLyric(media *player.Media) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (l *Local) FormatPlaylistUrl(uri string) string {

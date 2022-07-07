@@ -84,3 +84,16 @@ func TestBV_GetMusic2(t *testing.T) {
 	//fmt.Println(media)
 	fmt.Println(media.Url)
 }
+
+func TestBV_Search(t *testing.T) {
+	var api MediaProvider = BilibiliVideoAPI
+	result, err := api.Search("家有女友")
+	if err != nil {
+		fmt.Println(1, err)
+		return
+	}
+	fmt.Println(len(result))
+	for _, r := range result {
+		fmt.Println(r.Artist)
+	}
+}

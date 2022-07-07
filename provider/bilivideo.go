@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/tidwall/gjson"
+	"net/url"
 	"regexp"
 )
 
@@ -23,7 +24,7 @@ func _newBilibiliVideo() *BilibiliVideo {
 	return &BilibiliVideo{
 		InfoApi:   "https://api.bilibili.com/x/web-interface/view/detail?bvid=%s&aid=&jsonp=jsonp",
 		FileApi:   "https://api.bilibili.com/x/player/playurl?type=&otype=json&fourk=1&qn=32&avid=&bvid=%s&cid=%s",
-		SearchApi: "",
+		SearchApi: "https://api.bilibili.com/x/web-interface/search/type?search_type=video&page=1&keyword=%s",
 		BVRegex:   regexp.MustCompile("^BV[0-9A-Za-z]+"),
 		IdRegex:   regexp.MustCompile("^BV[0-9A-Za-z]+(\\?p=[0-9]+)?"),
 		PageRegex: regexp.MustCompile("p=[0-9]+"),
@@ -78,7 +79,29 @@ func (b *BilibiliVideo) FormatPlaylistUrl(uri string) string {
 }
 
 func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
-	return nil, ErrorExternalApi
+	resp := httpGetString(fmt.Sprintf(b.SearchApi, url.QueryEscape(keyword)), nil)
+	if resp == "" {
+		return nil, ErrorExternalApi
+	}
+	jresp := gjson.Parse(resp)
+	if jresp.Get("code").String() != "0" {
+		return nil, ErrorExternalApi
+	}
+	result := make([]*player.Media, 0)
+	r := regexp.MustCompile("</?em[^>]*>")
+	jresp.Get("data.result").ForEach(func(key, value gjson.Result) bool {
+		result = append(result, &player.Media{
+			Title:  r.ReplaceAllString(value.Get("title").String(), ""),
+			Cover:  "https:" + value.Get("pic").String(),
+			Artist: value.Get("author").String(),
+			Meta: Meta{
+				Name: b.GetName(),
+				Id:   value.Get("bvid").String(),
+			},
+		})
+		return true
+	})
+	return result, nil
 }
 
 func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
