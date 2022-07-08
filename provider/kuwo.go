@@ -116,7 +116,7 @@ func (k *Kuwo) Search(keyword string) ([]*player.Media, error) {
 	gjson.Parse(resp).Get("data.list").ForEach(func(key, value gjson.Result) bool {
 		result = append(result, &player.Media{
 			Title:  html.UnescapeString(value.Get("name").String()),
-			Cover:  value.Get("pic").String(),
+			Cover:  player.Picture{Url: value.Get("pic").String()},
 			Artist: value.Get("artist").String(),
 			Album:  value.Get("album").String(),
 			Meta: Meta{
@@ -139,7 +139,7 @@ func (k *Kuwo) UpdateMedia(media *player.Media) error {
 		return ErrorExternalApi
 	}
 	media.Title = html.UnescapeString(jresp.Get("data.name").String())
-	media.Cover = jresp.Get("data.pic").String()
+	media.Cover.Url = jresp.Get("data.pic").String()
 	media.Artist = jresp.Get("data.artist").String()
 	media.Album = jresp.Get("data.album").String()
 	return nil
@@ -193,7 +193,7 @@ func (k *Kuwo) GetPlaylist(meta Meta) ([]*player.Media, error) {
 				&player.Media{
 					Title:  html.UnescapeString(value.Get("name").String()),
 					Artist: value.Get("artist").String(),
-					Cover:  value.Get("pic").String(),
+					Cover:  player.Picture{Url: value.Get("pic").String()},
 					Album:  value.Get("album").String(),
 					Meta: Meta{
 						Name: k.GetName(),

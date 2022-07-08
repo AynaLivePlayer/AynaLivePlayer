@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aynakeya/go-mpv"
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -41,6 +42,7 @@ type MediaInfo struct {
 	Artist   string
 	Album    string
 	Username string
+	Cover    player.Picture
 }
 
 type OutInfo struct {
@@ -159,6 +161,34 @@ func (t *TextInfo) RenderTemplates() {
 	}
 }
 
+func (t *TextInfo) OutputCover() {
+	if !t.Rendering {
+		return
+	}
+	if !t.info.Current.Cover.Exists() {
+		return
+	}
+	if t.info.Current.Cover.Data != nil {
+		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.info.Current.Cover.Data, 0666)
+		if err != nil {
+			l().Warnf("write cover file failed: %s", err)
+		}
+		return
+	}
+	go func() {
+		resp, err := resty.New().R().
+			Get(t.info.Current.Cover.Url)
+		if err != nil {
+			l().Warnf("get cover %s content failed: %s", t.info.Current.Cover.Url, err)
+			return
+		}
+		err = ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), resp.Body(), 0666)
+		if err != nil {
+			l().Warnf("write cover file failed: %s", err)
+		}
+	}()
+}
+
 func (t *TextInfo) registerHandlers() {
 	controller.MainPlayer.EventHandler.RegisterA(player.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
 		t.info.Current = MediaInfo{
@@ -166,9 +196,11 @@ func (t *TextInfo) registerHandlers() {
 			Title:    event.Data.(player.PlayEvent).Media.Title,
 			Artist:   event.Data.(player.PlayEvent).Media.Artist,
 			Album:    event.Data.(player.PlayEvent).Media.Album,
+			Cover:    event.Data.(player.PlayEvent).Media.Cover,
 			Username: event.Data.(player.PlayEvent).Media.ToUser().Name,
 		}
 		t.RenderTemplates()
+		t.OutputCover()
 	})
 	if controller.MainPlayer.ObserveProperty("time-pos", func(property *mpv.EventProperty) {
 		if property.Data == nil {

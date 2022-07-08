@@ -5,10 +5,19 @@ import (
 	"github.com/jinzhu/copier"
 )
 
+type Picture struct {
+	Url  string
+	Data []byte
+}
+
+func (p Picture) Exists() bool {
+	return p.Url != "" || p.Data != nil
+}
+
 type Media struct {
 	Title  string
 	Artist string
-	Cover  string
+	Cover  Picture
 	Album  string
 	Lyric  string
 	Url    string

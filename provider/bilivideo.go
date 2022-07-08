@@ -92,7 +92,7 @@ func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
 	jresp.Get("data.result").ForEach(func(key, value gjson.Result) bool {
 		result = append(result, &player.Media{
 			Title:  r.ReplaceAllString(value.Get("title").String(), ""),
-			Cover:  "https:" + value.Get("pic").String(),
+			Cover:  player.Picture{Url: "https:" + value.Get("pic").String()},
 			Artist: value.Get("author").String(),
 			Meta: Meta{
 				Name: b.GetName(),
@@ -115,7 +115,7 @@ func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
 	}
 	media.Title = jresp.Get("data.View.title").String()
 	media.Artist = jresp.Get("data.View.owner.name").String()
-	media.Cover = jresp.Get("data.View.pic").String()
+	media.Cover.Url = jresp.Get("data.View.pic").String()
 	media.Album = media.Title
 	return nil
 }
@@ -139,11 +139,11 @@ func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
 		return ErrorExternalApi
 	}
 	jresp = gjson.Parse(resp)
-	url := jresp.Get("data.durl.0.url").String()
-	if url == "" {
+	uri := jresp.Get("data.durl.0.url").String()
+	if uri == "" {
 		return ErrorExternalApi
 	}
-	media.Url = url
+	media.Url = uri
 	header := make(map[string]string)
 	_ = copier.Copy(&header, &b.header)
 	header["Referer"] = fmt.Sprintf("https://www.bilibili.com/video/%s", b.getBv(media.Meta.(Meta).Id))

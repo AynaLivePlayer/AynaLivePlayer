@@ -44,3 +44,10 @@ func StringSliceCopy(src []string) []string {
 	copy(x, src)
 	return x
 }
+
+func GetOrDefault(s string, def string) string {
+	if s == "" {
+		return def
+	}
+	return s
+}

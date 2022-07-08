@@ -120,7 +120,7 @@ func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
 			medias = append(medias, &player.Media{
 				Title:  result2.Songs[i].Name,
 				Artist: _neteaseGetArtistNames(result2.Songs[i]),
-				Cover:  result2.Songs[i].Al.PicUrl,
+				Cover:  player.Picture{Url: result2.Songs[i].Al.PicUrl},
 				Album:  result2.Songs[i].Al.Name,
 				Url:    "",
 				Header: nil,
@@ -158,7 +158,7 @@ func (n *Netease) Search(keyword string) ([]*player.Media, error) {
 		medias = append(medias, &player.Media{
 			Title:  song.Name,
 			Artist: strings.Join(artists, ","),
-			Cover:  "",
+			Cover:  player.Picture{},
 			Album:  song.Album.Name,
 			Url:    "",
 			Header: nil,
@@ -182,7 +182,7 @@ func (n *Netease) UpdateMedia(media *player.Media) error {
 		return ErrorExternalApi
 	}
 	media.Title = result.Songs[0].Name
-	media.Cover = result.Songs[0].Al.PicUrl
+	media.Cover.Url = result.Songs[0].Al.PicUrl
 	media.Album = result.Songs[0].Al.Name
 	media.Artist = _neteaseGetArtistNames(result.Songs[0])
 	return nil

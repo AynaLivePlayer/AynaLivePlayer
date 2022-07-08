@@ -22,6 +22,10 @@ func (t *TestConfig) CreatePanel() fyne.CanvasObject {
 }
 
 func createConfigLayout() fyne.CanvasObject {
+	// initialize config panels
+	for _, c := range ConfigList {
+		c.CreatePanel()
+	}
 	content := container.NewMax()
 	entryList := widget.NewList(
 		func() int {

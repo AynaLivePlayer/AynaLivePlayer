@@ -29,6 +29,7 @@ func l() *logrus.Entry {
 }
 
 func Initialize() {
+	l().Info("Initializing GUI")
 	os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
 	MainWindow = App.NewWindow(fmt.Sprintf("AynaLivePlayer Ver.%s", config.VERSION))

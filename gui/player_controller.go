@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aynakeya/go-mpv"
@@ -195,24 +194,34 @@ func registerPlayControllerHandler() {
 		PlayController.Artist.SetText(
 			media.Artist)
 		PlayController.Username.SetText(media.ToUser().Name)
-		if media.Cover == "" {
+		if !media.Cover.Exists() {
 			PlayController.SetDefaultCover()
 		} else {
-			uri, err := storage.ParseURI(media.Cover)
-			if err != nil || uri == nil {
-				l().Warn("fail to load parse cover url", media.Cover)
-			}
-			// async update
 			go func() {
-				img := canvas.NewImageFromURI(uri)
-				if img == nil {
+				picture, err := newImageFromPlayerPicture(media.Cover)
+				if err != nil {
 					l().Warn("fail to load parse cover url", media.Cover)
 					PlayController.SetDefaultCover()
 					return
 				}
-				PlayController.Cover.Resource = img.Resource
+				PlayController.Cover.Resource = picture.Resource
 				PlayController.Cover.Refresh()
 			}()
+			//uri, err := storage.ParseURI(media.Cover)
+			//if err != nil || uri == nil {
+			//	l().Warn("fail to load parse cover url", media.Cover)
+			//}
+			//// async update
+			//go func() {
+			//	img := canvas.NewImageFromURI(uri)
+			//	if img == nil {
+			//		l().Warn("fail to load parse cover url", media.Cover)
+			//		PlayController.SetDefaultCover()
+			//		return
+			//	}
+			//	PlayController.Cover.Resource = img.Resource
+			//	PlayController.Cover.Refresh()
+			//}()
 		}
 	})
 	return

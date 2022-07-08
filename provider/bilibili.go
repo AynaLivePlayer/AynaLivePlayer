@@ -76,7 +76,7 @@ func (b *Bilibili) Search(keyword string) ([]*player.Media, error) {
 	gjson.Get(resp, "data.result").ForEach(func(key, value gjson.Result) bool {
 		result = append(result, &player.Media{
 			Title:  value.Get("title").String(),
-			Cover:  value.Get("cover").String(),
+			Cover:  player.Picture{Url: value.Get("cover").String()},
 			Artist: value.Get("author").String(),
 			Meta: Meta{
 				Name: b.GetName(),
@@ -99,7 +99,7 @@ func (b *Bilibili) UpdateMedia(media *player.Media) error {
 		return ErrorExternalApi
 	}
 	media.Title = gjson.Get(resp, "data.title").String()
-	media.Cover = gjson.Get(resp, "data.cover").String()
+	media.Cover.Url = gjson.Get(resp, "data.cover").String()
 	media.Artist = gjson.Get(resp, "data.author").String()
 	media.Album = media.Title
 	return nil

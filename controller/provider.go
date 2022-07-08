@@ -8,7 +8,7 @@ import (
 
 func PrepareMedia(media *player.Media) error {
 	var err error
-	if media.Title == "" || media.Cover == "" {
+	if media.Title == "" || !media.Cover.Exists() {
 		l().Trace("fetching media info")
 		if err = provider.UpdateMedia(media); err != nil {
 			l().Warn("fail to prepare media when fetch info", err)
