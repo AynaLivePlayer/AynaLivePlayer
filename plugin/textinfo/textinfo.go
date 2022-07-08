@@ -55,14 +55,16 @@ type OutInfo struct {
 }
 
 type TextInfo struct {
-	Rendering bool
-	info      OutInfo
-	templates []*Template
-	panel     fyne.CanvasObject
+	Rendering  bool
+	info       OutInfo
+	templates  []*Template
+	emptyCover []byte
+	panel      fyne.CanvasObject
 }
 
 func NewTextInfo() *TextInfo {
-	return &TextInfo{Rendering: true}
+	b, _ := ioutil.ReadFile(config.GetAssetPath("empty.png"))
+	return &TextInfo{Rendering: true, emptyCover: b}
 }
 
 func (t *TextInfo) Title() string {
@@ -166,6 +168,10 @@ func (t *TextInfo) OutputCover() {
 		return
 	}
 	if !t.info.Current.Cover.Exists() {
+		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.emptyCover, 0666)
+		if err != nil {
+			l().Warnf("write cover file failed: %s", err)
+		}
 		return
 	}
 	if t.info.Current.Cover.Data != nil {
