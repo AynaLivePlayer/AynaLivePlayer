@@ -6,7 +6,7 @@ import (
 	"path"
 )
 
-const VERSION = "alpha 0.7.5"
+const VERSION = "alpha 0.8.0"
 
 const CONFIG_PATH = "./config.ini"
 const Assests_PATH = "./assets"
