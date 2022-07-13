@@ -1,6 +1,7 @@
 package webinfo
 
 import (
+	"AynaLivePlayer/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -35,7 +36,7 @@ func NewWebInfoServer(port int) *WebInfoServer {
 		Clients: map[*Client]int{},
 	}
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir("./assets/webinfo")))
+	mux.Handle("/", http.FileServer(http.Dir(config.GetAssetPath("webinfo"))))
 	mux.HandleFunc("/ws/info", server.handleInfo)
 	mux.HandleFunc("/api/info", server.getInfo)
 	server.Server = &http.Server{
