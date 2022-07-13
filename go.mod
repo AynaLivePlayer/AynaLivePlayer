@@ -10,12 +10,14 @@ require (
 	github.com/aynakeya/go-mpv v0.0.4
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jinzhu/copier v0.3.5
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cast v1.3.1
 	github.com/tidwall/gjson v1.14.1
 	gopkg.in/ini.v1 v1.66.4
+	nhooyr.io/websocket v1.8.7
 )
 
 replace (

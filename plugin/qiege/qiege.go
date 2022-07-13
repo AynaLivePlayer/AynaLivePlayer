@@ -48,6 +48,10 @@ func (d *Qiege) Enable() error {
 	return nil
 }
 
+func (d *Qiege) Disable() error {
+	return nil
+}
+
 func (d *Qiege) Match(command string) bool {
 	for _, c := range []string{"切歌", d.CustomCMD} {
 		if command == c {

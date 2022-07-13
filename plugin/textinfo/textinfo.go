@@ -106,6 +106,10 @@ func (t *TextInfo) Enable() (err error) {
 	return nil
 }
 
+func (d *TextInfo) Disable() error {
+	return nil
+}
+
 func (t *TextInfo) reloadTemplates() {
 	var err error
 	t.templates = make([]*Template, 0)
@@ -228,6 +232,7 @@ func (t *TextInfo) registerHandlers() {
 			return
 		}
 		t.info.TotalTime = int(property.Data.(mpv.Node).Value.(float64))
+		t.RenderTemplates()
 	}) != nil {
 		l().Error("fail to register handler for total time with property duration")
 	}

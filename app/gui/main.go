@@ -8,6 +8,7 @@ import (
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/textinfo"
+	"AynaLivePlayer/plugin/webinfo"
 	"fmt"
 	"github.com/mitchellh/panicwrap"
 	"os"
@@ -24,11 +25,12 @@ func init() {
 	}
 }
 
+var plugins = []controller.Plugin{diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo(), webinfo.NewWebInfo()}
+
 func main() {
 	fmt.Printf("BiliAudioBot Revive %s\n", config.VERSION)
-	//logger.Logger.SetLevel(logrus.DebugLevel)
 	controller.Initialize()
-	controller.LoadPlugins(diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo())
+	controller.LoadPlugins(plugins...)
 	defer func() {
 		controller.Destroy()
 		config.SaveToConfigFile(config.CONFIG_PATH)
@@ -36,4 +38,5 @@ func main() {
 	}()
 	gui.Initialize()
 	gui.MainWindow.ShowAndRun()
+	controller.ClosePlugins(plugins...)
 }

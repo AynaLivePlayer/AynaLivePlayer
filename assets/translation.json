@@ -92,13 +92,13 @@
       "en": "ID/URL",
       "zh-CN": "ID/网址"
     },
-    "gui.playlist.add.source": {
-      "en": "Source",
-      "zh-CN": "来源"
-    },
     "gui.playlist.add.prompt": {
       "en": "Please enter the ID or URL of the song you want to add.",
       "zh-CN": "输入歌单ID或者歌单网址。"
+    },
+    "gui.playlist.add.source": {
+      "en": "Source",
+      "zh-CN": "来源"
     },
     "gui.playlist.add.title": {
       "en": "Add Playlist",
@@ -220,10 +220,6 @@
       "en": "Custom Command (Default one still works)",
       "zh-CN": "自定义命令 (默认的依然可用)"
     },
-    "plugin.diange.source_cmd": {
-      "en": "Source Command",
-      "zh-CN": "来源点歌命令"
-    },
     "plugin.diange.description": {
       "en": "Basic Diange Configuration",
       "zh-CN": "点歌基本设置"
@@ -239,6 +235,10 @@
     "plugin.diange.queue_max": {
       "en": "Max Queue",
       "zh-CN": "最大点歌数"
+    },
+    "plugin.diange.source_cmd": {
+      "en": "Source Command",
+      "zh-CN": "来源点歌命令"
     },
     "plugin.diange.title": {
       "en": "Diange",
@@ -291,6 +291,14 @@
     "plugin.textinfo.title": {
       "en": "Text Output",
       "zh-CN": "文本输出"
+    },
+    "plugin.webinfo.description": {
+      "en": "Web output configuration",
+      "zh-CN": "web输出设置"
+    },
+    "plugin.webinfo.title": {
+      "en": "Web Output",
+      "zh-CN": "Web输出"
     }
   }
 }

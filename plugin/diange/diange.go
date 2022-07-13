@@ -60,6 +60,10 @@ func (d *Diange) Enable() error {
 	return nil
 }
 
+func (d *Diange) Disable() error {
+	return nil
+}
+
 func (d *Diange) initCMD() {
 	if len(d.SourceCMD) == len(config.Provider.Priority) {
 		return
