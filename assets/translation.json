@@ -248,10 +248,6 @@
       "en": "User",
       "zh-CN": "普通用户"
     },
-    "plugin.neteaselogin.logout": {
-      "en": "Logout",
-      "zh-CN": "登出"
-    },
     "plugin.neteaselogin.current_user": {
       "en": "Current User:",
       "zh-CN": "当前用户:"
@@ -263,6 +259,10 @@
     "plugin.neteaselogin.description": {
       "en": "Netease User Login",
       "zh-CN": "网易云登录"
+    },
+    "plugin.neteaselogin.logout": {
+      "en": "Logout",
+      "zh-CN": "登出"
     },
     "plugin.neteaselogin.qr.finish": {
       "en": "Finish Scan",
@@ -327,6 +327,38 @@
     "plugin.webinfo.description": {
       "en": "Web output configuration",
       "zh-CN": "web输出设置"
+    },
+    "plugin.webinfo.port": {
+      "en": "Port",
+      "zh-CN": "服务器端口"
+    },
+    "plugin.webinfo.server_control": {
+      "en": "Control",
+      "zh-CN": "操作"
+    },
+    "plugin.webinfo.server_control.restart": {
+      "en": "Restart",
+      "zh-CN": "重启"
+    },
+    "plugin.webinfo.server_control.start": {
+      "en": "Start",
+      "zh-CN": "启动"
+    },
+    "plugin.webinfo.server_control.stop": {
+      "en": "Stop",
+      "zh-CN": "停止"
+    },
+    "plugin.webinfo.server_status": {
+      "en": "Server Status",
+      "zh-CN": "服务器状态"
+    },
+    "plugin.webinfo.server_status.running": {
+      "en": "Running",
+      "zh-CN": "运行中"
+    },
+    "plugin.webinfo.server_status.stopped": {
+      "en": "Stopped",
+      "zh-CN": "已停止"
     },
     "plugin.webinfo.title": {
       "en": "Web Output",

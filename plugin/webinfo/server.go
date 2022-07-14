@@ -19,11 +19,13 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebInfoServer struct {
-	Info    OutInfo
-	Server  *http.Server
-	Clients map[*Client]int
-	Running bool
-	lock    sync.Mutex
+	Info      OutInfo
+	Port      int
+	ServerMux *http.ServeMux
+	Server    *http.Server
+	Clients   map[*Client]int
+	Running   bool
+	lock      sync.Mutex
 }
 
 type Client struct {
@@ -34,16 +36,15 @@ type Client struct {
 
 func NewWebInfoServer(port int) *WebInfoServer {
 	server := &WebInfoServer{
+		Port:    port,
 		Clients: map[*Client]int{},
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(config.GetAssetPath("webinfo"))))
 	mux.HandleFunc("/ws/info", server.handleInfo)
 	mux.HandleFunc("/api/info", server.getInfo)
-	server.Server = &http.Server{
-		Addr:    fmt.Sprintf("localhost:%d", port),
-		Handler: mux,
-	}
+	server.ServerMux = mux
+
 	return server
 }
 
@@ -128,12 +129,17 @@ func (s *WebInfoServer) removeClient(c *Client) {
 }
 
 func (s *WebInfoServer) Start() {
+	lg.Debug("WebInfoServer starting...")
 	s.Running = true
 	go func() {
+		s.Server = &http.Server{
+			Addr:    fmt.Sprintf("localhost:%d", s.Port),
+			Handler: s.ServerMux,
+		}
 		err := s.Server.ListenAndServe()
 		s.Running = false
 		if err == http.ErrServerClosed {
-			lg.Info("server closed")
+			lg.Info("WebInfoServer closed")
 			return
 		}
 		if err != nil {
@@ -144,8 +150,9 @@ func (s *WebInfoServer) Start() {
 }
 
 func (s *WebInfoServer) Stop() error {
+	lg.Debug("WebInfoServer stopping...")
 	s.lock.Lock()
 	s.Clients = map[*Client]int{}
 	s.lock.Unlock()
-	return s.Server.Shutdown(context.Background())
+	return s.Server.Shutdown(context.TODO())
 }

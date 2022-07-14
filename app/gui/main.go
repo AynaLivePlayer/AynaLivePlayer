@@ -8,6 +8,7 @@ import (
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/textinfo"
+	"AynaLivePlayer/plugin/webinfo"
 	"AynaLivePlayer/plugin/wylogin"
 	"fmt"
 	"github.com/mitchellh/panicwrap"
@@ -25,7 +26,7 @@ func init() {
 	}
 }
 
-var plugins = []controller.Plugin{diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo(),
+var plugins = []controller.Plugin{diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo(), webinfo.NewWebInfo(),
 	wylogin.NewWYLogin()}
 
 func main() {

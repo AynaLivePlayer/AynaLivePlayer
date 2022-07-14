@@ -9,6 +9,9 @@ import (
 	"AynaLivePlayer/logger"
 	"AynaLivePlayer/player"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aynakeya/go-mpv"
 )
@@ -20,6 +23,7 @@ var lg = logger.Logger.WithField("Module", MODULE_PLGUIN_WEBINFO)
 type WebInfo struct {
 	Port   int
 	server *WebInfoServer
+	panel  fyne.CanvasObject
 }
 
 func NewWebInfo() *WebInfo {
@@ -132,9 +136,79 @@ func (t *WebInfo) registerHandlers() {
 			OutInfo{Lyric: t.server.Info.Lyric},
 		)
 	})
+}
 
+func (w *WebInfo) getServerStatusText() string {
+	if w.server.Running {
+		return i18n.T("plugin.webinfo.server_status.running")
+	} else {
+		return i18n.T("plugin.webinfo.server_status.stopped")
+	}
 }
 
 func (w *WebInfo) CreatePanel() fyne.CanvasObject {
-	return widget.NewLabel("No Setting")
+	if w.panel != nil {
+		return w.panel
+	}
+	statusText := widget.NewLabel("")
+	serverStatus := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.webinfo.server_status")),
+		statusText,
+	)
+	statusText.SetText(w.getServerStatusText())
+	serverPort := container.NewBorder(nil, nil,
+		widget.NewLabel(i18n.T("plugin.webinfo.port")), nil,
+		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port))),
+	)
+	stopBtn := gui.NewAsyncButtonWithIcon(
+		i18n.T("plugin.webinfo.server_control.stop"),
+		theme.MediaStopIcon(),
+		func() {
+			if !w.server.Running {
+				return
+			}
+			lg.Info("User try stop webinfo server")
+			err := w.server.Stop()
+			if err != nil {
+				lg.Warnf("stop server have error: %s", err)
+				return
+			}
+			statusText.SetText(w.getServerStatusText())
+		},
+	)
+	startBtn := gui.NewAsyncButtonWithIcon(
+		i18n.T("plugin.webinfo.server_control.start"),
+		theme.MediaPlayIcon(),
+		func() {
+			if w.server.Running {
+				return
+			}
+			lg.Infof("User try start webinfo server with port %d", w.Port)
+			w.server.Port = w.Port
+			w.server.Start()
+			statusText.SetText(w.getServerStatusText())
+		},
+	)
+	restartBtn := gui.NewAsyncButtonWithIcon(
+		i18n.T("plugin.webinfo.server_control.restart"),
+		theme.MediaReplayIcon(),
+		func() {
+			lg.Infof("User try restart webinfo server with port %d", w.Port)
+			if w.server.Running {
+				if err := w.server.Stop(); err != nil {
+					lg.Warnf("stop server have error: %s", err)
+					return
+				}
+			}
+			w.server.Port = w.Port
+			w.server.Start()
+			statusText.SetText(w.getServerStatusText())
+		},
+	)
+	ctrlBtns := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.webinfo.server_control")),
+		startBtn, stopBtn, restartBtn,
+	)
+	w.panel = container.NewVBox(serverStatus, serverPort, ctrlBtns)
+	return w.panel
 }
