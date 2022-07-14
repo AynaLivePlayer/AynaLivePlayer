@@ -80,11 +80,7 @@ func registerPlayControllerHandler() {
 		controller.Seek(0, true)
 	}
 	PlayController.ButtonSwitch.OnTapped = func() {
-		if controller.Toggle() {
-			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
-		} else {
-			PlayController.ButtonSwitch.Icon = theme.MediaStopIcon()
-		}
+		controller.Toggle()
 	}
 	PlayController.ButtonNext.OnTapped = func() {
 		controller.PlayNext()
@@ -105,7 +101,7 @@ func registerPlayControllerHandler() {
 		if property.Data.(mpv.Node).Value.(bool) {
 			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
 		} else {
-			PlayController.ButtonSwitch.Icon = theme.MediaStopIcon()
+			PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
 		}
 	}) != nil {
 		l().Error("fail to register handler for switch button with property pause")
