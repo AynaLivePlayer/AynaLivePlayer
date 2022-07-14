@@ -22,6 +22,7 @@ type WebInfoServer struct {
 	Info    OutInfo
 	Server  *http.Server
 	Clients map[*Client]int
+	Running bool
 	lock    sync.Mutex
 }
 
@@ -40,7 +41,7 @@ func NewWebInfoServer(port int) *WebInfoServer {
 	mux.HandleFunc("/ws/info", server.handleInfo)
 	mux.HandleFunc("/api/info", server.getInfo)
 	server.Server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf("localhost:%d", port),
 		Handler: mux,
 	}
 	return server
@@ -127,8 +128,10 @@ func (s *WebInfoServer) removeClient(c *Client) {
 }
 
 func (s *WebInfoServer) Start() {
+	s.Running = true
 	go func() {
 		err := s.Server.ListenAndServe()
+		s.Running = false
 		if err == http.ErrServerClosed {
 			lg.Info("server closed")
 			return
@@ -141,5 +144,8 @@ func (s *WebInfoServer) Start() {
 }
 
 func (s *WebInfoServer) Stop() error {
+	s.lock.Lock()
+	s.Clients = map[*Client]int{}
+	s.lock.Unlock()
 	return s.Server.Shutdown(context.Background())
 }

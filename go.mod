@@ -14,6 +14,7 @@ require (
 	github.com/jinzhu/copier v0.3.5
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect
 	github.com/spf13/cast v1.3.1
 	github.com/tidwall/gjson v1.14.1
 	gopkg.in/ini.v1 v1.66.4

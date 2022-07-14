@@ -136,5 +136,5 @@ func (t *WebInfo) registerHandlers() {
 }
 
 func (w *WebInfo) CreatePanel() fyne.CanvasObject {
-	return widget.NewLabel("adf")
+	return widget.NewLabel("No Setting")
 }

@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/player"
 	"AynaLivePlayer/util"
 	neteaseApi "github.com/XiaoMengXinX/Music163Api-Go/api"
-	"github.com/XiaoMengXinX/Music163Api-Go/types"
+	neteaseTypes "github.com/XiaoMengXinX/Music163Api-Go/types"
 	neteaseUtil "github.com/XiaoMengXinX/Music163Api-Go/utils"
 	"regexp"
 	"strconv"
@@ -17,6 +17,7 @@ type Netease struct {
 	ReqData        neteaseUtil.RequestData
 	IdRegex0       *regexp.Regexp
 	IdRegex1       *regexp.Regexp
+	loginStatus    neteaseTypes.LoginStatusData
 }
 
 func _newNetease() *Netease {
@@ -44,13 +45,17 @@ func init() {
 	Providers[NeteaseAPI.GetName()] = NeteaseAPI
 }
 
-func _neteaseGetArtistNames(data types.SongDetailData) string {
+// Netease private helper method
+
+func _neteaseGetArtistNames(data neteaseTypes.SongDetailData) string {
 	artists := make([]string, 0)
 	for _, a := range data.Ar {
 		artists = append(artists, a.Name)
 	}
 	return strings.Join(artists, ",")
 }
+
+// MediaProvider implementation
 
 func (n *Netease) GetName() string {
 	return "netease"
