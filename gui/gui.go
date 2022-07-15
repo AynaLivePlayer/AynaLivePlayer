@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/logger"
+	"AynaLivePlayer/resource"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -32,7 +33,7 @@ func Initialize() {
 	l().Info("Initializing GUI")
 	os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
-	MainWindow = App.NewWindow(fmt.Sprintf("AynaLivePlayer Ver.%s", config.VERSION))
+	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver.%s", config.ProgramName, config.Version))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
@@ -56,7 +57,7 @@ func Initialize() {
 	)
 
 	tabs.SetTabLocation(container.TabLocationTop)
-
+	MainWindow.SetIcon(fyne.NewStaticResource("icon", resource.ProgramIcon))
 	MainWindow.SetContent(tabs)
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(960, 480))

@@ -32,8 +32,7 @@ type PlayControllerContainer struct {
 }
 
 func (p *PlayControllerContainer) SetDefaultCover() {
-	p.Cover.Resource = nil
-	p.Cover.File = config.GetAssetPath("empty.png")
+	p.Cover.Resource = ResEmptyImage
 	p.Cover.Refresh()
 }
 
@@ -224,7 +223,7 @@ func registerPlayControllerHandler() {
 }
 
 func createPlayControllerV2() fyne.CanvasObject {
-	PlayController.Cover = canvas.NewImageFromFile(config.GetAssetPath("empty.png"))
+	PlayController.Cover = canvas.NewImageFromResource(ResEmptyImage)
 	PlayController.Cover.SetMinSize(fyne.NewSize(128, 128))
 	PlayController.Cover.FillMode = canvas.ImageFillContain
 

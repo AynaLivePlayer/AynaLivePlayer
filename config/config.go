@@ -6,13 +6,18 @@ import (
 	"path"
 )
 
-const VERSION = "alpha 0.8.4"
+const (
+	ProgramName = "卡西米尔唱片机"
+	Version     = "alpha 0.8.4"
+)
 
-const CONFIG_PATH = "./config.ini"
-const Assests_PATH = "./assets"
+const (
+	ConfigPath = "./config.ini"
+	AssetsPath = "./assets"
+)
 
 func GetAssetPath(name string) string {
-	return path.Join(Assests_PATH, name)
+	return path.Join(AssetsPath, name)
 }
 
 type Config interface {
@@ -33,7 +38,7 @@ func LoadConfig(cfg Config) {
 
 func init() {
 	var err error
-	ConfigFile, err = ini.Load(CONFIG_PATH)
+	ConfigFile, err = ini.Load(ConfigPath)
 	if err != nil {
 		fmt.Println("config not found, using default config")
 		ConfigFile = ini.Empty()

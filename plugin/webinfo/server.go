@@ -50,6 +50,8 @@ func NewWebInfoServer(port int) *WebInfoServer {
 
 func (s *WebInfoServer) getInfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	d, _ := json.Marshal(s.Info)
 	_, err := w.Write(d)
 	if err != nil {

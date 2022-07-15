@@ -3,8 +3,9 @@ package config
 import "github.com/sirupsen/logrus"
 
 type _LogConfig struct {
-	Path  string
-	Level logrus.Level
+	Path           string
+	Level          logrus.Level
+	RedirectStderr bool
 }
 
 func (c *_LogConfig) Name() string {
@@ -12,6 +13,7 @@ func (c *_LogConfig) Name() string {
 }
 
 var Log = &_LogConfig{
-	Path:  "./log.txt",
-	Level: logrus.InfoLevel,
+	Path:           "./log.txt",
+	Level:          logrus.InfoLevel,
+	RedirectStderr: false, // this should be true if it is in production mode.
 }

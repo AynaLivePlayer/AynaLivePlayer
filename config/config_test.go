@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	fmt.Println(SaveToConfigFile(CONFIG_PATH))
+	fmt.Println(SaveToConfigFile(ConfigPath))
 }
 
 func TestLoad(t *testing.T) {

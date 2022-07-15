@@ -109,7 +109,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 		},
 	)
 	controlBtns := container.NewHBox(refreshBtn, logoutBtn)
-	qrcodeImg := canvas.NewImageFromFile(config.GetAssetPath("empty.png"))
+	qrcodeImg := canvas.NewImageFromResource(gui.ResEmptyImage)
 	qrcodeImg.SetMinSize(fyne.NewSize(200, 200))
 	qrcodeImg.FillMode = canvas.ImageFillContain
 	var key string
@@ -148,7 +148,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 			qrStatus.SetText(msg)
 			if ok {
 				key = ""
-				qrcodeImg.Resource = nil
+				qrcodeImg.Resource = gui.ResEmptyImage
 				qrcodeImg.Refresh()
 			}
 		},

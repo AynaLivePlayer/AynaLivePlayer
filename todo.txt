@@ -5,8 +5,6 @@
 - @5 delete optimization
 
 
-
-
 - web输出  (前端)
 - 进入beta版本
 
@@ -17,14 +15,15 @@ alpha
 ----
 
 Finished
-- 2022.7.13: 网易于登录
-- 2022.7.10: Local Provider
-- 2022.7.03: 多来源点歌
-- 2022.7.01: 文本输出
-- 2022.7.01: 历史记录
-- 2022.6.29: 跳过闲置歌单
-- 2022.6.26: i18n
-- 2022.6.25: kuwo歌单
-- 2022.6.25: 设置界面
-- 2022.6.25: @6 bug, race condition, playlist size changed during playlist update.
-- 2022.6.23: 用户歌单操作
+- 2022.7.15:       更新stderr重定向/添加logo/
+- 2022.7.13@0.8.4: 网易云登录
+- 2022.7.10:       Local Provider
+- 2022.7.03:       多来源点歌
+- 2022.7.01:       文本输出
+- 2022.7.01:       历史记录
+- 2022.6.29:       跳过闲置歌单
+- 2022.6.26:       i18n
+- 2022.6.25:       kuwo歌单
+- 2022.6.25:       设置界面
+- 2022.6.25:       @6 bug, race condition, playlist size changed during playlist update.
+- 2022.6.23:       用户歌单操作

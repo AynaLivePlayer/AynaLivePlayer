@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Printf("BiliAudioBot Revive %s\n", config.VERSION)
+	fmt.Printf("BiliAudioBot Revive %s\n", config.Version)
 	logger.Logger.SetLevel(logrus.DebugLevel)
 	fmt.Println("Please enter room id")
 	var roomid string
