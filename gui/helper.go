@@ -95,7 +95,8 @@ func newImageFromPlayerPicture(picture player.Picture) (*canvas.Image, error) {
 		}
 		img := canvas.NewImageFromURI(uri)
 		if img == nil {
-			return nil, err
+			// bug fix, return a new error to indicate fail to read an image
+			return nil, errors.New("fail to read image")
 		}
 		return img, err
 	}
