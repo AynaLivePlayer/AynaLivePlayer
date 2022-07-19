@@ -363,6 +363,10 @@
     "plugin.webinfo.title": {
       "en": "Web Output",
       "zh-CN": "Web输出"
+    },
+    "plugin.webinfo.server_preview": {
+      "en": "Server Preview",
+      "zh-CN":"效果预览"
     }
   }
 }

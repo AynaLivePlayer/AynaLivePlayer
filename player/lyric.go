@@ -41,6 +41,9 @@ func (l *Lyric) Reload(lyric string) {
 	for index, time := range times {
 		lrcs[index] = tmp[time]
 	}
+	if len(lrcs) == 0 {
+		lrcs = append(lrcs, LyricLine{Time: 0, Lyric: ""})
+	}
 	lrcs = append(lrcs, LyricLine{
 		Time:  99999999999,
 		Lyric: "",

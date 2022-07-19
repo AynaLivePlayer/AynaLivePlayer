@@ -8,6 +8,8 @@ import (
 	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/logger"
 	"AynaLivePlayer/player"
+	"AynaLivePlayer/util"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -146,6 +148,10 @@ func (w *WebInfo) getServerStatusText() string {
 	}
 }
 
+func (w *WebInfo) getServerUrl() string {
+	return fmt.Sprintf("http://localhost:%d/#/previewV2", w.Port)
+}
+
 func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 	if w.panel != nil {
 		return w.panel
@@ -159,6 +165,11 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.webinfo.port")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port))),
+	)
+	serverUrl := widget.NewHyperlink(w.getServerUrl(), util.UrlMustParse(w.getServerUrl()))
+	serverPreview := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.webinfo.server_preview")),
+		serverUrl,
 	)
 	stopBtn := gui.NewAsyncButtonWithIcon(
 		i18n.T("plugin.webinfo.server_control.stop"),
@@ -187,6 +198,8 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			w.server.Port = w.Port
 			w.server.Start()
 			statusText.SetText(w.getServerStatusText())
+			serverUrl.SetText(w.getServerUrl())
+			_ = serverUrl.SetURLFromString(w.getServerUrl())
 		},
 	)
 	restartBtn := gui.NewAsyncButtonWithIcon(
@@ -203,12 +216,14 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			w.server.Port = w.Port
 			w.server.Start()
 			statusText.SetText(w.getServerStatusText())
+			serverUrl.SetText(w.getServerUrl())
+			_ = serverUrl.SetURLFromString(w.getServerUrl())
 		},
 	)
 	ctrlBtns := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.webinfo.server_control")),
 		startBtn, stopBtn, restartBtn,
 	)
-	w.panel = container.NewVBox(serverStatus, serverPort, ctrlBtns)
+	w.panel = container.NewVBox(serverStatus, serverPreview, serverPort, ctrlBtns)
 	return w.panel
 }

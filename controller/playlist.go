@@ -5,6 +5,8 @@ import "AynaLivePlayer/player"
 func AddToHistory(media *player.Media) {
 	l().Tracef("add media %s (%s) to history", media.Title, media.Artist)
 	media = media.Copy()
+	// reset url for future use
+	media.Url = ""
 	if History.Size() >= 1024 {
 		History.Replace([]*player.Media{})
 	}
