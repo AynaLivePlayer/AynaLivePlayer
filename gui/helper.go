@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/player"
 	"bytes"
+	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -81,7 +82,12 @@ func newFixedSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject
 
 func newImageFromPlayerPicture(picture player.Picture) (*canvas.Image, error) {
 	if picture.Data != nil {
-		return canvas.NewImageFromReader(bytes.NewReader(picture.Data), "cover"), nil
+		img := canvas.NewImageFromReader(bytes.NewReader(picture.Data), "cover")
+		// return an error when img is nil
+		if img == nil {
+			return nil, errors.New("fail to read image")
+		}
+		return img, nil
 	} else {
 		uri, err := storage.ParseURI(picture.Url)
 		if err != nil || uri == nil {
