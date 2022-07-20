@@ -1,2 +1,3 @@
 .idea
-assets/webinfo/*
+assets/webinfo/*.html
+assets/webinfo/assets
