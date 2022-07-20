@@ -25,6 +25,7 @@ type WebInfoServer struct {
 	Server    *http.Server
 	Clients   map[*Client]int
 	Running   bool
+	Store     *TemplateStore
 	lock      sync.Mutex
 }
 
@@ -36,16 +37,84 @@ type Client struct {
 
 func NewWebInfoServer(port int) *WebInfoServer {
 	server := &WebInfoServer{
+		Store:   newTemplateStore(WebTemplateStorePath),
 		Port:    port,
+		Info:    OutInfo{Playlist: make([]MediaInfo, 0)},
 		Clients: map[*Client]int{},
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(config.GetAssetPath("webinfo"))))
 	mux.HandleFunc("/ws/info", server.handleInfo)
 	mux.HandleFunc("/api/info", server.getInfo)
+	mux.HandleFunc("/api/template/list", server.tmplList)
+	mux.HandleFunc("/api/template/get", server.tmplGet)
+	mux.HandleFunc("/api/template/save", server.tmplSave)
 	server.ServerMux = mux
 
 	return server
+}
+
+func (s *WebInfoServer) tmplList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	d, _ := json.Marshal(s.Store.List())
+	_, err := w.Write(d)
+	if err != nil {
+		lg.Warnf("/api/template/list error: %s", err)
+		return
+	}
+}
+
+func (s *WebInfoServer) tmplGet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		name = "default"
+	}
+	d, _ := json.Marshal(s.Store.Get(name))
+	_, err := w.Write(d)
+	if err != nil {
+		lg.Warnf("/api/template/get error: %s", err)
+		return
+	}
+}
+
+func (s *WebInfoServer) tmplSave(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Method", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Expose-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	lg.Info(r.Method)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if err := r.ParseMultipartForm(1 << 16); err != nil {
+		lg.Warnf("ParseForm() err: %v", err)
+		return
+	}
+	name := r.FormValue("name")
+	tmpl := r.FormValue("template")
+	if name == "" {
+		name = "default"
+	}
+	lg.Infof("change template %s", name)
+	s.Store.Modify(name, tmpl)
+	d, _ := json.Marshal(s.Store.Get(name))
+	_, err := w.Write(d)
+	if err != nil {
+		lg.Warnf("/api/template/save error: %s", err)
+		return
+	}
+	s.Store.Save(WebTemplateStorePath)
 }
 
 func (s *WebInfoServer) getInfo(w http.ResponseWriter, r *http.Request) {

@@ -202,21 +202,6 @@ func registerPlayControllerHandler() {
 				PlayController.Cover.Resource = picture.Resource
 				PlayController.Cover.Refresh()
 			}()
-			//uri, err := storage.ParseURI(media.Cover)
-			//if err != nil || uri == nil {
-			//	l().Warn("fail to load parse cover url", media.Cover)
-			//}
-			//// async update
-			//go func() {
-			//	img := canvas.NewImageFromURI(uri)
-			//	if img == nil {
-			//		l().Warn("fail to load parse cover url", media.Cover)
-			//		PlayController.SetDefaultCover()
-			//		return
-			//	}
-			//	PlayController.Cover.Resource = img.Resource
-			//	PlayController.Cover.Refresh()
-			//}()
 		}
 	})
 	return

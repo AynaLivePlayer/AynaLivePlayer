@@ -90,14 +90,17 @@ func newImageFromPlayerPicture(picture player.Picture) (*canvas.Image, error) {
 		return img, nil
 	} else {
 		uri, err := storage.ParseURI(picture.Url)
-		if err != nil || uri == nil {
+		if err != nil {
 			return nil, err
+		}
+		if uri == nil {
+			return nil, errors.New("fail to fail url")
 		}
 		img := canvas.NewImageFromURI(uri)
 		if img == nil {
 			// bug fix, return a new error to indicate fail to read an image
 			return nil, errors.New("fail to read image")
 		}
-		return img, err
+		return img, nil
 	}
 }

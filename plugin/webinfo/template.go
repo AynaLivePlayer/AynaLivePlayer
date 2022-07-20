@@ -19,13 +19,14 @@ type TemplateStore struct {
 
 func newTemplateStore(filename string) *TemplateStore {
 	s := &TemplateStore{Templates: map[string]*WebTemplate{}}
-	var templates []WebTemplate
+	var templates []*WebTemplate
 	file, err := ioutil.ReadFile(filename)
 	if err == nil {
 		_ = json.Unmarshal(file, &templates)
 	}
+
 	for _, tmpl := range templates {
-		s.Templates[tmpl.Name] = &tmpl
+		s.Templates[tmpl.Name] = tmpl
 	}
 	return s
 }
