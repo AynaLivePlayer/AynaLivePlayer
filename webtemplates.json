@@ -9,6 +9,6 @@
     },
     {
         "Name": "default",
-        "Template": "        <div>\r\n          <div class=\"current-playing\">\r\n            <media-title></media-title>\r\n            ---\r\n            <media-artist></media-artist>\r\n            ---\r\n            <media-username></media-username>\r\n          </div>"
+        "Template": "\r\n          <div class=\"current-playing\">\r\n            <media-title></media-title>\r\n            ---\r\n            <media-artist></media-artist>\r\n            ---\r\n            <media-username></media-username>\r\n          </div>\r\n"
     }
 ]
