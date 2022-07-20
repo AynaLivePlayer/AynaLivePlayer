@@ -1,7 +1,7 @@
 [
     {
         "Name": "时间例子",
-        "Template": "<p><media-title /></p>\r\n\r\n<p>秒显示：<current-time />/<total-time /></p>\r\n\r\n<p>\r\n分秒显示: \r\n<current-time format=\"m:s\"/>\r\n/\r\n<total-time format=\"m:s\"/>\r\n</p>\r\n"
+        "Template": "<p><media-title /></p>\r\n\r\n<p>秒显示：<current-time></current-time>\r\n/<total-time></total-time></p>\r\n\r\n<p>\r\n分秒显示: \r\n<current-time format=\"m:s\"/></current-time>\r\n/\r\n<total-time format=\"m:s\"/></total-time>\r\n</p>\r\n"
     },
     {
         "Name": "播放列表例子",
