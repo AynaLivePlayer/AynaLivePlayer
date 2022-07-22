@@ -83,6 +83,7 @@ func createPlaylists() fyne.CanvasObject {
 	})
 	PlaylistManager.Playlists.OnSelected = func(id widget.ListItemID) {
 		PlaylistManager.Index = id
+		PlaylistManager.PlaylistMedia.Refresh()
 	}
 	return container.NewHBox(
 		container.NewBorder(
