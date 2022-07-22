@@ -14,7 +14,7 @@ type _LocalPlaylist struct {
 }
 
 type Local struct {
-	Playlists []_LocalPlaylist
+	Playlists []*_LocalPlaylist
 }
 
 var LocalAPI *Local
@@ -25,15 +25,15 @@ func init() {
 }
 
 func _newLocal() *Local {
-	l := &Local{Playlists: make([]_LocalPlaylist, 0)}
+	l := &Local{Playlists: make([]*_LocalPlaylist, 0)}
 	if err := os.MkdirAll(config.Provider.LocalDir, 0755); err != nil {
 		return l
 	}
 	for _, n := range getPlaylistNames() {
-		l.Playlists = append(l.Playlists, _LocalPlaylist{Name: n})
+		l.Playlists = append(l.Playlists, &_LocalPlaylist{Name: n})
 	}
 	for i, _ := range l.Playlists {
-		_ = readLocalPlaylist(&l.Playlists[i])
+		_ = readLocalPlaylist(l.Playlists[i])
 	}
 	return l
 }
@@ -59,12 +59,12 @@ func (l *Local) GetPlaylist(playlist Meta) ([]*player.Media, error) {
 	var pl *_LocalPlaylist = nil
 	for _, p := range l.Playlists {
 		if p.Name == playlist.Id {
-			pl = &p
+			pl = p
 		}
 	}
 	if pl == nil {
-		l.Playlists = append(l.Playlists, _LocalPlaylist{Name: playlist.Id})
-		pl = &l.Playlists[len(l.Playlists)-1]
+		l.Playlists = append(l.Playlists, &_LocalPlaylist{Name: playlist.Id})
+		pl = l.Playlists[len(l.Playlists)-1]
 	}
 	if readLocalPlaylist(pl) != nil {
 		return nil, ErrorExternalApi
