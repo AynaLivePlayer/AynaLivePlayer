@@ -8,7 +8,7 @@ import (
 
 const (
 	ProgramName = "卡西米尔唱片机"
-	Version     = "beta 0.9.1"
+	Version     = "beta 0.9.2"
 )
 
 const (
