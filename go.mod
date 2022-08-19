@@ -6,8 +6,8 @@ require (
 	fyne.io/fyne/v2 v2.1.4
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.26
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/aynakeya/blivedm v0.1.3
-	github.com/aynakeya/go-mpv v0.0.4
+	github.com/aynakeya/blivedm v0.1.5
+	github.com/aynakeya/go-mpv v0.0.6
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gorilla/websocket v1.5.0
@@ -20,7 +20,7 @@ require (
 	gopkg.in/ini.v1 v1.66.4
 )
 
-replace (
-	github.com/aynakeya/blivedm => D:\Repository\blivedm
-	github.com/aynakeya/go-mpv => D:\Repository\go-mpv
-)
+//replace (
+//	github.com/aynakeya/blivedm => D:\Repository\blivedm
+//	github.com/aynakeya/go-mpv => D:\Repository\go-mpv
+//)
