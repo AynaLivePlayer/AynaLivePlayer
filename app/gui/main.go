@@ -24,5 +24,6 @@ func main() {
 	gui.MainWindow.ShowAndRun()
 	controller.ClosePlugins(plugins...)
 	controller.Destroy()
+	_ = config.SaveToConfigFile(config.ConfigPath)
 	logger.Logger.Info("================Program End================")
 }

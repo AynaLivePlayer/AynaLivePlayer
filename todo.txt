@@ -13,6 +13,7 @@ beta
 ----
 
 Finished
+- 2022.8.19@0.9.2: 修复歌词不更新/修复web自定义页面空白
 - 2022.7.21      : 修复本地歌单的bug/fix webinfo can't apply media-cover css/修复切换歌单时不自动刷新
 - 2022.7.18@0.9.0: Fix bug/网页第二版跟新，加入自定义模板/修复图片加载不出来导致的闪退bug
 - 2022.7.18      : Fix bug
