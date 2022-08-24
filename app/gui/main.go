@@ -25,5 +25,6 @@ func main() {
 	controller.ClosePlugins(plugins...)
 	controller.Destroy()
 	_ = config.SaveToConfigFile(config.ConfigPath)
+	//i18n.SaveTranslation()
 	logger.Logger.Info("================Program End================")
 }

@@ -224,6 +224,18 @@
       "en": "Basic Diange Configuration",
       "zh-CN": "点歌基本设置"
     },
+    "plugin.diange.medal.level": {
+      "en": "Level",
+      "zh-CN": "等级"
+    },
+    "plugin.diange.medal.name": {
+      "en": "Name",
+      "zh-CN": "牌子名"
+    },
+    "plugin.diange.medal.perm": {
+      "en": "Medal Permission",
+      "zh-CN": "牌子点歌权限"
+    },
     "plugin.diange.permission": {
       "en": "Permission",
       "zh-CN": "点歌权限"
@@ -348,6 +360,10 @@
       "en": "Stop",
       "zh-CN": "停止"
     },
+    "plugin.webinfo.server_preview": {
+      "en": "Server Preview",
+      "zh-CN": "效果预览"
+    },
     "plugin.webinfo.server_status": {
       "en": "Server Status",
       "zh-CN": "服务器状态"
@@ -363,10 +379,6 @@
     "plugin.webinfo.title": {
       "en": "Web Output",
       "zh-CN": "Web输出"
-    },
-    "plugin.webinfo.server_preview": {
-      "en": "Server Preview",
-      "zh-CN":"效果预览"
     }
   }
 }

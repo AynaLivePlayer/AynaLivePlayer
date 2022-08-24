@@ -80,13 +80,16 @@ func (l *Local) Search(keyword string) ([]*player.Media, error) {
 	keywords := strings.Split(keyword, " ")
 	for _, p := range l.Playlists {
 		for _, m := range p.Medias {
+			title := strings.ToLower(m.Title)
+			artist := strings.ToLower(m.Artist)
 			n := 0
 			for _, k := range keywords {
-				if strings.Contains(m.Title, k) || strings.Contains(m.Artist, k) {
+				kw := strings.ToLower(k)
+				if strings.Contains(title, kw) || strings.Contains(artist, kw) {
 					n++
 				}
-				if k == m.Title {
-					n += 2
+				if kw == title {
+					n += 3
 				}
 			}
 			if n > 0 {

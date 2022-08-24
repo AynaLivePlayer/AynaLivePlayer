@@ -27,6 +27,8 @@ type Diange struct {
 	UserPermission      bool
 	PrivilegePermission bool
 	AdminPermission     bool
+	MedalName           string
+	MedalPermission     int
 	QueueMax            int
 	UserCoolDown        int
 	CustomCMD           string
@@ -117,6 +119,10 @@ func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuM
 	l().Trace("privilege permission check: ", perm)
 	perm = perm || (d.AdminPermission && (danmu.User.Admin))
 	l().Trace("admin permission check: ", perm)
+	// if use medal check
+	if d.MedalName != "" && d.MedalPermission >= 0 {
+		perm = perm || ((danmu.User.Medal.Name == d.MedalName) && danmu.User.Medal.Level >= d.MedalPermission)
+	}
 	if !perm {
 		return
 	}
@@ -147,6 +153,17 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		widget.NewCheckWithData(i18n.T("plugin.diange.privilege"), binding.BindBool(&d.PrivilegePermission)),
 		widget.NewCheckWithData(i18n.T("plugin.diange.admin"), binding.BindBool(&d.AdminPermission)),
 	)
+	dgMdPerm := container.NewBorder(nil, nil,
+		widget.NewLabel(i18n.T("plugin.diange.medal.perm")), nil,
+		container.NewGridWithColumns(2,
+			container.NewBorder(nil, nil,
+				widget.NewLabel(i18n.T("plugin.diange.medal.name")), nil,
+				widget.NewEntryWithData(binding.BindString(&d.MedalName))),
+			container.NewBorder(nil, nil,
+				widget.NewLabel(i18n.T("plugin.diange.medal.level")), nil,
+				widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MedalPermission)))),
+		),
+	)
 	dgQueue := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.queue_max")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.QueueMax))),
@@ -170,6 +187,6 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 	dgSourceCMD := container.NewBorder(
 		nil, nil, widget.NewLabel(i18n.T("plugin.diange.source_cmd")), nil,
 		container.NewVBox(sourceCmds...))
-	d.panel = container.NewVBox(dgPerm, dgQueue, dgCoolDown, dgShortCut, dgSourceCMD)
+	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, dgSourceCMD)
 	return d.panel
 }
