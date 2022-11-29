@@ -10,7 +10,7 @@ import (
 func handleMpvIdlePlayNext(property *mpv.EventProperty) {
 	isIdle := property.Data.(mpv.Node).Value.(bool)
 	if isIdle {
-		l().Info("mpv went idle, try play next")
+		l.Info("mpv went idle, try play next")
 		PlayNext()
 	}
 }

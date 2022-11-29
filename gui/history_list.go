@@ -12,12 +12,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type HistoryContainer struct {
+var History = &struct {
 	Playlist *player.Playlist
 	List     *widget.List
-}
-
-var History = &PlaylistContainer{}
+}{}
 
 func createHistoryList() fyne.CanvasObject {
 	History.Playlist = controller.History

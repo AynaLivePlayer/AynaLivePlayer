@@ -24,6 +24,7 @@ func l() *logrus.Entry {
 }
 
 type Diange struct {
+	config.BaseConfig
 	UserPermission      bool
 	PrivilegePermission bool
 	AdminPermission     bool

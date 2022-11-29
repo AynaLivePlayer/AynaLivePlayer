@@ -21,6 +21,7 @@ func l() *logrus.Entry {
 }
 
 type Qiege struct {
+	config.BaseConfig
 	UserPermission      bool
 	PrivilegePermission bool
 	AdminPermission     bool

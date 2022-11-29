@@ -10,14 +10,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type SearchBarContainer struct {
+var SearchBar = &struct {
 	Input     *widget.Entry
 	Button    *widget.Button
 	UseSource *widget.CheckGroup
 	Items     []*player.Media
-}
-
-var SearchBar = &SearchBarContainer{}
+}{}
 
 func createSearchBar() fyne.CanvasObject {
 	SearchBar.Input = widget.NewEntry()

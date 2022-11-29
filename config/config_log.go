@@ -8,6 +8,12 @@ type _LogConfig struct {
 	RedirectStderr bool
 }
 
+func (c *_LogConfig) OnLoad() {
+}
+
+func (c *_LogConfig) OnSave() {
+}
+
 func (c *_LogConfig) Name() string {
 	return "Log"
 }

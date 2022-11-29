@@ -225,5 +225,8 @@ func (s *WebInfoServer) Stop() error {
 	s.lock.Lock()
 	s.Clients = map[*Client]int{}
 	s.lock.Unlock()
-	return s.Server.Shutdown(context.TODO())
+	if s.Server != nil {
+		return s.Server.Shutdown(context.TODO())
+	}
+	return nil
 }

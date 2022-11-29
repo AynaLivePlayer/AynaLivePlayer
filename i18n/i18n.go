@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/util"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
 const FILENAME = "translation.json"
@@ -28,7 +28,7 @@ var CurrentLanguage string
 
 func init() {
 	TranslationMap = Translation{make([]string, 0), make(map[string]map[string]string)}
-	file, err := ioutil.ReadFile(config.GetAssetPath(FILENAME))
+	file, err := os.ReadFile(config.GetAssetPath(FILENAME))
 	if err == nil {
 		_ = json.Unmarshal([]byte(file), &TranslationMap)
 	}
@@ -59,5 +59,5 @@ func T(id string) string {
 
 func SaveTranslation() {
 	content, _ := util.MarshalIndentUnescape(TranslationMap, "", "  ")
-	_ = ioutil.WriteFile(config.GetAssetPath(FILENAME), []byte(content), 0666)
+	_ = os.WriteFile(config.GetAssetPath(FILENAME), []byte(content), 0666)
 }

@@ -8,7 +8,7 @@ import (
 
 const (
 	ProgramName = "卡西米尔唱片机"
-	Version     = "beta 0.9.2"
+	Version     = "beta 0.9.3"
 )
 
 const (
@@ -22,6 +22,17 @@ func GetAssetPath(name string) string {
 
 type Config interface {
 	Name() string
+	OnLoad()
+	OnSave()
+}
+
+type BaseConfig struct {
+}
+
+func (c *BaseConfig) OnLoad() {
+}
+
+func (c *BaseConfig) OnSave() {
 }
 
 var ConfigFile *ini.File
@@ -32,6 +43,7 @@ func LoadConfig(cfg Config) {
 	if err == nil {
 		_ = sec.MapTo(cfg)
 	}
+	cfg.OnLoad()
 	Configs = append(Configs, cfg)
 	return
 }
@@ -43,7 +55,7 @@ func init() {
 		fmt.Println("config not found, using default config")
 		ConfigFile = ini.Empty()
 	}
-	for _, cfg := range []Config{Log, LiveRoom, Player, Provider, General} {
+	for _, cfg := range []Config{Log, Player, Provider, General} {
 		LoadConfig(cfg)
 	}
 }
@@ -51,6 +63,7 @@ func init() {
 func SaveToConfigFile(filename string) error {
 	cfgFile := ini.Empty()
 	for _, cfg := range Configs {
+		cfg.OnSave()
 		if err := cfgFile.Section(cfg.Name()).ReflectFrom(cfg); err != nil {
 			fmt.Println(err)
 		}

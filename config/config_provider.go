@@ -1,6 +1,7 @@
 package config
 
 type _ProviderConfig struct {
+	BaseConfig
 	Priority []string
 	LocalDir string
 }

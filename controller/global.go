@@ -9,28 +9,27 @@ import (
 )
 
 var MainPlayer *player.Player
-var UserPlaylist *player.Playlist
-var History *player.Playlist
-var HistoryUser *player.User
-var SystemPlaylist *player.Playlist
 var LiveClient liveclient.LiveClient
-var PlaylistManager []*player.Playlist
 var CurrentLyric *player.Lyric
 var CurrentMedia *player.Media
 
 func Initialize() {
-
 	MainPlayer = player.NewPlayer()
+
 	SetAudioDevice(config.Player.AudioDevice)
 	SetVolume(config.Player.Volume)
-	UserPlaylist = player.NewPlaylist("user", player.PlaylistConfig{RandomNext: false})
+
+	UserPlaylist = player.NewPlaylist("user", player.PlaylistConfig{RandomNext: config.Player.UserPlaylistRandom})
 	SystemPlaylist = player.NewPlaylist("system", player.PlaylistConfig{RandomNext: config.Player.PlaylistRandom})
 	PlaylistManager = make([]*player.Playlist, 0)
-	CurrentLyric = player.NewLyric("")
-	loadPlaylists()
-
 	History = player.NewPlaylist("history", player.PlaylistConfig{RandomNext: false})
 	HistoryUser = &player.User{Name: "History"}
+	loadPlaylists()
+
+	config.LoadConfig(LiveRoomManager)
+	LiveRoomManager.InitializeRooms()
+
+	CurrentLyric = player.NewLyric("")
 
 	MainPlayer.ObserveProperty("idle-active", handleMpvIdlePlayNext)
 	UserPlaylist.Handler.RegisterA(player.EventPlaylistInsert, "controller.playnextwhenadd", handlePlaylistAdd)
@@ -39,24 +38,31 @@ func Initialize() {
 
 }
 
+func CloseAndSave() {
+	// set value to global config
+	config.Player.PlaylistRandom = SystemPlaylist.Config.RandomNext
+	config.Player.UserPlaylistRandom = UserPlaylist.Config.RandomNext
+	_ = config.SaveToConfigFile(config.ConfigPath)
+}
+
 func loadPlaylists() {
-	l().Info("Loading playlists ", config.Player.Playlists, config.Player.PlaylistsProvider)
+	l.Info("Loading playlists ", config.Player.Playlists)
 	if len(config.Player.Playlists) != len(config.Player.Playlists) {
-		l().Warn("playlist id and provider does not have same length")
+		l.Warn("playlist id and provider does not have same length")
 		return
 	}
 	for i := 0; i < len(config.Player.Playlists); i++ {
-		pname := config.Player.PlaylistsProvider[i]
-		id := config.Player.Playlists[i]
-		p := player.NewPlaylist(fmt.Sprintf("%s-%s", pname, id), player.PlaylistConfig{})
+		pc := config.Player.Playlists[i]
+		p := player.NewPlaylist(fmt.Sprintf("%s-%s", pc.Provider, pc.ID), player.PlaylistConfig{})
 		p.Meta = provider.Meta{
-			Name: pname,
-			Id:   id,
+			Name: pc.Provider,
+			Id:   pc.ID,
 		}
 		PlaylistManager = append(PlaylistManager, p)
 	}
 	if config.Player.PlaylistIndex < 0 || config.Player.PlaylistIndex >= len(config.Player.Playlists) {
-		l().Warn("playlist index did not find")
+		config.Player.PlaylistIndex = 0
+		l.Warn("playlist index did not find")
 		return
 	}
 	go func() {

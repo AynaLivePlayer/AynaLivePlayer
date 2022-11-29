@@ -7,9 +7,9 @@ type Plugin interface {
 }
 
 func LoadPlugin(plugin Plugin) {
-	l().Info("Loading plugin: " + plugin.Name())
+	l.Info("Loading plugin: " + plugin.Name())
 	if err := plugin.Enable(); err != nil {
-		l().Warnf("Failed to load plugin: %s, %s", plugin.Name(), err)
+		l.Warnf("Failed to load plugin: %s, %s", plugin.Name(), err)
 	}
 }
 
@@ -23,7 +23,7 @@ func ClosePlugins(plugins ...Plugin) {
 	for _, plugin := range plugins {
 		err := plugin.Disable()
 		if err != nil {
-			l().Warnf("Failed to close plugin: %s, %s", plugin.Name(), err)
+			l.Warnf("Failed to close plugin: %s, %s", plugin.Name(), err)
 			return
 		}
 	}

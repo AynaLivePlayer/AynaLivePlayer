@@ -1,6 +1,9 @@
 package liveclient
 
-import "AynaLivePlayer/event"
+import (
+	"AynaLivePlayer/event"
+	"errors"
+)
 
 const MODULE_NAME = "LiveClient"
 
@@ -24,7 +27,29 @@ type DanmuMessage struct {
 
 type LiveClient interface {
 	ClientName() string
+	RoomName() string
 	Connect() bool
 	Disconnect() bool
+	Status() bool
 	Handler() *event.Handler
+}
+
+type LiveClientCtor func(id string) (LiveClient, error)
+
+var LiveClients map[string]LiveClientCtor = map[string]LiveClientCtor{}
+
+func GetAllClientNames() []string {
+	names := make([]string, 0)
+	for key, _ := range LiveClients {
+		names = append(names, key)
+	}
+	return names
+}
+
+func NewLiveClient(clientName, id string) (LiveClient, error) {
+	ctor, ok := LiveClients[clientName]
+	if !ok {
+		return nil, errors.New("no such client")
+	}
+	return ctor(id)
 }

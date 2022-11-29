@@ -1,6 +1,7 @@
 package config
 
 type _GeneralConfig struct {
+	BaseConfig
 	Language string
 }
 

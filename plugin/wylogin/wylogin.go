@@ -20,6 +20,7 @@ const MODULE_PLGUIN_NETEASELOGIN = "plugin.neteaselogin"
 var lg = logger.Logger.WithField("Module", MODULE_PLGUIN_NETEASELOGIN)
 
 type WYLogin struct {
+	config.BaseConfig
 	MusicU string
 	CSRF   string
 	panel  fyne.CanvasObject

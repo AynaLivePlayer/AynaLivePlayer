@@ -55,6 +55,7 @@ type OutInfo struct {
 }
 
 type TextInfo struct {
+	config.BaseConfig
 	Rendering  bool
 	info       OutInfo
 	templates  []*Template

@@ -23,14 +23,17 @@ const MODULE_PLGUIN_WEBINFO = "plugin.webinfo"
 var lg = logger.Logger.WithField("Module", MODULE_PLGUIN_WEBINFO)
 
 type WebInfo struct {
-	Port   int
-	server *WebInfoServer
-	panel  fyne.CanvasObject
+	config.BaseConfig
+	Enabled bool
+	Port    int
+	server  *WebInfoServer
+	panel   fyne.CanvasObject
 }
 
 func NewWebInfo() *WebInfo {
 	return &WebInfo{
-		Port: 4000,
+		Enabled: true,
+		Port:    4000,
 	}
 }
 
@@ -49,11 +52,13 @@ func (w *WebInfo) Description() string {
 func (w *WebInfo) Enable() error {
 	config.LoadConfig(w)
 	w.server = NewWebInfoServer(w.Port)
-	lg.Info("starting web backend server")
-	w.server.Start()
 	w.registerHandlers()
 	gui.AddConfigLayout(w)
 	lg.Info("webinfo loaded")
+	if w.Enabled {
+		lg.Info("starting web backend server")
+		w.server.Start()
+	}
 	return nil
 }
 
@@ -156,11 +161,15 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 	if w.panel != nil {
 		return w.panel
 	}
+
 	statusText := widget.NewLabel("")
 	serverStatus := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.webinfo.server_status")),
 		statusText,
 	)
+	autoStart := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.webinfo.autostart")),
+		widget.NewCheckWithData("", binding.BindBool(&w.Enabled)))
 	statusText.SetText(w.getServerStatusText())
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.webinfo.port")), nil,
@@ -224,6 +233,6 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.webinfo.server_control")),
 		startBtn, stopBtn, restartBtn,
 	)
-	w.panel = container.NewVBox(serverStatus, serverPreview, serverPort, ctrlBtns)
+	w.panel = container.NewVBox(serverStatus, autoStart, serverPreview, serverPort, ctrlBtns)
 	return w.panel
 }

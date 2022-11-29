@@ -128,6 +128,30 @@
       "en": "Current: None",
       "zh-CN": "当前为: 无"
     },
+    "gui.room.add.cancel": {
+      "en": "Cancel",
+      "zh-CN": "取消"
+    },
+    "gui.room.add.client_name": {
+      "en": "Client Name",
+      "zh-CN": "直播平台"
+    },
+    "gui.room.add.confirm": {
+      "en": "Confirm",
+      "zh-CN": "确定"
+    },
+    "gui.room.add.id_url": {
+      "en": "Room ID",
+      "zh-CN": "房间号"
+    },
+    "gui.room.add.prompt": {
+      "en": "enter room id",
+      "zh-CN": "填入房间号"
+    },
+    "gui.room.add.title": {
+      "en": "Add Room",
+      "zh-CN": "添加房间"
+    },
     "gui.room.btn.connect": {
       "en": "Connect",
       "zh-CN": "连接"
@@ -135,6 +159,18 @@
     "gui.room.btn.disconnect": {
       "en": "Disconnect",
       "zh-CN": "断开"
+    },
+    "gui.room.button.add": {
+      "en": "Add",
+      "zh-CN": "新增"
+    },
+    "gui.room.button.remove": {
+      "en": "Remove",
+      "zh-CN": "删除"
+    },
+    "gui.room.check.autoconnect": {
+      "en": "Auto Connection",
+      "zh-CN": "自动连接"
     },
     "gui.room.id": {
       "en": "Room ID: ",
@@ -335,6 +371,10 @@
     "plugin.textinfo.title": {
       "en": "Text Output",
       "zh-CN": "文本输出"
+    },
+    "plugin.webinfo.autostart": {
+      "en": "Auto start",
+      "zh-CN": "自动启用"
     },
     "plugin.webinfo.description": {
       "en": "Web output configuration",

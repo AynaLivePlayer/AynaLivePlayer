@@ -12,12 +12,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type SearchResultContainer struct {
+var SearchResult = &struct {
 	List  *widget.List
 	Items []*player.Media
+}{
+	Items: []*player.Media{},
 }
-
-var SearchResult = &SearchResultContainer{Items: []*player.Media{}}
 
 func createSearchList() fyne.CanvasObject {
 	SearchResult.List = widget.NewList(

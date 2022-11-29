@@ -7,7 +7,7 @@ import (
 )
 
 func PlayNext() {
-	l().Info("try to play next possible media")
+	l.Info("try to play next possible media")
 	if UserPlaylist.Size() == 0 && SystemPlaylist.Size() == 0 {
 		return
 	}
@@ -21,17 +21,17 @@ func PlayNext() {
 }
 
 func Play(media *player.Media) {
-	l().Infof("prepare media %s", media.Title)
+	l.Infof("prepare media %s", media.Title)
 	err := PrepareMedia(media)
 	if err != nil {
-		l().Warn("prepare media failed. try play next")
+		l.Warn("prepare media failed. try play next")
 		PlayNext()
 		return
 	}
 	CurrentMedia = media
 	AddToHistory(media)
 	if err := MainPlayer.Play(media); err != nil {
-		l().Warn("play failed", err)
+		l.Warn("play failed", err)
 		return
 	}
 	CurrentLyric.Reload(media.Lyric)
@@ -44,17 +44,17 @@ func Add(keyword string, user interface{}) {
 	if media == nil {
 		medias, err := Search(keyword)
 		if err != nil {
-			l().Warnf("search for %s, got error %s", keyword, err)
+			l.Warnf("search for %s, got error %s", keyword, err)
 			return
 		}
 		if len(medias) == 0 {
-			l().Info("search for %s, got no result", keyword)
+			l.Info("search for %s, got no result", keyword)
 			return
 		}
 		media = medias[0]
 	}
 	media.User = user
-	l().Infof("add media %s (%s)", media.Title, media.Artist)
+	l.Infof("add media %s (%s)", media.Title, media.Artist)
 	UserPlaylist.Insert(-1, media)
 }
 
@@ -63,23 +63,23 @@ func AddWithProvider(keyword string, pname string, user interface{}) {
 	if media == nil {
 		medias, err := provider.Search(pname, keyword)
 		if err != nil {
-			l().Warnf("search for %s, got error %s", keyword, err)
+			l.Warnf("search for %s, got error %s", keyword, err)
 			return
 		}
 		if len(medias) == 0 {
-			l().Infof("search for %s, got no result", keyword)
+			l.Infof("search for %s, got no result", keyword)
 			return
 		}
 		media = medias[0]
 	}
 	media.User = user
-	l().Infof("add media %s (%s)", media.Title, media.Artist)
+	l.Infof("add media %s (%s)", media.Title, media.Artist)
 	UserPlaylist.Insert(-1, media)
 }
 
 func Seek(position float64, absolute bool) {
 	if err := MainPlayer.Seek(position, absolute); err != nil {
-		l().Warnf("seek to position %f (%t) failed, %s", position, absolute, err)
+		l.Warnf("seek to position %f (%t) failed, %s", position, absolute, err)
 	}
 }
 
@@ -93,14 +93,14 @@ func Toggle() (b bool) {
 		b = true
 	}
 	if err != nil {
-		l().Warn("toggle failed", err)
+		l.Warn("toggle failed", err)
 	}
 	return
 }
 
 func SetVolume(volume float64) {
 	if MainPlayer.SetVolume(volume) != nil {
-		l().Warnf("set mpv volume to %f failed", volume)
+		l.Warnf("set mpv volume to %f failed", volume)
 		return
 	}
 	config.Player.Volume = volume
@@ -119,9 +119,9 @@ func GetAudioDevices() []player.AudioDevice {
 }
 
 func SetAudioDevice(device string) {
-	l().Infof("set audio device to %s", device)
+	l.Infof("set audio device to %s", device)
 	if err := MainPlayer.SetAudioDevice(device); err != nil {
-		l().Warnf("set mpv audio device to %s failed, %s", device, err)
+		l.Warnf("set mpv audio device to %s failed, %s", device, err)
 		MainPlayer.SetAudioDevice("auto")
 		config.Player.AudioDevice = "auto"
 		return

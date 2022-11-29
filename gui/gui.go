@@ -43,7 +43,7 @@ func Initialize() {
 			newPaddedBoarder(createSearchBar(), nil, nil, nil, createSearchList()),
 		),
 		container.NewTabItem(i18n.T("gui.tab.room"),
-			newPaddedBoarder(createRoomController(), nil, nil, nil, createRoomLogger()),
+			newPaddedBoarder(nil, nil, createRoomSelector(), nil, createRoomController()),
 		),
 		container.NewTabItem(i18n.T("gui.tab.playlist"),
 			newPaddedBoarder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
