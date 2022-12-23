@@ -1,18 +1,17 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/event"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/model"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/aynakeya/go-mpv"
 )
 
 type PlayControllerContainer struct {
@@ -76,13 +75,13 @@ func createPlayController() fyne.CanvasObject {
 
 func registerPlayControllerHandler() {
 	PlayController.ButtonPrev.OnTapped = func() {
-		controller.Seek(0, true)
+		controller.Instance.PlayControl().Seek(0, true)
 	}
 	PlayController.ButtonSwitch.OnTapped = func() {
-		controller.Toggle()
+		controller.Instance.PlayControl().Toggle()
 	}
 	PlayController.ButtonNext.OnTapped = func() {
-		controller.PlayNext()
+		controller.Instance.PlayControl().PlayNext()
 	}
 
 	PlayController.ButtonLrc.OnTapped = func() {
@@ -92,94 +91,104 @@ func registerPlayControllerHandler() {
 		}
 	}
 
-	if controller.MainPlayer.ObserveProperty("pause", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
-			return
-		}
-		if property.Data.(mpv.Node).Value.(bool) {
-			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
-		} else {
-			PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
-		}
-	}) != nil {
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropPause, "gui.play_controller.pause", func(ev *event.Event) {
+			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
+				return
+			}
+			if data.(bool) {
+				PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
+			} else {
+				PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
+			}
+		}) != nil {
 		l().Error("fail to register handler for switch button with property pause")
 	}
 
-	if controller.MainPlayer.ObserveProperty("percent-pos", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			PlayController.Progress.Value = 0
-		} else {
-			PlayController.Progress.Value = property.Data.(mpv.Node).Value.(float64) * 10
-		}
-		PlayController.Progress.Refresh()
-	}) != nil {
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropPercentPos, "gui.play_controller.percent_pos", func(ev *event.Event) {
+			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				PlayController.Progress.Value = 0
+			} else {
+				PlayController.Progress.Value = data.(float64) * 10
+			}
+			PlayController.Progress.Refresh()
+		}) != nil {
 		l().Error("fail to register handler for progress bar with property percent-pos")
 	}
 
-	if controller.MainPlayer.ObserveProperty("idle-active", func(property *mpv.EventProperty) {
-		isIdle := property.Data.(mpv.Node).Value.(bool)
-		l().Debug("receive idle active ", isIdle, " set/reset info")
-		// todo: @3
-		if isIdle {
-			PlayController.Progress.Value = 0
-			PlayController.Progress.Max = 0
-			//PlayController.Title.SetText("Title")
-			//PlayController.Artist.SetText("Artist")
-			//PlayController.Username.SetText("Username")
-			//PlayController.SetDefaultCover()
-		} else {
-			PlayController.Progress.Max = 1000
-		}
-	}) != nil {
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropIdleActive, "gui.play_controller.idle_active", func(ev *event.Event) {
+			isIdle := ev.Data.(model.PlayerPropertyUpdateEvent).Value.(bool)
+			l().Debug("receive idle active ", isIdle, " set/reset info")
+			// todo: @3
+			if isIdle {
+				PlayController.Progress.Value = 0
+				PlayController.Progress.Max = 0
+				//PlayController.Title.SetText("Title")
+				//PlayController.Artist.SetText("Artist")
+				//PlayController.Username.SetText("Username")
+				//PlayController.SetDefaultCover()
+			} else {
+				PlayController.Progress.Max = 1000
+			}
+		}) != nil {
 		l().Error("fail to register handler for progress bar with property idle-active")
 	}
 
 	PlayController.Progress.Max = 0
 	PlayController.Progress.OnChanged = func(f float64) {
-		controller.Seek(f/10, false)
+		controller.Instance.PlayControl().Seek(f/10, false)
 	}
 
-	if controller.MainPlayer.ObserveProperty("time-pos", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			PlayController.CurrentTime.SetText("0:00")
-			return
-		}
-		PlayController.CurrentTime.SetText(util.FormatTime(int(property.Data.(mpv.Node).Value.(float64))))
-	}) != nil {
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropTimePos, "gui.play_controller.time_pos", func(ev *event.Event) {
+			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				PlayController.CurrentTime.SetText("0:00")
+				return
+			}
+			PlayController.CurrentTime.SetText(util.FormatTime(int(data.(float64))))
+		}) != nil {
 		l().Error("fail to register handler for current time with property time-pos")
 	}
 
-	if controller.MainPlayer.ObserveProperty("duration", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			PlayController.TotalTime.SetText("0:00")
-			return
-		}
-		PlayController.TotalTime.SetText(util.FormatTime(int(property.Data.(mpv.Node).Value.(float64))))
-	}) != nil {
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropDuration, "gui.play_controller.duration", func(ev *event.Event) {
+			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				PlayController.TotalTime.SetText("0:00")
+				return
+			}
+			PlayController.TotalTime.SetText(util.FormatTime(int(data.(float64))))
+		}) != nil {
 		l().Error("fail to register handler for total time with property duration")
 	}
 
-	if controller.MainPlayer.ObserveProperty("volume", func(property *mpv.EventProperty) {
-		l().Trace("receive volume change event", *property)
-		if property.Data == nil {
-			PlayController.Volume.Value = 0
-		} else {
-			PlayController.Volume.Value = property.Data.(mpv.Node).Value.(float64)
-		}
+	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropVolume, "gui.play_controller.volume", func(ev *event.Event) {
+			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				PlayController.Volume.Value = 0
+			} else {
+				PlayController.Volume.Value = data.(float64)
+			}
 
-		PlayController.Volume.Refresh()
-	}) != nil {
+			PlayController.Volume.Refresh()
+		}) != nil {
 		l().Error("fail to register handler for progress bar with property percent-pos")
 	}
 
 	PlayController.Volume.OnChanged = func(f float64) {
-		controller.SetVolume(f)
+		controller.Instance.PlayControl().SetVolume(f)
 	}
 
-	controller.MainPlayer.EventHandler.RegisterA(player.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
+	controller.Instance.PlayControl().EventManager().RegisterA(model.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
 		l().Debug("receive EventPlay update player info")
-		media := event.Data.(player.PlayEvent).Media
+		media := event.Data.(model.PlayEvent).Media
 		//PlayController.Title.SetText(
 		//	util.StringNormalize(media.Title, 16, 16))
 		//PlayController.Artist.SetText(

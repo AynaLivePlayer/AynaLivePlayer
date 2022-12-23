@@ -1,7 +1,7 @@
 package liveclient
 
 import (
-	"AynaLivePlayer/event"
+	"AynaLivePlayer/common/event"
 )
 
 const (

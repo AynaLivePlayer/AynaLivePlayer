@@ -1,12 +1,12 @@
 package diange
 
 import (
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/liveclient"
-	"AynaLivePlayer/logger"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -36,9 +36,10 @@ type Diange struct {
 	SourceCMD           []string
 	cooldowns           map[string]int
 	panel               fyne.CanvasObject
+	contro              controller.IController
 }
 
-func NewDiange() *Diange {
+func NewDiange(contr controller.IController) *Diange {
 	return &Diange{
 		UserPermission:      true,
 		PrivilegePermission: true,
@@ -48,6 +49,7 @@ func NewDiange() *Diange {
 		CustomCMD:           "add",
 		SourceCMD:           make([]string, 0),
 		cooldowns:           make(map[string]int),
+		contro:              contr,
 	}
 }
 
@@ -58,7 +60,7 @@ func (d *Diange) Name() string {
 func (d *Diange) Enable() error {
 	config.LoadConfig(d)
 	d.initCMD()
-	controller.AddCommand(d)
+	d.contro.LiveRooms().AddDanmuCommand(d)
 	gui.AddConfigLayout(d)
 	return nil
 }
@@ -68,15 +70,15 @@ func (d *Diange) Disable() error {
 }
 
 func (d *Diange) initCMD() {
-	if len(d.SourceCMD) == len(config.Provider.Priority) {
+	if len(d.SourceCMD) == len(d.contro.Provider().GetPriority()) {
 		return
 	}
-	if len(d.SourceCMD) > len(config.Provider.Priority) {
-		d.SourceCMD = d.SourceCMD[:len(config.Provider.Priority)]
+	if len(d.SourceCMD) > len(d.contro.Provider().GetPriority()) {
+		d.SourceCMD = d.SourceCMD[:len(d.contro.Provider().GetPriority())]
 		return
 	}
-	for i := len(d.SourceCMD); i < len(config.Provider.Priority); i++ {
-		d.SourceCMD = append(d.SourceCMD, "点歌"+config.Provider.Priority[i])
+	for i := len(d.SourceCMD); i < len(d.contro.Provider().GetPriority()); i++ {
+		d.SourceCMD = append(d.SourceCMD, "点歌"+d.contro.Provider().GetPriority()[i])
 	}
 }
 
@@ -102,7 +104,7 @@ func (d *Diange) Match(command string) bool {
 func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuMessage) {
 	l().Infof("%s(%s) Execute command: %s %s", danmu.User.Username, danmu.User.Uid, command, args)
 	// if queue is full, return
-	if controller.UserPlaylist.Size() >= d.QueueMax {
+	if d.contro.Playlists().GetCurrent().Size() >= d.QueueMax {
 		l().Info("Queue is full, ignore diange")
 		return
 	}
@@ -130,9 +132,9 @@ func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuM
 	// reset cool down
 	d.cooldowns[danmu.User.Uid] = ct
 	if cmdType == 0 {
-		controller.Add(keyword, &danmu.User)
+		d.contro.PlayControl().Add(keyword, &danmu.User)
 	} else {
-		controller.AddWithProvider(keyword, config.Provider.Priority[cmdType-1], &danmu.User)
+		d.contro.PlayControl().AddWithProvider(keyword, d.contro.Provider().GetPriority()[cmdType-1], &danmu.User)
 	}
 }
 
@@ -182,7 +184,7 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		sourceCmds = append(
 			sourceCmds,
 			container.NewBorder(
-				nil, nil, widget.NewLabel(config.Provider.Priority[i]), nil,
+				nil, nil, widget.NewLabel(d.contro.Provider().GetPriority()[i]), nil,
 				widget.NewEntryWithData(binding.BindString(&d.SourceCMD[i]))))
 	}
 	dgSourceCMD := container.NewBorder(

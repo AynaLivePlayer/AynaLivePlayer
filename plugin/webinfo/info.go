@@ -1,6 +1,8 @@
 package webinfo
 
-import "AynaLivePlayer/player"
+import (
+	"AynaLivePlayer/model"
+)
 
 type MediaInfo struct {
 	Index    int
@@ -8,7 +10,7 @@ type MediaInfo struct {
 	Artist   string
 	Album    string
 	Username string
-	Cover    player.Picture
+	Cover    model.Picture
 }
 
 type OutInfo struct {
@@ -24,7 +26,7 @@ const (
 	OutInfoCT = "CurrentTime"
 	OutInfoTT = "TotalTime"
 	OutInfoL  = "Lyric"
-	OutInfoPL = "Playlist"
+	OutInfoPL = "Playlists"
 )
 
 type WebsocketData struct {

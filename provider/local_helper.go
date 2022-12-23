@@ -1,18 +1,17 @@
 package provider
 
 import (
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/common/util"
+	"AynaLivePlayer/model"
 	"github.com/dhowden/tag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
-func getPlaylistNames() []string {
+func getPlaylistNames(localdir string) []string {
 	names := make([]string, 0)
-	items, _ := ioutil.ReadDir(config.Provider.LocalDir)
+	items, _ := ioutil.ReadDir(localdir)
 	for _, item := range items {
 		if item.IsDir() {
 			names = append(names, item.Name())
@@ -24,10 +23,10 @@ func getPlaylistNames() []string {
 // readLocalPlaylist read files under a directory
 // and return a _LocalPlaylist object.
 // This function assume this directory exists
-func readLocalPlaylist(playlist *_LocalPlaylist) error {
+func readLocalPlaylist(localdir string, playlist *_LocalPlaylist) error {
 	p1th := playlist.Name
-	playlist.Medias = make([]*player.Media, 0)
-	fullPath := filepath.Join(config.Provider.LocalDir, p1th)
+	playlist.Medias = make([]*model.Media, 0)
+	fullPath := filepath.Join(localdir, p1th)
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		return err
 	}
@@ -36,8 +35,8 @@ func readLocalPlaylist(playlist *_LocalPlaylist) error {
 		// if item is a file, read file
 		if !item.IsDir() {
 			fn := item.Name()
-			media := player.Media{
-				Meta: Meta{
+			media := model.Media{
+				Meta: model.Meta{
 					Name: LocalAPI.GetName(),
 					Id:   filepath.Join(fullPath, fn),
 				},
@@ -51,8 +50,8 @@ func readLocalPlaylist(playlist *_LocalPlaylist) error {
 	return nil
 }
 
-func readMediaFile(media *player.Media) error {
-	p := media.Meta.(Meta).Id
+func readMediaFile(media *model.Media) error {
+	p := media.Meta.(model.Meta).Id
 	f, err := os.Open(p)
 	if err != nil {
 		return err

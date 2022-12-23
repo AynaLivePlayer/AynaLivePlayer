@@ -1,4 +1,4 @@
-package player
+package model
 
 import (
 	"fmt"

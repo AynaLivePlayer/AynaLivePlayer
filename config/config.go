@@ -8,7 +8,7 @@ import (
 
 const (
 	ProgramName = "卡西米尔唱片机"
-	Version     = "beta 0.9.3"
+	Version     = "beta 0.9.5"
 )
 
 const (
@@ -55,7 +55,7 @@ func init() {
 		fmt.Println("config not found, using default config")
 		ConfigFile = ini.Empty()
 	}
-	for _, cfg := range []Config{Log, Player, Provider, General} {
+	for _, cfg := range []Config{Log, General} {
 		LoadConfig(cfg)
 	}
 }

@@ -1,24 +1,26 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/event"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"sync"
 )
 
 var History = &struct {
-	Playlist *player.Playlist
+	Playlist *model.Playlist
 	List     *widget.List
+	mux      sync.RWMutex
 }{}
 
 func createHistoryList() fyne.CanvasObject {
-	History.Playlist = controller.History
+	History.Playlist = controller.Instance.Playlists().GetHistory().Model().Copy()
 	History.List = widget.NewList(
 		func() int {
 			return History.Playlist.Size()
@@ -36,7 +38,7 @@ func createHistoryList() fyne.CanvasObject {
 					newLabelWithWrapping("user", fyne.TextTruncate)))
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
-			m := History.Playlist.Playlist[History.Playlist.Size()-id-1]
+			m := History.Playlist.Medias[History.Playlist.Size()-id-1].Copy()
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
 				m.Title)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
@@ -45,11 +47,12 @@ func createHistoryList() fyne.CanvasObject {
 				m.ToUser().Name)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
+			m.User = controller.HistoryUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				controller.Play(controller.ToHistoryMedia(m))
+				controller.Instance.PlayControl().Play(m)
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.UserPlaylist.Push(controller.ToHistoryMedia(m))
+				controller.Instance.Playlists().GetCurrent().Push(m)
 			}
 		})
 	registerHistoryHandler()
@@ -66,9 +69,10 @@ func createHistoryList() fyne.CanvasObject {
 }
 
 func registerHistoryHandler() {
-	History.Playlist.Handler.RegisterA(player.EventPlaylistUpdate, "gui.history.update", func(event *event.Event) {
-		History.Playlist.Lock.RLock()
+	controller.Instance.Playlists().GetHistory().EventManager().RegisterA(model.EventPlaylistUpdate, "gui.history.update", func(event *event.Event) {
+		History.mux.RLock()
+		History.Playlist = event.Data.(model.PlaylistUpdateEvent).Playlist
 		History.List.Refresh()
-		History.Playlist.Lock.RUnlock()
+		History.mux.RUnlock()
 	})
 }

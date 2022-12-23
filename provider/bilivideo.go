@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/common/util"
+	"AynaLivePlayer/model"
 	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/tidwall/gjson"
@@ -58,10 +58,10 @@ func (b *BilibiliVideo) GetName() string {
 	return "bilibili-video"
 }
 
-func (b *BilibiliVideo) MatchMedia(keyword string) *player.Media {
+func (b *BilibiliVideo) MatchMedia(keyword string) *model.Media {
 	if id := b.IdRegex.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: b.GetName(),
 				Id:   id,
 			},
@@ -70,7 +70,7 @@ func (b *BilibiliVideo) MatchMedia(keyword string) *player.Media {
 	return nil
 }
 
-func (b *BilibiliVideo) GetPlaylist(playlist Meta) ([]*player.Media, error) {
+func (b *BilibiliVideo) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 	return nil, ErrorExternalApi
 }
 
@@ -78,7 +78,7 @@ func (b *BilibiliVideo) FormatPlaylistUrl(uri string) string {
 	return ""
 }
 
-func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
+func (b *BilibiliVideo) Search(keyword string) ([]*model.Media, error) {
 	resp := httpGetString(fmt.Sprintf(b.SearchApi, url.QueryEscape(keyword)), nil)
 	if resp == "" {
 		return nil, ErrorExternalApi
@@ -87,14 +87,14 @@ func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
 	if jresp.Get("code").String() != "0" {
 		return nil, ErrorExternalApi
 	}
-	result := make([]*player.Media, 0)
+	result := make([]*model.Media, 0)
 	r := regexp.MustCompile("</?em[^>]*>")
 	jresp.Get("data.result").ForEach(func(key, value gjson.Result) bool {
-		result = append(result, &player.Media{
+		result = append(result, &model.Media{
 			Title:  r.ReplaceAllString(value.Get("title").String(), ""),
-			Cover:  player.Picture{Url: "https:" + value.Get("pic").String()},
+			Cover:  model.Picture{Url: "https:" + value.Get("pic").String()},
 			Artist: value.Get("author").String(),
-			Meta: Meta{
+			Meta: model.Meta{
 				Name: b.GetName(),
 				Id:   value.Get("bvid").String(),
 			},
@@ -104,8 +104,8 @@ func (b *BilibiliVideo) Search(keyword string) ([]*player.Media, error) {
 	return result, nil
 }
 
-func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(Meta).Id)), nil)
+func (b *BilibiliVideo) UpdateMedia(media *model.Media) error {
+	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(model.Meta).Id)), nil)
 	if resp == "" {
 		return ErrorExternalApi
 	}
@@ -120,13 +120,13 @@ func (b *BilibiliVideo) UpdateMedia(media *player.Media) error {
 	return nil
 }
 
-func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(Meta).Id)), nil)
+func (b *BilibiliVideo) UpdateMediaUrl(media *model.Media) error {
+	resp := httpGetString(fmt.Sprintf(b.InfoApi, b.getBv(media.Meta.(model.Meta).Id)), nil)
 	if resp == "" {
 		return ErrorExternalApi
 	}
 	jresp := gjson.Parse(resp)
-	page := b.getPage(media.Meta.(Meta).Id) - 1
+	page := b.getPage(media.Meta.(model.Meta).Id) - 1
 	cid := jresp.Get(fmt.Sprintf("data.View.pages.%d.cid", page)).String()
 	if cid == "" {
 		cid = jresp.Get("data.View.cid").String()
@@ -134,7 +134,7 @@ func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
 	if cid == "" {
 		return ErrorExternalApi
 	}
-	resp = httpGetString(fmt.Sprintf(b.FileApi, b.getBv(media.Meta.(Meta).Id), cid), b.header)
+	resp = httpGetString(fmt.Sprintf(b.FileApi, b.getBv(media.Meta.(model.Meta).Id), cid), b.header)
 	if resp == "" {
 		return ErrorExternalApi
 	}
@@ -146,11 +146,11 @@ func (b *BilibiliVideo) UpdateMediaUrl(media *player.Media) error {
 	media.Url = uri
 	header := make(map[string]string)
 	_ = copier.Copy(&header, &b.header)
-	header["Referer"] = fmt.Sprintf("https://www.bilibili.com/video/%s", b.getBv(media.Meta.(Meta).Id))
+	header["Referer"] = fmt.Sprintf("https://www.bilibili.com/video/%s", b.getBv(media.Meta.(model.Meta).Id))
 	media.Header = b.header
 	return nil
 }
 
-func (b *BilibiliVideo) UpdateMediaLyric(media *player.Media) error {
+func (b *BilibiliVideo) UpdateMediaLyric(media *model.Media) error {
 	return nil
 }

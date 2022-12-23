@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"testing"
 )
@@ -23,8 +23,8 @@ func TestNetease_Search(t *testing.T) {
 func TestNetease_GetMusicMeta(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
 
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "33516503",
 		},
@@ -39,8 +39,8 @@ func TestNetease_GetMusicMeta(t *testing.T) {
 
 func TestNetease_GetMusic(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "33516503",
 		},
@@ -59,7 +59,7 @@ func TestNetease_GetMusic(t *testing.T) {
 
 func TestNetease_GetPlaylist(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
-	playlist, err := api.GetPlaylist(Meta{
+	playlist, err := api.GetPlaylist(model.Meta{
 		Name: api.GetName(),
 		//Id:   "2520739691",
 		Id: "2382819181",
@@ -77,8 +77,8 @@ func TestNetease_GetPlaylist(t *testing.T) {
 
 func TestNetease_UpdateMediaLyric(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "33516503",
 		},

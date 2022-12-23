@@ -1,8 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"os"
 	"sort"
 	"strings"
@@ -10,31 +9,29 @@ import (
 
 type _LocalPlaylist struct {
 	Name   string
-	Medias []*player.Media
+	Medias []*model.Media
 }
 
 type Local struct {
+	localDir  string
 	Playlists []*_LocalPlaylist
 }
 
 var LocalAPI *Local
 
-func init() {
-	LocalAPI = _newLocal()
-	Providers[LocalAPI.GetName()] = LocalAPI
-}
-
-func _newLocal() *Local {
-	l := &Local{Playlists: make([]*_LocalPlaylist, 0)}
-	if err := os.MkdirAll(config.Provider.LocalDir, 0755); err != nil {
+func NewLocal(localdir string) *Local {
+	l := &Local{Playlists: make([]*_LocalPlaylist, 0), localDir: localdir}
+	if err := os.MkdirAll(localdir, 0755); err != nil {
 		return l
 	}
-	for _, n := range getPlaylistNames() {
+	for _, n := range getPlaylistNames(localdir) {
 		l.Playlists = append(l.Playlists, &_LocalPlaylist{Name: n})
 	}
 	for i, _ := range l.Playlists {
-		_ = readLocalPlaylist(l.Playlists[i])
+		_ = readLocalPlaylist(localdir, l.Playlists[i])
 	}
+	LocalAPI = l
+	Providers[LocalAPI.GetName()] = LocalAPI
 	return l
 }
 
@@ -42,11 +39,11 @@ func (l *Local) GetName() string {
 	return "local"
 }
 
-func (l *Local) MatchMedia(keyword string) *player.Media {
+func (l *Local) MatchMedia(keyword string) *model.Media {
 	return nil
 }
 
-func (l *Local) UpdateMediaLyric(media *player.Media) error {
+func (l *Local) UpdateMediaLyric(media *model.Media) error {
 	// already update in UpdateMedia, do nothing
 	return nil
 }
@@ -55,7 +52,7 @@ func (l *Local) FormatPlaylistUrl(uri string) string {
 	return uri
 }
 
-func (l *Local) GetPlaylist(playlist Meta) ([]*player.Media, error) {
+func (l *Local) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 	var pl *_LocalPlaylist = nil
 	for _, p := range l.Playlists {
 		if p.Name == playlist.Id {
@@ -66,15 +63,15 @@ func (l *Local) GetPlaylist(playlist Meta) ([]*player.Media, error) {
 		l.Playlists = append(l.Playlists, &_LocalPlaylist{Name: playlist.Id})
 		pl = l.Playlists[len(l.Playlists)-1]
 	}
-	if readLocalPlaylist(pl) != nil {
+	if readLocalPlaylist(l.localDir, pl) != nil {
 		return nil, ErrorExternalApi
 	}
 	return pl.Medias, nil
 }
 
-func (l *Local) Search(keyword string) ([]*player.Media, error) {
+func (l *Local) Search(keyword string) ([]*model.Media, error) {
 	result := make([]struct {
-		M *player.Media
+		M *model.Media
 		N int
 	}, 0)
 	keywords := strings.Split(keyword, " ")
@@ -94,7 +91,7 @@ func (l *Local) Search(keyword string) ([]*player.Media, error) {
 			}
 			if n > 0 {
 				result = append(result, struct {
-					M *player.Media
+					M *model.Media
 					N int
 				}{M: m, N: n})
 			}
@@ -103,15 +100,15 @@ func (l *Local) Search(keyword string) ([]*player.Media, error) {
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].N > result[j].N
 	})
-	medias := make([]*player.Media, len(result))
+	medias := make([]*model.Media, len(result))
 	for i, r := range result {
 		medias[i] = r.M.Copy()
 	}
 	return medias, nil
 }
 
-func (l *Local) UpdateMedia(media *player.Media) error {
-	mediaPath := media.Meta.(Meta).Id
+func (l *Local) UpdateMedia(media *model.Media) error {
+	mediaPath := media.Meta.(model.Meta).Id
 	_, err := os.Stat(mediaPath)
 	if err != nil {
 		return err
@@ -119,8 +116,8 @@ func (l *Local) UpdateMedia(media *player.Media) error {
 	return readMediaFile(media)
 }
 
-func (l *Local) UpdateMediaUrl(media *player.Media) error {
-	mediaPath := media.Meta.(Meta).Id
+func (l *Local) UpdateMediaUrl(media *model.Media) error {
+	mediaPath := media.Meta.(model.Meta).Id
 	_, err := os.Stat(mediaPath)
 	if err != nil {
 		return err

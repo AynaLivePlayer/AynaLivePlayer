@@ -1,10 +1,9 @@
 package gui
 
 import (
-	"AynaLivePlayer/config"
+	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -14,7 +13,7 @@ var SearchBar = &struct {
 	Input     *widget.Entry
 	Button    *widget.Button
 	UseSource *widget.CheckGroup
-	Items     []*player.Media
+	Items     []*model.Media
 }{}
 
 func createSearchBar() fyne.CanvasObject {
@@ -26,18 +25,18 @@ func createSearchBar() fyne.CanvasObject {
 		s := make([]string, len(SearchBar.UseSource.Selected))
 
 		copy(s, SearchBar.UseSource.Selected)
-		items := make([]*player.Media, 0)
+		items := make([]*model.Media, 0)
 		for _, p := range s {
-			if r, err := controller.SearchWithProvider(keyword, p); err == nil {
+			if r, err := controller.Instance.Provider().SearchWithProvider(keyword, p); err == nil {
 				items = append(items, r...)
 			}
 		}
-		controller.ApplyUser(items, player.SystemUser)
+		controller.ApplyUser(items, controller.SystemUser)
 		SearchResult.Items = items
 		SearchResult.List.Refresh()
 	})
-	s := make([]string, len(config.Provider.Priority))
-	copy(s, config.Provider.Priority)
+	s := make([]string, len(controller.Instance.Provider().GetPriority()))
+	copy(s, controller.Instance.Provider().GetPriority())
 
 	SearchBar.UseSource = widget.NewCheckGroup(s, nil)
 	SearchBar.UseSource.Horizontal = true

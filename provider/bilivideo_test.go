@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"regexp"
 	"testing"
@@ -10,8 +10,8 @@ import (
 func TestBV_GetMusicMeta(t *testing.T) {
 	var api MediaProvider = BilibiliVideoAPI
 
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "BV1434y1q71P",
 		},
@@ -26,8 +26,8 @@ func TestBV_GetMusicMeta(t *testing.T) {
 
 func TestBV_GetMusic(t *testing.T) {
 	var api MediaProvider = BilibiliVideoAPI
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "BV1434y1q71P",
 		},
@@ -51,8 +51,8 @@ func TestBV_Regex(t *testing.T) {
 func TestBV_GetMusicMeta2(t *testing.T) {
 	var api MediaProvider = BilibiliVideoAPI
 
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "BV1gA411P7ir?p=3",
 		},
@@ -67,8 +67,8 @@ func TestBV_GetMusicMeta2(t *testing.T) {
 
 func TestBV_GetMusic2(t *testing.T) {
 	var api MediaProvider = BilibiliVideoAPI
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "BV1gA411P7ir?p=3",
 		},

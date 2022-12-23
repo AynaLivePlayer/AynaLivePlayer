@@ -1,7 +1,6 @@
-package player
+package model
 
 import (
-	"AynaLivePlayer/event"
 	"github.com/spf13/cast"
 	"regexp"
 	"sort"
@@ -23,12 +22,10 @@ type LyricContext struct {
 }
 
 type Lyric struct {
-	Lyrics  []*LyricLine
-	Handler *event.Handler
-	prev    float64
+	Lyrics []*LyricLine
 }
 
-func (l *Lyric) Reload(lyric string) {
+func LoadLyric(lyric string) *Lyric {
 	tmp := make(map[float64]*LyricLine)
 	times := make([]float64, 0)
 	for _, line := range strings.Split(lyric, "\n") {
@@ -55,26 +52,7 @@ func (l *Lyric) Reload(lyric string) {
 		Time:  99999999999,
 		Lyric: "",
 	})
-	l.Lyrics = lrcs
-	l.Handler.CallA(EventLyricReload, LyricReloadEvent{Lyrics: l})
-	return
-}
-
-func (l *Lyric) Update(time float64) {
-	lrc := l.Find(time)
-	if lrc == nil {
-		return
-	}
-	if l.prev == lrc.Time {
-		return
-	}
-	l.prev = lrc.Time
-	l.Handler.CallA(EventLyricUpdate, LyricUpdateEvent{
-		Lyrics: l,
-		Time:   time,
-		Lyric:  lrc,
-	})
-	return
+	return &Lyric{Lyrics: lrcs}
 }
 
 func (l *Lyric) Find(time float64) *LyricLine {
@@ -95,7 +73,6 @@ func (l *Lyric) FindContext(time float64, prev int, next int) *LyricContext {
 			if (i + 1 + next) > len(l.Lyrics) {
 				next = len(l.Lyrics) - i - 1
 			}
-			//l.Lyrics[i+prev : i+1+next]
 			return &LyricContext{
 				Current: l.Lyrics[i],
 				Prev:    l.Lyrics[i+prev : i],
@@ -104,10 +81,4 @@ func (l *Lyric) FindContext(time float64, prev int, next int) *LyricContext {
 		}
 	}
 	return nil
-}
-
-func NewLyric(lyric string) *Lyric {
-	l := &Lyric{Handler: event.NewHandler(), prev: -1}
-	l.Reload(lyric)
-	return l
 }

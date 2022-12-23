@@ -1,10 +1,9 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/provider"
+	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -14,9 +13,9 @@ import (
 
 var SearchResult = &struct {
 	List  *widget.List
-	Items []*player.Media
+	Items []*model.Media
 }{
-	Items: []*player.Media{},
+	Items: []*model.Media{},
 }
 
 func createSearchList() fyne.CanvasObject {
@@ -42,14 +41,14 @@ func createSearchList() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
 				SearchResult.Items[id].Artist)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Label).SetText(
-				SearchResult.Items[id].Meta.(provider.Meta).Name)
+				SearchResult.Items[id].Meta.(model.Meta).Name)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			btns[0].(*widget.Button).OnTapped = func() {
-				controller.Play(SearchResult.Items[id])
+				controller.Instance.PlayControl().Play(SearchResult.Items[id])
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.UserPlaylist.Push(SearchResult.Items[id])
+				controller.Instance.Playlists().GetCurrent().Push(SearchResult.Items[id])
 			}
 		})
 	return container.NewBorder(

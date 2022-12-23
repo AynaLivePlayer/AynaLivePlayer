@@ -1,9 +1,13 @@
 package controller
 
-import (
-	"AynaLivePlayer/logger"
-)
+var Instance IController = nil
 
-const MODULE_CONTROLLER = "Controller"
-
-var l = logger.Logger.WithField("Module", MODULE_CONTROLLER)
+type IController interface {
+	LiveRooms() ILiveRoomController
+	PlayControl() IPlayController
+	Playlists() IPlaylistController
+	Provider() IProviderController
+	Plugin() IPluginController
+	LoadPlugins(plugins ...Plugin)
+	CloseAndSave()
+}

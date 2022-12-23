@@ -1,7 +1,7 @@
 package webinfo
 
 import (
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/common/util"
 	"encoding/json"
 	"io/ioutil"
 )

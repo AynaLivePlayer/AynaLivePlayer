@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"github.com/tidwall/gjson"
 	"net/url"
@@ -37,18 +37,18 @@ func (b *Bilibili) GetName() string {
 	return "bilibili"
 }
 
-func (b *Bilibili) MatchMedia(keyword string) *player.Media {
+func (b *Bilibili) MatchMedia(keyword string) *model.Media {
 	if id := b.IdRegex0.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: b.GetName(),
 				Id:   id,
 			},
 		}
 	}
 	if id := b.IdRegex1.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: b.GetName(),
 				Id:   id[2:],
 			},
@@ -61,24 +61,24 @@ func (b *Bilibili) FormatPlaylistUrl(uri string) string {
 	return ""
 }
 
-func (b *Bilibili) GetPlaylist(meta Meta) ([]*player.Media, error) {
+func (b *Bilibili) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 	return nil, ErrorExternalApi
 }
 
-func (b *Bilibili) Search(keyword string) ([]*player.Media, error) {
+func (b *Bilibili) Search(keyword string) ([]*model.Media, error) {
 	resp := httpGetString(fmt.Sprintf(b.SearchApi, url.QueryEscape(keyword)), map[string]string{
 		"user-agent": "BiliMusic/2.233.3",
 	})
 	if resp == "" {
 		return nil, ErrorExternalApi
 	}
-	result := make([]*player.Media, 0)
+	result := make([]*model.Media, 0)
 	gjson.Get(resp, "data.result").ForEach(func(key, value gjson.Result) bool {
-		result = append(result, &player.Media{
+		result = append(result, &model.Media{
 			Title:  value.Get("title").String(),
-			Cover:  player.Picture{Url: value.Get("cover").String()},
+			Cover:  model.Picture{Url: value.Get("cover").String()},
 			Artist: value.Get("author").String(),
-			Meta: Meta{
+			Meta: model.Meta{
 				Name: b.GetName(),
 				Id:   value.Get("id").String(),
 			},
@@ -88,8 +88,8 @@ func (b *Bilibili) Search(keyword string) ([]*player.Media, error) {
 	return result, nil
 }
 
-func (b *Bilibili) UpdateMedia(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.InfoApi, media.Meta.(Meta).Id), map[string]string{
+func (b *Bilibili) UpdateMedia(media *model.Media) error {
+	resp := httpGetString(fmt.Sprintf(b.InfoApi, media.Meta.(model.Meta).Id), map[string]string{
 		"user-agent": "BiliMusic/2.233.3",
 	})
 	if resp == "" {
@@ -105,8 +105,8 @@ func (b *Bilibili) UpdateMedia(media *player.Media) error {
 	return nil
 }
 
-func (b *Bilibili) UpdateMediaUrl(media *player.Media) error {
-	resp := httpGetString(fmt.Sprintf(b.FileApi, media.Meta.(Meta).Id), map[string]string{
+func (b *Bilibili) UpdateMediaUrl(media *model.Media) error {
+	resp := httpGetString(fmt.Sprintf(b.FileApi, media.Meta.(model.Meta).Id), map[string]string{
 		"user-agent": "BiliMusic/2.233.3",
 	})
 
@@ -123,7 +123,7 @@ func (b *Bilibili) UpdateMediaUrl(media *player.Media) error {
 	media.Url = uri
 	return nil
 }
-func (k *Bilibili) UpdateMediaLyric(media *player.Media) error {
+func (k *Bilibili) UpdateMediaLyric(media *model.Media) error {
 
 	return nil
 }

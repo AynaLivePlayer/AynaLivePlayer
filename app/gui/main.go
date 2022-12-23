@@ -1,11 +1,13 @@
 package main
 
 import (
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
+	"AynaLivePlayer/controller/core"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/logger"
+	"AynaLivePlayer/player"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/textinfo"
@@ -16,22 +18,34 @@ import (
 
 var dev = flag.Bool("dev", false, "generate new translation file")
 
-var plugins = []controller.Plugin{diange.NewDiange(), qiege.NewQiege(), textinfo.NewTextInfo(), webinfo.NewWebInfo(),
-	wylogin.NewWYLogin()}
+func createController() controller.IController {
+	liveroom := core.NewLiveRoomController()
+	lyric := core.NewLyricLoader()
+	provider := core.NewProviderController()
+	playlist := core.NewPlaylistController(provider)
+	plugin := core.NewPluginController()
+	mpvPlayer := player.NewMpvPlayer()
+	playControl := core.NewPlayerController(mpvPlayer, playlist, lyric, provider)
+	ctr := core.NewController(liveroom, playControl, playlist, provider, plugin)
+	return ctr
+}
 
 func main() {
 	flag.Parse()
 	logger.Logger.Info("================Program Start================")
 	logger.Logger.Infof("================Current Version: %s================", config.Version)
-	controller.Initialize()
+	mainController := createController()
+	controller.Instance = mainController
 	gui.Initialize()
-	controller.LoadPlugins(plugins...)
+	plugins := []controller.Plugin{diange.NewDiange(mainController), qiege.NewQiege(mainController),
+		textinfo.NewTextInfo(mainController), webinfo.NewWebInfo(mainController),
+		wylogin.NewWYLogin()}
+	mainController.LoadPlugins(plugins...)
 	gui.MainWindow.ShowAndRun()
-	controller.ClosePlugins(plugins...)
-	controller.Destroy()
-	controller.CloseAndSave()
+	mainController.CloseAndSave()
 	if *dev {
 		i18n.SaveTranslation()
 	}
+	_ = config.SaveToConfigFile(config.ConfigPath)
 	logger.Logger.Info("================Program End================")
 }

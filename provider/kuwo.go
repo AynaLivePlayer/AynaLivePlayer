@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"github.com/tidwall/gjson"
 	"html"
@@ -50,18 +50,18 @@ func (k *Kuwo) GetName() string {
 	return "kuwo"
 }
 
-func (k *Kuwo) MatchMedia(keyword string) *player.Media {
+func (k *Kuwo) MatchMedia(keyword string) *model.Media {
 	if id := k.IdRegex0.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: k.GetName(),
 				Id:   id,
 			},
 		}
 	}
 	if id := k.IdRegex1.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: k.GetName(),
 				Id:   id[2:],
 			},
@@ -107,19 +107,19 @@ func (k *Kuwo) _kuwoGet(url string) string {
 	})
 }
 
-func (k *Kuwo) Search(keyword string) ([]*player.Media, error) {
+func (k *Kuwo) Search(keyword string) ([]*model.Media, error) {
 	resp := k._kuwoGet(fmt.Sprintf(k.SearchApi, url.QueryEscape(keyword), 1, 64))
 	if resp == "" {
 		return nil, ErrorExternalApi
 	}
-	result := make([]*player.Media, 0)
+	result := make([]*model.Media, 0)
 	gjson.Parse(resp).Get("data.list").ForEach(func(key, value gjson.Result) bool {
-		result = append(result, &player.Media{
+		result = append(result, &model.Media{
 			Title:  html.UnescapeString(value.Get("name").String()),
-			Cover:  player.Picture{Url: value.Get("pic").String()},
+			Cover:  model.Picture{Url: value.Get("pic").String()},
 			Artist: value.Get("artist").String(),
 			Album:  value.Get("album").String(),
-			Meta: Meta{
+			Meta: model.Meta{
 				Name: k.GetName(),
 				Id:   value.Get("rid").String(),
 			},
@@ -129,8 +129,8 @@ func (k *Kuwo) Search(keyword string) ([]*player.Media, error) {
 	return result, nil
 }
 
-func (k *Kuwo) UpdateMedia(media *player.Media) error {
-	resp := k._kuwoGet(fmt.Sprintf(k.InfoApi, media.Meta.(Meta).Id))
+func (k *Kuwo) UpdateMedia(media *model.Media) error {
+	resp := k._kuwoGet(fmt.Sprintf(k.InfoApi, media.Meta.(model.Meta).Id))
 	if resp == "" {
 		return ErrorExternalApi
 	}
@@ -145,8 +145,8 @@ func (k *Kuwo) UpdateMedia(media *player.Media) error {
 	return nil
 }
 
-func (k *Kuwo) UpdateMediaUrl(media *player.Media) error {
-	result := httpGetString(fmt.Sprintf(k.FileApi, media.Meta.(Meta).Id), nil)
+func (k *Kuwo) UpdateMediaUrl(media *model.Media) error {
+	result := httpGetString(fmt.Sprintf(k.FileApi, media.Meta.(model.Meta).Id), nil)
 	if result == "" {
 		return ErrorExternalApi
 	}
@@ -154,8 +154,8 @@ func (k *Kuwo) UpdateMediaUrl(media *player.Media) error {
 	return nil
 }
 
-func (k *Kuwo) UpdateMediaLyric(media *player.Media) error {
-	result := httpGetString(fmt.Sprintf(k.LyricApi, media.Meta.(Meta).Id), nil)
+func (k *Kuwo) UpdateMediaLyric(media *model.Media) error {
+	result := httpGetString(fmt.Sprintf(k.LyricApi, media.Meta.(model.Meta).Id), nil)
 	if result == "" {
 		return ErrorExternalApi
 	}
@@ -169,12 +169,12 @@ func (k *Kuwo) UpdateMediaLyric(media *player.Media) error {
 	return nil
 }
 
-func (k *Kuwo) GetPlaylist(meta Meta) ([]*player.Media, error) {
-	medias := make([]*player.Media, 0)
+func (k *Kuwo) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
+	medias := make([]*model.Media, 0)
 	var resp string
 	var jresp gjson.Result
 	for i := 1; i <= 20; i++ {
-		resp = k._kuwoGet(fmt.Sprintf(k.PlaylistApi, meta.Id, i, 128))
+		resp = k._kuwoGet(fmt.Sprintf(k.PlaylistApi, playlist.Id, i, 128))
 		if resp == "" {
 			break
 		}
@@ -190,12 +190,12 @@ func (k *Kuwo) GetPlaylist(meta Meta) ([]*player.Media, error) {
 		jresp.Get("data.musicList").ForEach(func(key, value gjson.Result) bool {
 			medias = append(
 				medias,
-				&player.Media{
+				&model.Media{
 					Title:  html.UnescapeString(value.Get("name").String()),
 					Artist: value.Get("artist").String(),
-					Cover:  player.Picture{Url: value.Get("pic").String()},
+					Cover:  model.Picture{Url: value.Get("pic").String()},
 					Album:  value.Get("album").String(),
-					Meta: Meta{
+					Meta: model.Meta{
 						Name: k.GetName(),
 						Id:   value.Get("rid").String(),
 					},

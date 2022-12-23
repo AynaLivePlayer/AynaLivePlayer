@@ -3,7 +3,7 @@ module AynaLivePlayer
 go 1.19
 
 require (
-	fyne.io/fyne/v2 v2.2.3
+	fyne.io/fyne/v2 v2.2.4
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.26
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/aynakeya/blivedm v0.1.6

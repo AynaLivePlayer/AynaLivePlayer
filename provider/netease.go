@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/common/util"
+	"AynaLivePlayer/model"
 	neteaseApi "github.com/XiaoMengXinX/Music163Api-Go/api"
 	neteaseTypes "github.com/XiaoMengXinX/Music163Api-Go/types"
 	neteaseUtil "github.com/XiaoMengXinX/Music163Api-Go/utils"
@@ -61,18 +61,18 @@ func (n *Netease) GetName() string {
 	return "netease"
 }
 
-func (n *Netease) MatchMedia(keyword string) *player.Media {
+func (n *Netease) MatchMedia(keyword string) *model.Media {
 	if id := n.IdRegex0.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: n.GetName(),
 				Id:   id,
 			},
 		}
 	}
 	if id := n.IdRegex1.FindString(keyword); id != "" {
-		return &player.Media{
-			Meta: Meta{
+		return &model.Media{
+			Meta: model.Meta{
 				Name: n.GetName(),
 				Id:   id[2:],
 			},
@@ -94,9 +94,9 @@ func (n *Netease) FormatPlaylistUrl(uri string) string {
 	return ""
 }
 
-func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
+func (n *Netease) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 	result, err := neteaseApi.GetPlaylistDetail(
-		n.ReqData, util.StringToInt(meta.Id))
+		n.ReqData, util.StringToInt(playlist.Id))
 	if err != nil || result.Code != 200 {
 		return nil, ErrorExternalApi
 	}
@@ -109,7 +109,7 @@ func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
 	for i := 0; i < cnt; i++ {
 		ids[i] = result.Playlist.TrackIds[i].Id
 	}
-	medias := make([]*player.Media, 0, cnt)
+	medias := make([]*model.Media, 0, cnt)
 	for index := 0; index < len(ids); index += 1000 {
 		result2, err := neteaseApi.GetSongDetail(
 			n.ReqData,
@@ -122,15 +122,15 @@ func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
 			break
 		}
 		for i := 0; i < cnt; i++ {
-			medias = append(medias, &player.Media{
+			medias = append(medias, &model.Media{
 				Title:  result2.Songs[i].Name,
 				Artist: _neteaseGetArtistNames(result2.Songs[i]),
-				Cover:  player.Picture{Url: result2.Songs[i].Al.PicUrl},
+				Cover:  model.Picture{Url: result2.Songs[i].Al.PicUrl},
 				Album:  result2.Songs[i].Al.Name,
 				Url:    "",
 				Header: nil,
 				User:   nil,
-				Meta: Meta{
+				Meta: model.Meta{
 					Name: n.GetName(),
 					Id:   strconv.Itoa(result2.Songs[i].Id),
 				},
@@ -143,7 +143,7 @@ func (n *Netease) GetPlaylist(meta Meta) ([]*player.Media, error) {
 	return medias, nil
 }
 
-func (n *Netease) Search(keyword string) ([]*player.Media, error) {
+func (n *Netease) Search(keyword string) ([]*model.Media, error) {
 	rawResult, err := neteaseApi.SearchSong(
 		n.ReqData,
 		neteaseApi.SearchSongConfig{
@@ -154,20 +154,20 @@ func (n *Netease) Search(keyword string) ([]*player.Media, error) {
 	if err != nil || rawResult.Code != 200 {
 		return nil, ErrorExternalApi
 	}
-	medias := make([]*player.Media, 0)
+	medias := make([]*model.Media, 0)
 	for _, song := range rawResult.Result.Songs {
 		artists := make([]string, 0)
 		for _, a := range song.Artists {
 			artists = append(artists, a.Name)
 		}
-		medias = append(medias, &player.Media{
+		medias = append(medias, &model.Media{
 			Title:  song.Name,
 			Artist: strings.Join(artists, ","),
-			Cover:  player.Picture{},
+			Cover:  model.Picture{},
 			Album:  song.Album.Name,
 			Url:    "",
 			Header: nil,
-			Meta: Meta{
+			Meta: model.Meta{
 				Name: n.GetName(),
 				Id:   strconv.Itoa(song.Id),
 			},
@@ -176,10 +176,10 @@ func (n *Netease) Search(keyword string) ([]*player.Media, error) {
 	return medias, nil
 }
 
-func (n *Netease) UpdateMedia(media *player.Media) error {
+func (n *Netease) UpdateMedia(media *model.Media) error {
 	result, err := neteaseApi.GetSongDetail(
 		n.ReqData,
-		[]int{util.StringToInt(media.Meta.(Meta).Id)})
+		[]int{util.StringToInt(media.Meta.(model.Meta).Id)})
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}
@@ -193,10 +193,10 @@ func (n *Netease) UpdateMedia(media *player.Media) error {
 	return nil
 }
 
-func (n *Netease) UpdateMediaUrl(media *player.Media) error {
+func (n *Netease) UpdateMediaUrl(media *model.Media) error {
 	result, err := neteaseApi.GetSongURL(
 		n.ReqData,
-		neteaseApi.SongURLConfig{Ids: []int{util.StringToInt(media.Meta.(Meta).Id)}})
+		neteaseApi.SongURLConfig{Ids: []int{util.StringToInt(media.Meta.(model.Meta).Id)}})
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}
@@ -210,8 +210,8 @@ func (n *Netease) UpdateMediaUrl(media *player.Media) error {
 	return nil
 }
 
-func (n *Netease) UpdateMediaLyric(media *player.Media) error {
-	result, err := neteaseApi.GetSongLyric(n.ReqData, util.StringToInt(media.Meta.(Meta).Id))
+func (n *Netease) UpdateMediaLyric(media *model.Media) error {
+	result, err := neteaseApi.GetSongLyric(n.ReqData, util.StringToInt(media.Meta.(model.Meta).Id))
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}

@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"testing"
 )
@@ -24,8 +24,8 @@ func TestBilibili_Search(t *testing.T) {
 func TestBilibili_GetMusicMeta(t *testing.T) {
 	var api MediaProvider = BilibiliAPI
 
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "1560601",
 		},
@@ -40,8 +40,8 @@ func TestBilibili_GetMusicMeta(t *testing.T) {
 
 func TestBilibili_GetMusic(t *testing.T) {
 	var api MediaProvider = BilibiliAPI
-	media := player.Media{
-		Meta: Meta{
+	media := model.Media{
+		Meta: model.Meta{
 			Name: api.GetName(),
 			Id:   "1560601",
 		},

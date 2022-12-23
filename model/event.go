@@ -1,7 +1,7 @@
-package player
+package model
 
 import (
-	"AynaLivePlayer/event"
+	"AynaLivePlayer/common/event"
 )
 
 const (
@@ -13,6 +13,10 @@ const (
 	EventLyricReload       event.EventId = "lyric.reload"
 )
 
+func EventPlayerPropertyUpdate(property PlayerProperty) event.EventId {
+	return event.EventId("player.property.update." + string(property))
+}
+
 type PlaylistInsertEvent struct {
 	Playlist *Playlist
 	Index    int
@@ -20,13 +24,7 @@ type PlaylistInsertEvent struct {
 }
 
 type PlaylistUpdateEvent struct {
-	Playlist *Playlist
-}
-
-func newPlaylistUpdateEvent(playlist *Playlist) PlaylistUpdateEvent {
-	return PlaylistUpdateEvent{
-		Playlist: playlist,
-	}
+	Playlist *Playlist // Playlist is a copy of the playlist
 }
 
 type PlayEvent struct {
@@ -41,4 +39,14 @@ type LyricUpdateEvent struct {
 
 type LyricReloadEvent struct {
 	Lyrics *Lyric
+}
+
+type PlayerPropertyUpdateEvent struct {
+	Property PlayerProperty
+	Value    PlayerPropertyValue
+}
+
+type LiveRoomStatusUpdateEvent struct {
+	RoomTitle string
+	Status    bool
 }

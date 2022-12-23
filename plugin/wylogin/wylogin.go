@@ -1,10 +1,10 @@
 package wylogin
 
 import (
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/logger"
 	"AynaLivePlayer/provider"
 	"bytes"
 	"fyne.io/fyne/v2"

@@ -1,12 +1,12 @@
 package qiege
 
 import (
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
 	"AynaLivePlayer/liveclient"
-	"AynaLivePlayer/logger"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -27,14 +27,16 @@ type Qiege struct {
 	AdminPermission     bool
 	CustomCMD           string
 	panel               fyne.CanvasObject
+	ctr                 controller.IController
 }
 
-func NewQiege() *Qiege {
+func NewQiege(ctr controller.IController) *Qiege {
 	return &Qiege{
 		UserPermission:      true,
 		PrivilegePermission: true,
 		AdminPermission:     true,
 		CustomCMD:           "skip",
+		ctr:                 ctr,
 	}
 }
 
@@ -44,7 +46,7 @@ func (d *Qiege) Name() string {
 
 func (d *Qiege) Enable() error {
 	config.LoadConfig(d)
-	controller.AddCommand(d)
+	d.ctr.LiveRooms().AddDanmuCommand(d)
 	gui.AddConfigLayout(d)
 	return nil
 }
@@ -63,18 +65,18 @@ func (d *Qiege) Match(command string) bool {
 }
 
 func (d *Qiege) Execute(command string, args []string, danmu *liveclient.DanmuMessage) {
-	if d.UserPermission && (controller.CurrentMedia != nil) {
-		if controller.CurrentMedia.DanmuUser() != nil && controller.CurrentMedia.DanmuUser().Uid == danmu.User.Uid {
-			controller.PlayNext()
+	if d.UserPermission && (d.ctr.PlayControl().GetPlaying() != nil) {
+		if d.ctr.PlayControl().GetPlaying().DanmuUser() != nil && d.ctr.PlayControl().GetPlaying().DanmuUser().Uid == danmu.User.Uid {
+			d.ctr.PlayControl().PlayNext()
 			return
 		}
 	}
 	if d.PrivilegePermission && danmu.User.Privilege > 0 {
-		controller.PlayNext()
+		d.ctr.PlayControl().PlayNext()
 		return
 	}
 	if d.AdminPermission && danmu.User.Admin {
-		controller.PlayNext()
+		d.ctr.PlayControl().PlayNext()
 		return
 	}
 }

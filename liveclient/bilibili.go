@@ -1,8 +1,8 @@
 package liveclient
 
 import (
-	"AynaLivePlayer/event"
-	"AynaLivePlayer/logger"
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/logger"
 	"errors"
 	"github.com/aynakeya/blivedm"
 	"github.com/sirupsen/logrus"
@@ -11,10 +11,10 @@ import (
 )
 
 type Bilibili struct {
-	client   *blivedm.BLiveWsClient
-	handlers *event.Handler
-	roomName string
-	status   bool
+	client       *blivedm.BLiveWsClient
+	eventManager *event.Manager
+	roomName     string
+	status       bool
 }
 
 func init() {
@@ -29,14 +29,14 @@ func init() {
 
 func NewBilibili(roomId int) LiveClient {
 	cl := &Bilibili{
-		client:   &blivedm.BLiveWsClient{ShortId: roomId, Account: blivedm.DanmuAccount{UID: 0}, HearbeatInterval: 10 * time.Second},
-		handlers: event.NewHandler(),
-		roomName: "Unknown",
+		client:       &blivedm.BLiveWsClient{ShortId: roomId, Account: blivedm.DanmuAccount{UID: 0}, HearbeatInterval: 10 * time.Second},
+		eventManager: event.MainManager.NewChildManager(),
+		roomName:     "Unknown",
 	}
 	cl.client.OnDisconnect = func(client *blivedm.BLiveWsClient) {
 		cl.l().Warn("disconnect from websocket connection, maybe try reconnect")
 		cl.status = false
-		cl.Handler().CallA(EventStatusChange, StatusChangeEvent{Connected: false, Client: cl})
+		cl.eventManager.CallA(EventStatusChange, StatusChangeEvent{Connected: false, Client: cl})
 	}
 	cl.client.RegHandler(blivedm.CmdDanmaku, cl.handleMsg)
 	return cl
@@ -54,8 +54,8 @@ func (b *Bilibili) Status() bool {
 	return b.status
 }
 
-func (b *Bilibili) Handler() *event.Handler {
-	return b.handlers
+func (b *Bilibili) EventManager() *event.Manager {
+	return b.eventManager
 }
 
 func (b *Bilibili) Connect() bool {
@@ -66,7 +66,7 @@ func (b *Bilibili) Connect() bool {
 	if b.client.InitRoom() && b.client.ConnectDanmuServer() {
 		b.roomName = b.client.RoomInfo.Title
 		b.status = true
-		b.Handler().CallA(EventStatusChange, StatusChangeEvent{Connected: true, Client: b})
+		b.eventManager.CallA(EventStatusChange, StatusChangeEvent{Connected: true, Client: b})
 		b.l().Info("Connect Success")
 		return true
 	}
@@ -80,7 +80,7 @@ func (b *Bilibili) Disconnect() bool {
 		return true
 	}
 	b.client.Disconnect()
-	b.Handler().CallA(EventStatusChange, StatusChangeEvent{Connected: false, Client: b})
+	b.eventManager.CallA(EventStatusChange, StatusChangeEvent{Connected: false, Client: b})
 	return true
 }
 
@@ -113,7 +113,7 @@ func (b *Bilibili) handleMsg(context *blivedm.Context) {
 	}
 	b.l().Debug("receive message", dmsg)
 	go func() {
-		b.handlers.Call(&event.Event{
+		b.eventManager.Call(&event.Event{
 			Id:        EventMessageReceive,
 			Cancelled: false,
 			Data:      &dmsg,

@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"AynaLivePlayer/logger"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/common/logger"
+	"AynaLivePlayer/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,25 +12,20 @@ func l() *logrus.Entry {
 	return logger.Logger.WithField("Module", MODULE_CONTROLLER)
 }
 
-type Meta struct {
-	Name string
-	Id   string
-}
-
 type MediaProvider interface {
 	GetName() string
-	MatchMedia(keyword string) *player.Media
-	GetPlaylist(playlist Meta) ([]*player.Media, error)
+	MatchMedia(keyword string) *model.Media
+	GetPlaylist(playlist *model.Meta) ([]*model.Media, error)
 	FormatPlaylistUrl(uri string) string
-	Search(keyword string) ([]*player.Media, error)
-	UpdateMedia(media *player.Media) error
-	UpdateMediaUrl(media *player.Media) error
-	UpdateMediaLyric(media *player.Media) error
+	Search(keyword string) ([]*model.Media, error)
+	UpdateMedia(media *model.Media) error
+	UpdateMediaUrl(media *model.Media) error
+	UpdateMediaLyric(media *model.Media) error
 }
 
 var Providers map[string]MediaProvider = make(map[string]MediaProvider)
 
-func GetPlaylist(meta Meta) ([]*player.Media, error) {
+func GetPlaylist(meta *model.Meta) ([]*model.Media, error) {
 	if v, ok := Providers[meta.Name]; ok {
 		return v.GetPlaylist(meta)
 	}
@@ -44,36 +39,36 @@ func FormatPlaylistUrl(pname, uri string) (string, error) {
 	return "", ErrorNoSuchProvider
 }
 
-func MatchMedia(provider string, keyword string) *player.Media {
+func MatchMedia(provider string, keyword string) *model.Media {
 	if v, ok := Providers[provider]; ok {
 		return v.MatchMedia(keyword)
 	}
 	return nil
 }
 
-func Search(provider string, keyword string) ([]*player.Media, error) {
+func Search(provider string, keyword string) ([]*model.Media, error) {
 	if v, ok := Providers[provider]; ok {
 		return v.Search(keyword)
 	}
 	return nil, ErrorNoSuchProvider
 }
 
-func UpdateMedia(media *player.Media) error {
-	if v, ok := Providers[media.Meta.(Meta).Name]; ok {
+func UpdateMedia(media *model.Media) error {
+	if v, ok := Providers[media.Meta.(model.Meta).Name]; ok {
 		return v.UpdateMedia(media)
 	}
 	return ErrorNoSuchProvider
 }
 
-func UpdateMediaUrl(media *player.Media) error {
-	if v, ok := Providers[media.Meta.(Meta).Name]; ok {
+func UpdateMediaUrl(media *model.Media) error {
+	if v, ok := Providers[media.Meta.(model.Meta).Name]; ok {
 		return v.UpdateMediaUrl(media)
 	}
 	return ErrorNoSuchProvider
 }
 
-func UpdateMediaLyric(media *player.Media) error {
-	if v, ok := Providers[media.Meta.(Meta).Name]; ok {
+func UpdateMediaLyric(media *model.Media) error {
+	if v, ok := Providers[media.Meta.(model.Meta).Name]; ok {
 		return v.UpdateMediaLyric(media)
 	}
 	return ErrorNoSuchProvider

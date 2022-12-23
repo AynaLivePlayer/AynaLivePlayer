@@ -1,9 +1,8 @@
 package gui
 
 import (
-	"AynaLivePlayer/config"
+	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -25,10 +24,7 @@ type PlaylistManagerContainer struct {
 }
 
 func (p *PlaylistManagerContainer) UpdateCurrentSystemPlaylist() {
-	if config.Player.PlaylistIndex >= len(controller.PlaylistManager) {
-		p.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current.none"))
-	}
-	p.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current") + controller.PlaylistManager[config.Player.PlaylistIndex].Name)
+	p.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current") + controller.Instance.Playlists().GetDefault().Name())
 }
 
 var PlaylistManager = &PlaylistManagerContainer{}
@@ -36,17 +32,17 @@ var PlaylistManager = &PlaylistManagerContainer{}
 func createPlaylists() fyne.CanvasObject {
 	PlaylistManager.Playlists = widget.NewList(
 		func() int {
-			return len(controller.PlaylistManager)
+			return controller.Instance.Playlists().Size()
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("AAAAAAAAAAAAAAAA")
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*widget.Label).SetText(
-				controller.PlaylistManager[id].Name)
+				controller.Instance.Playlists().Get(id).Name())
 		})
 	PlaylistManager.AddBtn = widget.NewButton(i18n.T("gui.playlist.button.add"), func() {
-		providerEntry := widget.NewSelect(config.Provider.Priority, nil)
+		providerEntry := widget.NewSelect(controller.Instance.Provider().GetPriority(), nil)
 		idEntry := widget.NewEntry()
 		dia := dialog.NewCustomConfirm(
 			i18n.T("gui.playlist.add.title"),
@@ -64,7 +60,7 @@ func createPlaylists() fyne.CanvasObject {
 			),
 			func(b bool) {
 				if b && len(providerEntry.Selected) > 0 && len(idEntry.Text) > 0 {
-					controller.AddPlaylist(providerEntry.Selected, idEntry.Text)
+					controller.Instance.Playlists().Add(providerEntry.Selected, idEntry.Text)
 					PlaylistManager.Playlists.Refresh()
 					PlaylistManager.PlaylistMedia.Refresh()
 				}
@@ -75,7 +71,7 @@ func createPlaylists() fyne.CanvasObject {
 		dia.Show()
 	})
 	PlaylistManager.RemoveBtn = widget.NewButton(i18n.T("gui.playlist.button.remove"), func() {
-		controller.RemovePlaylist(PlaylistManager.Index)
+		controller.Instance.Playlists().Remove(PlaylistManager.Index)
 		//PlaylistManager.Index = 0
 		PlaylistManager.Playlists.Select(0)
 		PlaylistManager.Playlists.Refresh()
@@ -99,13 +95,13 @@ func createPlaylistMedias() fyne.CanvasObject {
 	PlaylistManager.RefreshBtn = createAsyncButton(
 		widget.NewButtonWithIcon(i18n.T("gui.playlist.button.refresh"), theme.ViewRefreshIcon(), nil),
 		func() {
-			controller.PreparePlaylistByIndex(PlaylistManager.Index)
+			showDialogIfError(controller.Instance.Playlists().PreparePlaylistByIndex(PlaylistManager.Index))
 			PlaylistManager.PlaylistMedia.Refresh()
 		})
 	PlaylistManager.SetAsSystemBtn = createAsyncButton(
 		widget.NewButton(i18n.T("gui.playlist.button.set_as_system"), nil),
 		func() {
-			controller.SetSystemPlaylist(PlaylistManager.Index)
+			showDialogIfError(controller.Instance.Playlists().SetDefault(PlaylistManager.Index))
 			PlaylistManager.PlaylistMedia.Refresh()
 			PlaylistManager.UpdateCurrentSystemPlaylist()
 		})
@@ -113,10 +109,10 @@ func createPlaylistMedias() fyne.CanvasObject {
 	PlaylistManager.UpdateCurrentSystemPlaylist()
 	PlaylistManager.PlaylistMedia = widget.NewList(
 		func() int {
-			if len(controller.PlaylistManager) == 0 {
+			if controller.Instance.Playlists().Size() == 0 {
 				return 0
 			}
-			return controller.PlaylistManager[PlaylistManager.Index].Size()
+			return controller.Instance.Playlists().Get(PlaylistManager.Index).Size()
 		},
 		func() fyne.CanvasObject {
 			return container.NewBorder(nil, nil,
@@ -130,18 +126,19 @@ func createPlaylistMedias() fyne.CanvasObject {
 					newLabelWithWrapping("artist", fyne.TextTruncate)))
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
-			m := controller.PlaylistManager[PlaylistManager.Index].Playlist[id]
+			m := controller.Instance.Playlists().Get(PlaylistManager.Index).Get(id).Copy()
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
 				m.Title)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
 				m.Artist)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
+			m.User = controller.SystemUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				controller.Play(controller.ToSystemMedia(m))
+				controller.Instance.PlayControl().Play(m)
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.UserPlaylist.Push(controller.ToSystemMedia(m))
+				controller.Instance.Playlists().GetCurrent().Push(m)
 			}
 		})
 	return container.NewBorder(

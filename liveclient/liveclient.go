@@ -1,7 +1,7 @@
 package liveclient
 
 import (
-	"AynaLivePlayer/event"
+	"AynaLivePlayer/common/event"
 	"errors"
 )
 
@@ -24,14 +24,13 @@ type DanmuMessage struct {
 	User    DanmuUser
 	Message string
 }
-
 type LiveClient interface {
 	ClientName() string
 	RoomName() string
 	Connect() bool
 	Disconnect() bool
 	Status() bool
-	Handler() *event.Handler
+	EventManager() *event.Manager
 }
 
 type LiveClientCtor func(id string) (LiveClient, error)

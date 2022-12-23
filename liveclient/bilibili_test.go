@@ -1,8 +1,8 @@
 package liveclient
 
 import (
-	"AynaLivePlayer/event"
-	"AynaLivePlayer/logger"
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/logger"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"testing"
@@ -11,9 +11,9 @@ import (
 
 func TestBilibili_Client(t *testing.T) {
 	logger.Logger.SetLevel(logrus.DebugLevel)
-	lc := NewBilibili(7777)
+	lc := NewBilibili(7777, event.NewManger())
 	//lc := NewBilibili(8524916587)
-	lc.Handler().Register(&event.EventHandler{
+	lc.Handler().Register(&event.Handler{
 		EventId: EventMessageReceive,
 		Name:    "test.receivemsg",
 		Handler: func(event *event.Event) {

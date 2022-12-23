@@ -1,9 +1,9 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/logger"
 	"AynaLivePlayer/resource"
 	"fmt"
 	"fyne.io/fyne/v2"

@@ -1,12 +1,13 @@
 package gui
 
 import (
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"bytes"
 	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
@@ -80,7 +81,7 @@ func newFixedSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject
 	return fs
 }
 
-func newImageFromPlayerPicture(picture player.Picture) (*canvas.Image, error) {
+func newImageFromPlayerPicture(picture model.Picture) (*canvas.Image, error) {
 	if picture.Data != nil {
 		img := canvas.NewImageFromReader(bytes.NewReader(picture.Data), "cover")
 		// return an error when img is nil
@@ -103,4 +104,16 @@ func newImageFromPlayerPicture(picture player.Picture) (*canvas.Image, error) {
 		}
 		return img, nil
 	}
+}
+
+func showDialogIfError(err error) {
+	if err != nil {
+		dialog.ShowError(err, MainWindow)
+	}
+}
+
+func newCheckInit(name string, changed func(bool), checked bool) *widget.Check {
+	check := widget.NewCheck(name, changed)
+	check.SetChecked(checked)
+	return check
 }

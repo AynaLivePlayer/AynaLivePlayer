@@ -1,21 +1,20 @@
 package webinfo
 
 import (
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
+	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/event"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/logger"
-	"AynaLivePlayer/player"
-	"AynaLivePlayer/util"
+	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/aynakeya/go-mpv"
 )
 
 const MODULE_PLGUIN_WEBINFO = "plugin.webinfo"
@@ -28,12 +27,14 @@ type WebInfo struct {
 	Port    int
 	server  *WebInfoServer
 	panel   fyne.CanvasObject
+	ctr     controller.IController
 }
 
-func NewWebInfo() *WebInfo {
+func NewWebInfo(ctr controller.IController) *WebInfo {
 	return &WebInfo{
 		Enabled: true,
 		Port:    4000,
+		ctr:     ctr,
 	}
 }
 
@@ -71,78 +72,82 @@ func (w *WebInfo) Disable() error {
 }
 
 func (t *WebInfo) registerHandlers() {
-	controller.MainPlayer.EventHandler.RegisterA(player.EventPlay, "plugin.webinfo.current", func(event *event.Event) {
+	t.ctr.PlayControl().EventManager().RegisterA(model.EventPlay, "plugin.webinfo.current", func(event *event.Event) {
 		t.server.Info.Current = MediaInfo{
 			Index:    0,
-			Title:    event.Data.(player.PlayEvent).Media.Title,
-			Artist:   event.Data.(player.PlayEvent).Media.Artist,
-			Album:    event.Data.(player.PlayEvent).Media.Album,
-			Cover:    event.Data.(player.PlayEvent).Media.Cover,
-			Username: event.Data.(player.PlayEvent).Media.ToUser().Name,
+			Title:    event.Data.(model.PlayEvent).Media.Title,
+			Artist:   event.Data.(model.PlayEvent).Media.Artist,
+			Album:    event.Data.(model.PlayEvent).Media.Album,
+			Cover:    event.Data.(model.PlayEvent).Media.Cover,
+			Username: event.Data.(model.PlayEvent).Media.ToUser().Name,
 		}
 		t.server.SendInfo(
 			OutInfoC,
 			OutInfo{Current: t.server.Info.Current},
 		)
 	})
-	if controller.MainPlayer.ObserveProperty("time-pos", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			t.server.Info.CurrentTime = 0
-			return
-		}
-		ct := int(property.Data.(mpv.Node).Value.(float64))
-		if ct == t.server.Info.CurrentTime {
-			return
-		}
-		t.server.Info.CurrentTime = ct
-		t.server.SendInfo(
-			OutInfoCT,
-			OutInfo{CurrentTime: t.server.Info.CurrentTime},
-		)
-	}) != nil {
+	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropTimePos, "plugin.webinfo.timepos", func(event *event.Event) {
+			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				t.server.Info.CurrentTime = 0
+				return
+			}
+			ct := int(data.(float64))
+			if ct == t.server.Info.CurrentTime {
+				return
+			}
+			t.server.Info.CurrentTime = ct
+			t.server.SendInfo(
+				OutInfoCT,
+				OutInfo{CurrentTime: t.server.Info.CurrentTime},
+			)
+		}) != nil {
 		lg.Error("register time-pos handler failed")
 	}
-	if controller.MainPlayer.ObserveProperty("duration", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			t.server.Info.TotalTime = 0
-			return
-		}
-		t.server.Info.TotalTime = int(property.Data.(mpv.Node).Value.(float64))
-		t.server.SendInfo(
-			OutInfoTT,
-			OutInfo{TotalTime: t.server.Info.TotalTime},
-		)
-	}) != nil {
+	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropDuration, "plugin.webinfo.duration", func(event *event.Event) {
+			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				t.server.Info.TotalTime = 0
+				return
+			}
+			t.server.Info.TotalTime = int(data.(float64))
+			t.server.SendInfo(
+				OutInfoTT,
+				OutInfo{TotalTime: t.server.Info.TotalTime},
+			)
+		}) != nil {
 		lg.Error("fail to register handler for total time with property duration")
 	}
-	controller.UserPlaylist.Handler.RegisterA(player.EventPlaylistUpdate, "plugin.webinfo.playlist", func(event *event.Event) {
-		pl := make([]MediaInfo, 0)
-		e := event.Data.(player.PlaylistUpdateEvent)
-		e.Playlist.Lock.RLock()
-		for index, m := range e.Playlist.Playlist {
-			pl = append(pl, MediaInfo{
-				Index:    index,
-				Title:    m.Title,
-				Artist:   m.Artist,
-				Album:    m.Album,
-				Username: m.ToUser().Name,
-			})
-		}
-		e.Playlist.Lock.RUnlock()
-		t.server.Info.Playlist = pl
-		t.server.SendInfo(
-			OutInfoPL,
-			OutInfo{Playlist: t.server.Info.Playlist},
-		)
-	})
-	controller.CurrentLyric.Handler.RegisterA(player.EventLyricUpdate, "plugin.webinfo.lyric", func(event *event.Event) {
-		lrcLine := event.Data.(player.LyricUpdateEvent).Lyric
-		t.server.Info.Lyric = lrcLine.Lyric
-		t.server.SendInfo(
-			OutInfoL,
-			OutInfo{Lyric: t.server.Info.Lyric},
-		)
-	})
+	t.ctr.Playlists().GetCurrent().EventManager().RegisterA(
+		model.EventPlaylistUpdate, "plugin.webinfo.playlist", func(event *event.Event) {
+			pl := make([]MediaInfo, 0)
+			e := event.Data.(model.PlaylistUpdateEvent)
+			for index, m := range e.Playlist.Medias {
+				pl = append(pl, MediaInfo{
+					Index:    index,
+					Title:    m.Title,
+					Artist:   m.Artist,
+					Album:    m.Album,
+					Username: m.ToUser().Name,
+				})
+			}
+			t.server.Info.Playlist = pl
+			t.server.SendInfo(
+				OutInfoPL,
+				OutInfo{Playlist: t.server.Info.Playlist},
+			)
+		})
+	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
+		model.EventLyricUpdate, "plugin.webinfo.lyric", func(event *event.Event) {
+			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
+			t.server.Info.Lyric = lrcLine.Lyric
+			t.server.SendInfo(
+				OutInfoL,
+				OutInfo{Lyric: t.server.Info.Lyric},
+			)
+		})
 }
 
 func (w *WebInfo) getServerStatusText() string {

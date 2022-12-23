@@ -1,18 +1,17 @@
 package textinfo
 
 import (
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/event"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/logger"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	"github.com/aynakeya/go-mpv"
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -42,7 +41,7 @@ type MediaInfo struct {
 	Artist   string
 	Album    string
 	Username string
-	Cover    player.Picture
+	Cover    model.Picture
 }
 
 type OutInfo struct {
@@ -61,11 +60,12 @@ type TextInfo struct {
 	templates  []*Template
 	emptyCover []byte
 	panel      fyne.CanvasObject
+	ctr        controller.IController
 }
 
-func NewTextInfo() *TextInfo {
+func NewTextInfo(ctr controller.IController) *TextInfo {
 	b, _ := ioutil.ReadFile(config.GetAssetPath("empty.png"))
-	return &TextInfo{Rendering: true, emptyCover: b}
+	return &TextInfo{Rendering: true, emptyCover: b, ctr: ctr}
 }
 
 func (t *TextInfo) Title() string {
@@ -201,63 +201,67 @@ func (t *TextInfo) OutputCover() {
 }
 
 func (t *TextInfo) registerHandlers() {
-	controller.MainPlayer.EventHandler.RegisterA(player.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
+	t.ctr.PlayControl().EventManager().RegisterA(model.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
 		t.info.Current = MediaInfo{
 			Index:    0,
-			Title:    event.Data.(player.PlayEvent).Media.Title,
-			Artist:   event.Data.(player.PlayEvent).Media.Artist,
-			Album:    event.Data.(player.PlayEvent).Media.Album,
-			Cover:    event.Data.(player.PlayEvent).Media.Cover,
-			Username: event.Data.(player.PlayEvent).Media.ToUser().Name,
+			Title:    event.Data.(model.PlayEvent).Media.Title,
+			Artist:   event.Data.(model.PlayEvent).Media.Artist,
+			Album:    event.Data.(model.PlayEvent).Media.Album,
+			Cover:    event.Data.(model.PlayEvent).Media.Cover,
+			Username: event.Data.(model.PlayEvent).Media.ToUser().Name,
 		}
 		t.RenderTemplates()
 		t.OutputCover()
 	})
-	if controller.MainPlayer.ObserveProperty("time-pos", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			t.info.CurrentTime = 0
-			return
-		}
-		ct := int(property.Data.(mpv.Node).Value.(float64))
-		if ct == t.info.CurrentTime {
-			return
-		}
-		t.info.CurrentTime = ct
-		t.RenderTemplates()
-	}) != nil {
+	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropTimePos, "plugin.txtinfo.timepos", func(event *event.Event) {
+			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				t.info.CurrentTime = 0
+				return
+			}
+			ct := int(data.(float64))
+			if ct == t.info.CurrentTime {
+				return
+			}
+			t.info.CurrentTime = ct
+			t.RenderTemplates()
+		}) != nil {
 		l().Error("register time-pos handler failed")
 	}
-	if controller.MainPlayer.ObserveProperty("duration", func(property *mpv.EventProperty) {
-		if property.Data == nil {
-			t.info.TotalTime = 0
-			return
-		}
-		t.info.TotalTime = int(property.Data.(mpv.Node).Value.(float64))
-		t.RenderTemplates()
-	}) != nil {
+	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+		model.PlayerPropDuration, "plugin.txtinfo.duration", func(event *event.Event) {
+			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			if data == nil {
+				t.info.TotalTime = 0
+				return
+			}
+			t.info.TotalTime = int(data.(float64))
+			t.RenderTemplates()
+		}) != nil {
 		l().Error("fail to register handler for total time with property duration")
 	}
-	controller.UserPlaylist.Handler.RegisterA(player.EventPlaylistUpdate, "plugin.textinfo.playlist", func(event *event.Event) {
-		pl := make([]MediaInfo, 0)
-		e := event.Data.(player.PlaylistUpdateEvent)
-		e.Playlist.Lock.RLock()
-		for index, m := range e.Playlist.Playlist {
-			pl = append(pl, MediaInfo{
-				Index:    index,
-				Title:    m.Title,
-				Artist:   m.Artist,
-				Album:    m.Album,
-				Username: m.ToUser().Name,
-			})
-		}
-		e.Playlist.Lock.RUnlock()
-		t.info.Playlist = pl
-		t.RenderTemplates()
-	})
-	controller.CurrentLyric.Handler.RegisterA(player.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
-		lrcLine := event.Data.(player.LyricUpdateEvent).Lyric
-		t.info.Lyric = lrcLine.Lyric
-		t.RenderTemplates()
-	})
+	t.ctr.Playlists().GetCurrent().EventManager().RegisterA(
+		model.EventPlaylistUpdate, "plugin.textinfo.playlist", func(event *event.Event) {
+			pl := make([]MediaInfo, 0)
+			e := event.Data.(model.PlaylistUpdateEvent)
+			for index, m := range e.Playlist.Medias {
+				pl = append(pl, MediaInfo{
+					Index:    index,
+					Title:    m.Title,
+					Artist:   m.Artist,
+					Album:    m.Album,
+					Username: m.ToUser().Name,
+				})
+			}
+			t.info.Playlist = pl
+			t.RenderTemplates()
+		})
+	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
+		model.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
+			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
+			t.info.Lyric = lrcLine.Lyric
+			t.RenderTemplates()
+		})
 
 }

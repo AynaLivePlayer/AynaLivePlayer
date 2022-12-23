@@ -1,15 +1,16 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/event"
+	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/event"
-	"AynaLivePlayer/i18n"
-	"AynaLivePlayer/player"
+	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"sync"
 )
 
 type playlistOperationButton struct {
@@ -25,10 +26,10 @@ func (b *playlistOperationButton) Tapped(e *fyne.PointEvent) {
 func newPlaylistOperationButton() *playlistOperationButton {
 	b := &playlistOperationButton{Index: 0}
 	deleteItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.delete"), func() {
-		controller.UserPlaylist.Delete(b.Index)
+		controller.Instance.Playlists().GetCurrent().Delete(b.Index)
 	})
 	topItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.top"), func() {
-		controller.UserPlaylist.Move(b.Index, 0)
+		controller.Instance.Playlists().GetCurrent().Move(b.Index, 0)
 	})
 	m := fyne.NewMenu("", deleteItem, topItem)
 	b.menu = m
@@ -38,15 +39,14 @@ func newPlaylistOperationButton() *playlistOperationButton {
 	return b
 }
 
-type PlaylistContainer struct {
-	Playlist *player.Playlist
+var UserPlaylist = &struct {
+	Playlist *model.Playlist
 	List     *widget.List
-}
-
-var UserPlaylist = &PlaylistContainer{}
+	mux      sync.RWMutex
+}{}
 
 func createPlaylist() fyne.CanvasObject {
-	UserPlaylist.Playlist = controller.UserPlaylist
+	UserPlaylist.Playlist = controller.Instance.Playlists().GetCurrent().Model().Copy()
 	UserPlaylist.List = widget.NewList(
 		func() int {
 			//debug.PrintStack()
@@ -62,11 +62,11 @@ func createPlaylist() fyne.CanvasObject {
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				UserPlaylist.Playlist.Playlist[id].Title)
+				UserPlaylist.Playlist.Medias[id].Title)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
-				UserPlaylist.Playlist.Playlist[id].Artist)
+				UserPlaylist.Playlist.Medias[id].Artist)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Label).SetText(
-				UserPlaylist.Playlist.Playlist[id].ToUser().Name)
+				UserPlaylist.Playlist.Medias[id].ToUser().Name)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			object.(*fyne.Container).Objects[2].(*playlistOperationButton).Index = id
 		})
@@ -85,10 +85,12 @@ func createPlaylist() fyne.CanvasObject {
 }
 
 func registerPlaylistHandler() {
-	UserPlaylist.Playlist.Handler.RegisterA(player.EventPlaylistUpdate, "gui.playlist.update", func(event *event.Event) {
-		// @6 Read lock Playlist when updating free after updating.
-		UserPlaylist.Playlist.Lock.RLock()
+	controller.Instance.Playlists().GetCurrent().EventManager().RegisterA(model.EventPlaylistUpdate, "gui.playlist.update", func(event *event.Event) {
+		// Read lock Playlists when updating free after updating.
+		l().Tracef("Playlist update event received: %s", event.Data.(model.PlaylistUpdateEvent).Playlist)
+		UserPlaylist.mux.RLock()
+		UserPlaylist.Playlist = event.Data.(model.PlaylistUpdateEvent).Playlist
 		UserPlaylist.List.Refresh()
-		UserPlaylist.Playlist.Lock.RUnlock()
+		UserPlaylist.mux.RUnlock()
 	})
 }
