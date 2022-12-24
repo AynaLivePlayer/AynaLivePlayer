@@ -1,25 +1,11 @@
 package gui
 
 import (
+	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
-
-type TestConfig struct {
-}
-
-func (t *TestConfig) Title() string {
-	return "Test Title"
-}
-
-func (T *TestConfig) Description() string {
-	return "Test Description"
-}
-
-func (t *TestConfig) CreatePanel() fyne.CanvasObject {
-	return widget.NewLabel("asdf")
-}
 
 func createConfigLayout() fyne.CanvasObject {
 	// initialize config panels
@@ -32,7 +18,7 @@ func createConfigLayout() fyne.CanvasObject {
 			return len(ConfigList)
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("AAAAAAAAAAAAAAAA")
+			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*widget.Label).SetText(ConfigList[id].Title())
@@ -44,16 +30,11 @@ func createConfigLayout() fyne.CanvasObject {
 				seg.Style.Alignment = fyne.TextAlignCenter
 			}
 		}
-		a := container.NewVScroll(ConfigList[id].CreatePanel())
 		content.Objects = []fyne.CanvasObject{
-			container.NewBorder(container.NewVBox(desc, widget.NewSeparator()), nil, nil, nil,
-				a),
+			container.NewVScroll(container.NewVBox(desc, widget.NewSeparator(), ConfigList[id].CreatePanel())),
 		}
-
 		content.Refresh()
 	}
-	return container.NewBorder(
-		nil, nil,
-		container.NewHBox(entryList, widget.NewSeparator()), nil,
-		content)
+
+	return component.NewFixedSplitContainer(entryList, content, true, 0.23)
 }

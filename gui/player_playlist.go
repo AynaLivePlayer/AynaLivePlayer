@@ -49,7 +49,6 @@ func createPlaylist() fyne.CanvasObject {
 	UserPlaylist.Playlist = controller.Instance.Playlists().GetCurrent().Model().Copy()
 	UserPlaylist.List = widget.NewList(
 		func() int {
-			//debug.PrintStack()
 			//todo: @4
 			return UserPlaylist.Playlist.Size()
 		},

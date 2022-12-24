@@ -240,6 +240,7 @@ This styled row should also wrap as expected, but only *when required*.
 	grid := makeTextGrid()
 	return container.NewBorder(fixed, grid, nil, nil,
 		container.NewGridWithRows(2, rich, entryLoremIpsum))
+
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {

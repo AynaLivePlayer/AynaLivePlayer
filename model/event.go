@@ -34,7 +34,7 @@ type PlayEvent struct {
 type LyricUpdateEvent struct {
 	Lyrics *Lyric
 	Time   float64
-	Lyric  *LyricLine
+	Lyric  *LyricContext
 }
 
 type LyricReloadEvent struct {

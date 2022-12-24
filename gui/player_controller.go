@@ -4,9 +4,11 @@ import (
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/common/util"
-	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
+	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/model"
+	"AynaLivePlayer/resource"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -22,7 +24,7 @@ type PlayControllerContainer struct {
 	ButtonPrev    *widget.Button
 	ButtonSwitch  *widget.Button
 	ButtonNext    *widget.Button
-	Progress      *widget.Slider
+	Progress      *component.SliderPlus
 	Volume        *widget.Slider
 	ButtonLrc     *widget.Button
 	LrcWindowOpen bool
@@ -31,47 +33,11 @@ type PlayControllerContainer struct {
 }
 
 func (p *PlayControllerContainer) SetDefaultCover() {
-	p.Cover.Resource = ResEmptyImage
+	p.Cover.Resource = resource.ImageEmpty
 	p.Cover.Refresh()
 }
 
 var PlayController = &PlayControllerContainer{}
-
-func createPlayController() fyne.CanvasObject {
-	PlayController.Cover = canvas.NewImageFromFile(config.GetAssetPath("empty.png"))
-	PlayController.Cover.SetMinSize(fyne.NewSize(128, 128))
-	PlayController.Cover.FillMode = canvas.ImageFillContain
-
-	PlayController.ButtonPrev = widget.NewButtonWithIcon("", theme.MediaSkipPreviousIcon(), func() {})
-	PlayController.ButtonSwitch = widget.NewButtonWithIcon("", theme.MediaPlayIcon(), func() {})
-	PlayController.ButtonNext = widget.NewButtonWithIcon("", theme.MediaSkipNextIcon(), func() {})
-
-	buttonsBox := container.NewCenter(
-		container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext))
-
-	PlayController.Progress = widget.NewSlider(0, 1000)
-	PlayController.CurrentTime = widget.NewLabel("0:00")
-	PlayController.TotalTime = widget.NewLabel("0:00")
-	progressItem := container.NewBorder(nil, nil, PlayController.CurrentTime, PlayController.TotalTime, PlayController.Progress)
-
-	PlayController.Title = widget.NewLabel("Title")
-	PlayController.Artist = widget.NewLabel("Artist")
-	PlayController.Username = widget.NewLabel("Username")
-
-	playInfo := container.NewVBox(PlayController.Title, PlayController.Artist, PlayController.Username)
-
-	PlayController.Volume = widget.NewSlider(0, 100)
-	volumeIcon := widget.NewIcon(theme.VolumeMuteIcon())
-	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
-
-	volumeControl := container.NewBorder(nil, nil, container.NewHBox(widget.NewLabel(" "), volumeIcon), nil,
-		container.NewGridWithColumns(3, container.NewMax(PlayController.Volume), PlayController.ButtonLrc))
-
-	registerPlayControllerHandler()
-
-	return container.NewBorder(nil, nil, container.NewHBox(PlayController.Cover, playInfo, widget.NewSeparator()), nil,
-		container.NewVBox(buttonsBox, progressItem, volumeControl))
-}
 
 func registerPlayControllerHandler() {
 	PlayController.ButtonPrev.OnTapped = func() {
@@ -109,6 +75,9 @@ func registerPlayControllerHandler() {
 
 	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropPercentPos, "gui.play_controller.percent_pos", func(ev *event.Event) {
+			if PlayController.Progress.Dragging {
+				return
+			}
 			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.Progress.Value = 0
@@ -140,7 +109,7 @@ func registerPlayControllerHandler() {
 	}
 
 	PlayController.Progress.Max = 0
-	PlayController.Progress.OnChanged = func(f float64) {
+	PlayController.Progress.OnDragEnd = func(f float64) {
 		controller.Instance.PlayControl().Seek(f/10, false)
 	}
 
@@ -202,7 +171,7 @@ func registerPlayControllerHandler() {
 			PlayController.SetDefaultCover()
 		} else {
 			go func() {
-				picture, err := newImageFromPlayerPicture(media.Cover)
+				picture, err := gutil.NewImageFromPlayerPicture(media.Cover)
 				if err != nil {
 					l().Warn("fail to load parse cover url", media.Cover)
 					PlayController.SetDefaultCover()
@@ -217,7 +186,7 @@ func registerPlayControllerHandler() {
 }
 
 func createPlayControllerV2() fyne.CanvasObject {
-	PlayController.Cover = canvas.NewImageFromResource(ResEmptyImage)
+	PlayController.Cover = canvas.NewImageFromResource(resource.ImageEmpty)
 	PlayController.Cover.SetMinSize(fyne.NewSize(128, 128))
 	PlayController.Cover.FillMode = canvas.ImageFillContain
 
@@ -239,7 +208,7 @@ func createPlayControllerV2() fyne.CanvasObject {
 				PlayController.Volume)),
 	))
 
-	PlayController.Progress = widget.NewSlider(0, 1000)
+	PlayController.Progress = component.NewSliderPlus(0, 1000)
 	PlayController.CurrentTime = widget.NewLabel("0:00")
 	PlayController.TotalTime = widget.NewLabel("0:00")
 	progressItem := container.NewBorder(nil, nil,

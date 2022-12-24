@@ -3,33 +3,34 @@ package gui
 import (
 	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/controller"
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
 var SearchBar = &struct {
-	Input     *widget.Entry
-	Button    *widget.Button
-	UseSource *widget.CheckGroup
-	Items     []*model.Media
+	Input     *component.Entry
+	Button    *component.AsyncButton
+	UseSource *widget.Select
 }{}
 
 func createSearchBar() fyne.CanvasObject {
-	SearchBar.Input = widget.NewEntry()
+	SearchBar.Input = component.NewEntry()
 	SearchBar.Input.SetPlaceHolder(i18n.T("gui.search.placeholder"))
-	SearchBar.Button = widget.NewButton(i18n.T("gui.search.search"), nil)
-	SearchBar.Button.OnTapped = createAsyncOnTapped(SearchBar.Button, func() {
+	SearchBar.Input.OnKeyUp = func(key *fyne.KeyEvent) {
+		if key.Name == fyne.KeyReturn {
+			SearchBar.Button.OnTapped()
+		}
+	}
+	SearchBar.Button = component.NewAsyncButton(i18n.T("gui.search.search"), func() {
 		keyword := SearchBar.Input.Text
-		s := make([]string, len(SearchBar.UseSource.Selected))
-
-		copy(s, SearchBar.UseSource.Selected)
-		items := make([]*model.Media, 0)
-		for _, p := range s {
-			if r, err := controller.Instance.Provider().SearchWithProvider(keyword, p); err == nil {
-				items = append(items, r...)
-			}
+		pr := SearchBar.UseSource.Selected
+		l().Debugf("Search keyword: %s, provider: %s", keyword, pr)
+		items, err := controller.Instance.Provider().SearchWithProvider(keyword, pr)
+		if err != nil {
+			dialog.ShowError(err, MainWindow)
 		}
 		controller.ApplyUser(items, controller.SystemUser)
 		SearchResult.Items = items
@@ -38,14 +39,14 @@ func createSearchBar() fyne.CanvasObject {
 	s := make([]string, len(controller.Instance.Provider().GetPriority()))
 	copy(s, controller.Instance.Provider().GetPriority())
 
-	SearchBar.UseSource = widget.NewCheckGroup(s, nil)
-	SearchBar.UseSource.Horizontal = true
-	SearchBar.UseSource.SetSelected(s)
+	SearchBar.UseSource = widget.NewSelect(s, func(s string) {})
+	if len(s) > 0 {
+		SearchBar.UseSource.SetSelected(s[0])
+	}
 	searchInput := container.NewBorder(
 		nil, nil, widget.NewLabel(i18n.T("gui.search.search")), SearchBar.Button,
-		SearchBar.Input)
+		container.NewBorder(nil, nil, SearchBar.UseSource, nil, SearchBar.Input))
 	return container.NewVBox(
 		searchInput,
-		container.NewHBox(widget.NewLabel(i18n.T("gui.search.filter")), SearchBar.UseSource),
 		widget.NewSeparator())
 }

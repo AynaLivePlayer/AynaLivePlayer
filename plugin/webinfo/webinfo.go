@@ -8,6 +8,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -142,7 +143,7 @@ func (t *WebInfo) registerHandlers() {
 	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
 		model.EventLyricUpdate, "plugin.webinfo.lyric", func(event *event.Event) {
 			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
-			t.server.Info.Lyric = lrcLine.Lyric
+			t.server.Info.Lyric = lrcLine.Now.Lyric
 			t.server.SendInfo(
 				OutInfoL,
 				OutInfo{Lyric: t.server.Info.Lyric},
@@ -185,7 +186,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.webinfo.server_preview")),
 		serverUrl,
 	)
-	stopBtn := gui.NewAsyncButtonWithIcon(
+	stopBtn := component.NewAsyncButtonWithIcon(
 		i18n.T("plugin.webinfo.server_control.stop"),
 		theme.MediaStopIcon(),
 		func() {
@@ -201,7 +202,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			statusText.SetText(w.getServerStatusText())
 		},
 	)
-	startBtn := gui.NewAsyncButtonWithIcon(
+	startBtn := component.NewAsyncButtonWithIcon(
 		i18n.T("plugin.webinfo.server_control.start"),
 		theme.MediaPlayIcon(),
 		func() {
@@ -216,7 +217,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			_ = serverUrl.SetURLFromString(w.getServerUrl())
 		},
 	)
-	restartBtn := gui.NewAsyncButtonWithIcon(
+	restartBtn := component.NewAsyncButtonWithIcon(
 		i18n.T("plugin.webinfo.server_control.restart"),
 		theme.MediaReplayIcon(),
 		func() {

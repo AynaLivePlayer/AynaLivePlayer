@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/model"
 	"AynaLivePlayer/player"
-	"AynaLivePlayer/provider"
+	"AynaLivePlayer/repo/provider"
 )
 
 type PlayController struct {

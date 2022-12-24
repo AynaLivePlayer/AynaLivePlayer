@@ -260,7 +260,7 @@ func (t *TextInfo) registerHandlers() {
 	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
 		model.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
 			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
-			t.info.Lyric = lrcLine.Lyric
+			t.info.Lyric = lrcLine.Now.Lyric
 			t.RenderTemplates()
 		})
 

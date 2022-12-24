@@ -1,5 +1,13 @@
 NAME = AynaLivePlayer
 
+ifeq ($(OS),Windows_NT)
+    RM = del /Q /F
+    RRM = rmdir /Q /S
+else
+    RM = rm -f
+    RRM = rm -rf
+endif
+
 ifeq ($(OS), Windows_NT)
 	EXECUTABLE=$(NAME).exe
 else
@@ -13,14 +21,15 @@ run:
 	go run ./app/gui/main.go
 
 clear:
-ifeq ($(OS), Windows_NT)
-	-DEL $(EXECUTABLE) config.ini log.txt playlists.json liverooms.json /s /q
-else
-	rm config.ini log.txt playlists.txt liverooms.json
-endif
+	$(RM) config.ini log.txt playlists.txt liverooms.json
 
+bundle:
+	fyne bundle --name resImageEmpty --package resource ./assets/empty.png >  ./resource/bundle.go
+	fyne bundle --append --name resImageIcon --package resource ./assets/icon.jpg >> ./resource/bundle.go
+	fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh.ttc >> ./resource/bundle.go
+	fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd.ttc >> ./resource/bundle.go
 
-release: ${EXECUTABLE}
+release: ${EXECUTABLE} bundle
 	-mkdir release
 ifeq ($(OS), Windows_NT)
 	COPY .\$(EXECUTABLE) .\release\$(EXECUTABLE)
@@ -39,11 +48,7 @@ else
 endif
 
 clean:
-ifeq ($(OS), Windows_NT)
-	-DEL $(EXECUTABLE) /s /q
-	-rmdir .\release /s /q
-else
-	rm -r $(EXECUTABLE) ./release
-endif
+	$(RM) $(EXECUTABLE) config.ini log.txt playlists.txt liverooms.json
+	$(RRM) release
 
 .PHONY: ${EXECUTABLE}

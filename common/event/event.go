@@ -21,7 +21,7 @@ type Handler struct {
 }
 
 type Manager struct {
-	handlers   map[string]*Handler
+	handlers   map[EventId]map[string]*Handler
 	queue      chan func()
 	stopSig    chan int
 	queueSize  int
@@ -31,7 +31,7 @@ type Manager struct {
 
 func NewManger(queueSize int, workerSize int) *Manager {
 	manager := &Manager{
-		handlers:   make(map[string]*Handler),
+		handlers:   make(map[EventId]map[string]*Handler),
 		queue:      make(chan func(), queueSize),
 		stopSig:    make(chan int, workerSize),
 		queueSize:  queueSize,
@@ -54,7 +54,7 @@ func NewManger(queueSize int, workerSize int) *Manager {
 
 func (h *Manager) NewChildManager() *Manager {
 	return &Manager{
-		handlers:   make(map[string]*Handler),
+		handlers:   make(map[EventId]map[string]*Handler),
 		queue:      h.queue,
 		stopSig:    h.stopSig,
 		queueSize:  h.queueSize,
@@ -71,7 +71,12 @@ func (h *Manager) Stop() {
 func (h *Manager) Register(handler *Handler) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	h.handlers[handler.Name] = handler
+	m, ok := h.handlers[handler.EventId]
+	if !ok {
+		m = make(map[string]*Handler)
+		h.handlers[handler.EventId] = m
+	}
+	m[handler.Name] = handler
 }
 
 func (h *Manager) RegisterA(id EventId, name string, handler HandlerFunc) {
@@ -85,24 +90,30 @@ func (h *Manager) RegisterA(id EventId, name string, handler HandlerFunc) {
 func (h *Manager) UnregisterAll() {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	h.handlers = make(map[string]*Handler)
+	h.handlers = make(map[EventId]map[string]*Handler)
 }
 
 func (h *Manager) Unregister(name string) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	delete(h.handlers, name)
+	for _, m := range h.handlers {
+		if _, ok := m[name]; ok {
+			delete(m, name)
+		}
+	}
 }
 
 func (h *Manager) Call(event *Event) {
 	h.lock.RLock()
-	defer h.lock.RUnlock()
-	for _, eh := range h.handlers {
-		if eh.EventId == event.Id {
-			handler := eh.Handler
-			h.queue <- func() {
-				handler(event)
-			}
+	handlers, ok := h.handlers[event.Id]
+	h.lock.RUnlock()
+	if !ok {
+		return
+	}
+	for _, eh := range handlers {
+		handler := eh.Handler
+		h.queue <- func() {
+			handler(event)
 		}
 	}
 }

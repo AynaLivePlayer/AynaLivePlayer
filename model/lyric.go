@@ -16,9 +16,11 @@ type LyricLine struct {
 }
 
 type LyricContext struct {
-	Current *LyricLine
-	Prev    []*LyricLine
-	Next    []*LyricLine
+	Now   *LyricLine
+	Index int
+	Total int
+	Prev  []*LyricLine
+	Next  []*LyricLine
 }
 
 type Lyric struct {
@@ -55,30 +57,58 @@ func LoadLyric(lyric string) *Lyric {
 	return &Lyric{Lyrics: lrcs}
 }
 
-func (l *Lyric) Find(time float64) *LyricLine {
+func (l *Lyric) findIndexV1(time float64) int {
 	for i := 0; i < len(l.Lyrics)-1; i++ {
 		if l.Lyrics[i].Time <= time && time < l.Lyrics[i+1].Time {
-			return l.Lyrics[i]
+			return i
 		}
 	}
-	return nil
+	return -1
+}
+
+func (l *Lyric) findIndex(time float64) int {
+	start := 0
+	end := len(l.Lyrics) - 1
+	mid := (start + end) / 2
+	for start < end {
+		if l.Lyrics[mid].Time <= time && time < l.Lyrics[mid+1].Time {
+			return mid
+		}
+		if l.Lyrics[mid].Time > time {
+			end = mid
+		} else {
+			start = mid
+		}
+		mid = (start + end) / 2
+	}
+	return -1
+}
+
+func (l *Lyric) Find(time float64) *LyricLine {
+	idx := l.findIndex(time)
+	if idx == -1 {
+		return nil
+	}
+	return l.Lyrics[idx]
 }
 
 func (l *Lyric) FindContext(time float64, prev int, next int) *LyricContext {
-	for i := 0; i < len(l.Lyrics)-1; i++ {
-		if l.Lyrics[i].Time <= time && time < l.Lyrics[i+1].Time {
-			if (i + prev) < 0 {
-				prev = -i
-			}
-			if (i + 1 + next) > len(l.Lyrics) {
-				next = len(l.Lyrics) - i - 1
-			}
-			return &LyricContext{
-				Current: l.Lyrics[i],
-				Prev:    l.Lyrics[i+prev : i],
-				Next:    l.Lyrics[i+1 : i+1+next],
-			}
-		}
+	prev = -prev
+	idx := l.findIndex(time)
+	if idx == -1 {
+		return nil
 	}
-	return nil
+	if (idx + prev) < 0 {
+		prev = -idx
+	}
+	if (idx + 1 + next) > len(l.Lyrics) {
+		next = len(l.Lyrics) - idx - 1
+	}
+	return &LyricContext{
+		Now:   l.Lyrics[idx],
+		Index: idx,
+		Total: len(l.Lyrics),
+		Prev:  l.Lyrics[idx+prev : idx],
+		Next:  l.Lyrics[idx+1 : idx+1+next],
+	}
 }

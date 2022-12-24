@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/controller"
 	"AynaLivePlayer/model"
-	"AynaLivePlayer/provider"
+	"AynaLivePlayer/repo/provider"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -27,7 +27,7 @@ type PlaylistController struct {
 func NewPlaylistController(
 	provider controller.IProviderController) controller.IPlaylistController {
 	pc := &PlaylistController{
-		PlaylistPath:          "playlist.json",
+		PlaylistPath:          "playlists.json",
 		provider:              provider,
 		History:               NewPlaylist("history"),
 		Default:               NewPlaylist("default"),

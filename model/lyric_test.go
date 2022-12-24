@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/magiconair/properties/assert"
 	"testing"
 )
 
@@ -19,5 +20,12 @@ func TestLyricFind(t *testing.T) {
 	fmt.Println(lryic.Find(90.4))
 	for _, l := range lryic.FindContext(90.4, -2, 2).Next {
 		fmt.Println(l)
+	}
+}
+
+func TestLyricFindV2(t *testing.T) {
+	lryic := LoadLyric(testLyric)
+	for i := 0.0; i < 170; i += 0.01 {
+		assert.Equal(t, lryic.FindV1(i), lryic.Find(i))
 	}
 }

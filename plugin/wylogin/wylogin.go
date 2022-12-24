@@ -5,7 +5,9 @@ import (
 	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/config"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/provider"
+	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/repo/provider"
+	"AynaLivePlayer/resource"
 	"bytes"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -90,7 +92,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.neteaselogin.current_user")),
 		currentUser)
 
-	refreshBtn := gui.NewAsyncButton(
+	refreshBtn := component.NewAsyncButton(
 		i18n.T("plugin.neteaselogin.refresh"),
 		func() {
 			provider.NeteaseAPI.UpdateStatus()
@@ -102,7 +104,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 
 		},
 	)
-	logoutBtn := gui.NewAsyncButton(
+	logoutBtn := component.NewAsyncButton(
 		i18n.T("plugin.neteaselogin.logout"),
 		func() {
 			provider.NeteaseAPI.Logout()
@@ -110,13 +112,13 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 		},
 	)
 	controlBtns := container.NewHBox(refreshBtn, logoutBtn)
-	qrcodeImg := canvas.NewImageFromResource(gui.ResEmptyImage)
+	qrcodeImg := canvas.NewImageFromResource(resource.ImageEmpty)
 	qrcodeImg.SetMinSize(fyne.NewSize(200, 200))
 	qrcodeImg.FillMode = canvas.ImageFillContain
 	var key string
 	qrStatus := widget.NewLabel("AAAAAAAA")
 	qrStatus.SetText("")
-	newQrBtn := gui.NewAsyncButton(
+	newQrBtn := component.NewAsyncButton(
 		i18n.T("plugin.neteaselogin.qr.new"),
 		func() {
 			qrStatus.SetText("")
@@ -138,7 +140,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 			qrcodeImg.Refresh()
 		},
 	)
-	finishQrBtn := gui.NewAsyncButton(
+	finishQrBtn := component.NewAsyncButton(
 		i18n.T("plugin.neteaselogin.qr.finish"),
 		func() {
 			if key == "" {
@@ -149,7 +151,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 			qrStatus.SetText(msg)
 			if ok {
 				key = ""
-				qrcodeImg.Resource = gui.ResEmptyImage
+				qrcodeImg.Resource = resource.ImageEmpty
 				qrcodeImg.Refresh()
 			}
 		},

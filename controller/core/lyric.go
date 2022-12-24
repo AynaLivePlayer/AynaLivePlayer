@@ -37,14 +37,14 @@ func (l *LyricLoader) Reload(lyric string) {
 }
 
 func (l *LyricLoader) Update(time float64) {
-	lrc := l.Lyric.Find(time)
+	lrc := l.Lyric.FindContext(time, 1, 3)
 	if lrc == nil {
 		return
 	}
-	if l.prev == lrc.Time {
+	if l.prev == lrc.Now.Time {
 		return
 	}
-	l.prev = lrc.Time
+	l.prev = lrc.Now.Time
 	l.Handler.CallA(
 		model.EventLyricUpdate,
 		model.LyricUpdateEvent{
