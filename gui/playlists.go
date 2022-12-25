@@ -137,7 +137,7 @@ func createPlaylistMedias() fyne.CanvasObject {
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			m.User = controller.SystemUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				controller.Instance.PlayControl().Play(m)
+				showDialogIfError(controller.Instance.PlayControl().Play(m))
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
 				controller.Instance.Playlists().GetCurrent().Push(m)

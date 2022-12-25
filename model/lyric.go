@@ -32,6 +32,9 @@ func LoadLyric(lyric string) *Lyric {
 	times := make([]float64, 0)
 	for _, line := range strings.Split(lyric, "\n") {
 		lrc := timeTagRegex.ReplaceAllString(line, "")
+		if len(lrc) > 0 && lrc[len(lrc)-1] == '\r' {
+			lrc = lrc[:len(lrc)-1]
+		}
 		for _, time := range timeTagRegex.FindAllString(line, -1) {
 			ts := strings.Split(time[1:len(time)-1], ":")
 			t := cast.ToFloat64(ts[0])*60 + cast.ToFloat64(ts[1])

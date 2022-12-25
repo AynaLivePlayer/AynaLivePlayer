@@ -10,14 +10,16 @@ endif
 
 ifeq ($(OS), Windows_NT)
 	EXECUTABLE=$(NAME).exe
+	SCRIPTPATH = .\assets\scripts\windows
 else
 	EXECUTABLE=$(NAME)
+	SCRIPTPATH = ./assets/scripts/linux
 endif
 
-${EXECUTABLE}:
+gui: bundle
 	go build -o $(EXECUTABLE) -ldflags -H=windowsgui ./app/gui/main.go
 
-run:
+run: bundle
 	go run ./app/gui/main.go
 
 clear:
@@ -29,20 +31,24 @@ bundle:
 	fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh.ttc >> ./resource/bundle.go
 	fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd.ttc >> ./resource/bundle.go
 
-release: ${EXECUTABLE} bundle
+release: gui
 	-mkdir release
 ifeq ($(OS), Windows_NT)
 	COPY .\$(EXECUTABLE) .\release\$(EXECUTABLE)
 	COPY .\webtemplates.json .\release\webtemplates.json
+	COPY .\assets\translation.json .\release\assets\translation.json
 	COPY LICENSE.md .\release\LICENSE.md
-	XCOPY  .\assets .\release\assets /s /e /i /y /q
+	XCOPY  .\assets\scripts\windows\* .\release\ /k /i /y /q
+	XCOPY  .\assets\webinfo .\release\assets\webinfo /s /e /i /y /q
 	XCOPY  .\music .\release\music /s /e /i /y /q
 	XCOPY  .\template .\release\template /s /e /i /y /q
 else
 	cp ./$(EXECUTABLE) ./release/$(EXECUTABLE)
 	cp ./webtemplates.json ./release/webtemplates.json
+	cp ./assets/translation.json ./release/assets/translation.json
 	cp LICENSE.md ./release/LICENSE.md
-	cp -r ./assets ./release/assest
+	cp ./assets/scripts/linux/* ./release/
+	cp -r ./assets/webinfo ./release/assest/webinfo
 	cp -r ./music ./release/music
 	cp -r ./template ./release/template
 endif

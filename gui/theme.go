@@ -13,7 +13,6 @@ var _ fyne.Theme = (*myTheme)(nil)
 
 // return bundled font resource
 func (*myTheme) Font(s fyne.TextStyle) fyne.Resource {
-	l().Debugf("12313123")
 	if s.Monospace {
 		return resource.FontMSYaHei
 	}

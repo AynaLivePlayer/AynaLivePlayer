@@ -20,6 +20,20 @@ func TestNetease_Search(t *testing.T) {
 	fmt.Println(media.Url)
 }
 
+func TestNetease_Search2(t *testing.T) {
+	var api MediaProvider = NeteaseAPI
+	result, err := api.Search("出山")
+	if err != nil {
+		return
+	}
+	t.Log(result)
+	media := result[0]
+	t.Log(media)
+	err = api.UpdateMediaUrl(media)
+	t.Log(err)
+	t.Log(media.Url)
+}
+
 func TestNetease_GetMusicMeta(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
 
@@ -59,7 +73,7 @@ func TestNetease_GetMusic(t *testing.T) {
 
 func TestNetease_GetPlaylist(t *testing.T) {
 	var api MediaProvider = NeteaseAPI
-	playlist, err := api.GetPlaylist(model.Meta{
+	playlist, err := api.GetPlaylist(&model.Meta{
 		Name: api.GetName(),
 		//Id:   "2520739691",
 		Id: "2382819181",

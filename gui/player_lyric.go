@@ -12,11 +12,13 @@ import (
 func createLyricObj(lyric *model.Lyric) []fyne.CanvasObject {
 	lrcs := make([]fyne.CanvasObject, len(lyric.Lyrics))
 	for i := 0; i < len(lrcs); i++ {
-		l := widget.NewLabelWithStyle(
+		lr := widget.NewLabelWithStyle(
 			lyric.Lyrics[i].Lyric,
 			fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
-		l.Wrapping = fyne.TextWrapWord
-		lrcs[i] = l
+		//lr.Wrapping = fyne.TextWrapWord
+		// todo fix fyne bug
+		lr.Wrapping = fyne.TextWrapBreak
+		lrcs[i] = lr
 	}
 	return lrcs
 }
@@ -41,6 +43,10 @@ func createLyricWindow() fyne.Window {
 	controller.Instance.PlayControl().GetLyric().EventManager().RegisterA(
 		model.EventLyricUpdate, "player.lyric.current_lyric", func(event *event.Event) {
 			e := event.Data.(model.LyricUpdateEvent)
+			if prevIndex >= len(fullLrc.Objects) || e.Lyric.Index >= len(fullLrc.Objects) {
+				// fix race condition
+				return
+			}
 			if e.Lyric == nil {
 				currentLrc.SetText("")
 				return

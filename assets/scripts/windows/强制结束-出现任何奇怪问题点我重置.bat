@@ -1,0 +1,1 @@
+taskkill /IM "AynaLivePlayer.exe" /F

@@ -71,7 +71,7 @@ func TestKuwo_UpdateMediaLyric(t *testing.T) {
 
 func TestKuwo_GetPlaylist(t *testing.T) {
 	var api MediaProvider = KuwoAPI
-	playlist, err := api.GetPlaylist(model.Meta{
+	playlist, err := api.GetPlaylist(&model.Meta{
 		Name: api.GetName(),
 		//Id:   "1082685104",
 		Id: "2959147566",

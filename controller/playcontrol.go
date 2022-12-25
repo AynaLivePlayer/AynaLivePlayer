@@ -11,7 +11,7 @@ type IPlayController interface {
 	GetPlaying() *model.Media
 	GetPlayer() player.IPlayer
 	PlayNext()
-	Play(media *model.Media)
+	Play(media *model.Media) error
 	Add(keyword string, user interface{})
 	AddWithProvider(keyword string, provider string, user interface{})
 	Seek(position float64, absolute bool)

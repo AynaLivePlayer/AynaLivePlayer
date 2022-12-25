@@ -114,7 +114,7 @@ func (n *Netease) FormatPlaylistUrl(uri string) string {
 
 func (n *Netease) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 	result, err := neteaseApi.GetPlaylistDetail(
-		n.ReqData, util.StringToInt(playlist.Id))
+		n.ReqData, util.Atoi(playlist.Id))
 	if err != nil || result.Code != 200 {
 		return nil, ErrorExternalApi
 	}
@@ -197,7 +197,7 @@ func (n *Netease) Search(keyword string) ([]*model.Media, error) {
 func (n *Netease) UpdateMedia(media *model.Media) error {
 	result, err := neteaseApi.GetSongDetail(
 		n.ReqData,
-		[]int{util.StringToInt(media.Meta.(model.Meta).Id)})
+		[]int{util.Atoi(media.Meta.(model.Meta).Id)})
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}
@@ -214,7 +214,7 @@ func (n *Netease) UpdateMedia(media *model.Media) error {
 func (n *Netease) UpdateMediaUrl(media *model.Media) error {
 	result, err := neteaseApi.GetSongURL(
 		n.ReqData,
-		neteaseApi.SongURLConfig{Ids: []int{util.StringToInt(media.Meta.(model.Meta).Id)}})
+		neteaseApi.SongURLConfig{Ids: []int{util.Atoi(media.Meta.(model.Meta).Id)}})
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}
@@ -229,7 +229,7 @@ func (n *Netease) UpdateMediaUrl(media *model.Media) error {
 }
 
 func (n *Netease) UpdateMediaLyric(media *model.Media) error {
-	result, err := neteaseApi.GetSongLyric(n.ReqData, util.StringToInt(media.Meta.(model.Meta).Id))
+	result, err := neteaseApi.GetSongLyric(n.ReqData, util.Atoi(media.Meta.(model.Meta).Id))
 	if err != nil || result.Code != 200 {
 		return ErrorExternalApi
 	}

@@ -9,10 +9,11 @@ import (
 
 type FixedSplit struct {
 	widget.BaseWidget
-	Offset     float64
-	Horizontal bool
-	Leading    fyne.CanvasObject
-	Trailing   fyne.CanvasObject
+	Offset             float64
+	Horizontal         bool
+	SeparatorThickness float32
+	Leading            fyne.CanvasObject
+	Trailing           fyne.CanvasObject
 }
 
 func NewFixedHSplitContainer(leading, trailing fyne.CanvasObject, offset float64) *FixedSplit {
@@ -26,10 +27,11 @@ func NewFixedVSplitContainer(top, bottom fyne.CanvasObject, offset float64) *Fix
 
 func NewFixedSplitContainer(leading, trailing fyne.CanvasObject, horizontal bool, offset float64) *FixedSplit {
 	s := &FixedSplit{
-		Offset:     offset, // Sensible default, can be overridden with SetOffset
-		Horizontal: horizontal,
-		Leading:    leading,
-		Trailing:   trailing,
+		Offset:             offset, // Sensible default, can be overridden with SetOffset
+		SeparatorThickness: theme.SeparatorThicknessSize(),
+		Horizontal:         horizontal,
+		Leading:            leading,
+		Trailing:           trailing,
 	}
 	s.BaseWidget.ExtendBaseWidget(s)
 	return s
@@ -53,6 +55,14 @@ func (s *FixedSplit) SetOffset(offset float64) {
 	s.Refresh()
 }
 
+func (s *FixedSplit) SetSepThickness(thickness float32) {
+	if s.SeparatorThickness == thickness {
+		return
+	}
+	s.SeparatorThickness = thickness
+	s.Refresh()
+}
+
 type fixedSplitContainerRenderer struct {
 	split   *FixedSplit
 	divider *widget.Separator
@@ -72,7 +82,7 @@ func (r *fixedSplitContainerRenderer) Layout(size fyne.Size) {
 		leadingSize.Width = lw
 		leadingSize.Height = size.Height
 		dividerPos.X = lw
-		dividerSize.Width = theme.SeparatorThicknessSize()
+		dividerSize.Width = r.split.SeparatorThickness
 		dividerSize.Height = size.Height
 		trailingPos.X = lw + dividerSize.Width
 		trailingSize.Width = tw
@@ -84,7 +94,7 @@ func (r *fixedSplitContainerRenderer) Layout(size fyne.Size) {
 		leadingSize.Height = lh
 		dividerPos.Y = lh
 		dividerSize.Width = size.Width
-		dividerSize.Height = theme.SeparatorThicknessSize()
+		dividerSize.Height = r.split.SeparatorThickness
 		trailingPos.Y = lh + dividerSize.Height
 		trailingSize.Width = size.Width
 		trailingSize.Height = th
@@ -129,7 +139,7 @@ func (r *fixedSplitContainerRenderer) Refresh() {
 }
 
 func (r *fixedSplitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) (float32, float32) {
-	available := float64(total - theme.SeparatorThicknessSize())
+	available := float64(total - r.split.SeparatorThickness)
 	if available <= 0 {
 		return 0, 0
 	}

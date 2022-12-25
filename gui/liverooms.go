@@ -30,7 +30,7 @@ func createRoomSelector() fyne.CanvasObject {
 			return controller.Instance.LiveRooms().Size()
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("")
+			return widget.NewLabel("AAAAAAAAAAAAAAAA")
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*widget.Label).SetText(

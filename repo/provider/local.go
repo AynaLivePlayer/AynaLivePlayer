@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/model"
 	"os"
 	"sort"
@@ -90,6 +91,22 @@ func (l *Local) GetPlaylist(playlist *model.Meta) ([]*model.Media, error) {
 }
 
 func (l *Local) Search(keyword string) ([]*model.Media, error) {
+	allMedias := make([]*model.Media, 0)
+	for _, p := range l.Playlists {
+		for _, m := range p.Medias {
+			allMedias = append(allMedias, m)
+		}
+	}
+	MediaSort(keyword, allMedias)
+	c := util.Min(len(allMedias), 32)
+	medias := make([]*model.Media, c)
+	for i := 0; i < c; i++ {
+		medias[i] = allMedias[i].Copy()
+	}
+	return medias, nil
+}
+
+func (l *Local) SearchV1(keyword string) ([]*model.Media, error) {
 	result := make([]struct {
 		M *model.Media
 		N int

@@ -9,6 +9,7 @@ import (
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/model"
 	"AynaLivePlayer/resource"
+	"context"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -21,6 +22,7 @@ type PlayControllerContainer struct {
 	Artist        *widget.Label
 	Username      *widget.Label
 	Cover         *canvas.Image
+	coverLoader   context.CancelFunc
 	ButtonPrev    *widget.Button
 	ButtonSwitch  *widget.Button
 	ButtonNext    *widget.Button
@@ -170,15 +172,33 @@ func registerPlayControllerHandler() {
 		if !media.Cover.Exists() {
 			PlayController.SetDefaultCover()
 		} else {
+			if PlayController.coverLoader != nil {
+				PlayController.coverLoader()
+			}
+			var ctx context.Context
+			ctx, PlayController.coverLoader = context.WithCancel(context.Background())
 			go func() {
-				picture, err := gutil.NewImageFromPlayerPicture(media.Cover)
-				if err != nil {
-					l().Warn("fail to load parse cover url", media.Cover)
-					PlayController.SetDefaultCover()
+				ch := make(chan *canvas.Image)
+				go func() {
+					picture, err := gutil.NewImageFromPlayerPicture(media.Cover)
+					if err != nil {
+						ch <- nil
+						return
+					}
+					ch <- picture
+				}()
+				select {
+				case <-ctx.Done():
 					return
+				case pic := <-ch:
+					if pic == nil {
+						PlayController.SetDefaultCover()
+						return
+					}
+					PlayController.Cover.Resource = pic.Resource
+					PlayController.Cover.Refresh()
 				}
-				PlayController.Cover.Resource = picture.Resource
-				PlayController.Cover.Refresh()
+
 			}()
 		}
 	})
@@ -217,11 +237,16 @@ func createPlayControllerV2() fyne.CanvasObject {
 		PlayController.Progress)
 
 	PlayController.Title = widget.NewLabel("Title")
+	PlayController.Title.Wrapping = fyne.TextTruncate
 	PlayController.Artist = widget.NewLabel("Artist")
 	PlayController.Username = widget.NewLabel("Username")
 
+	titleUser := component.NewFixedHSplitContainer(
+		PlayController.Title, PlayController.Artist, 0.32)
+	titleUser.SetSepThickness(0)
+
 	playInfo := container.NewBorder(nil, nil, nil, PlayController.Username,
-		container.NewHBox(PlayController.Title, PlayController.Artist))
+		titleUser)
 
 	registerPlayControllerHandler()
 

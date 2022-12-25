@@ -7,6 +7,7 @@ import (
 	"AynaLivePlayer/model"
 	"AynaLivePlayer/player"
 	"AynaLivePlayer/repo/provider"
+	"errors"
 )
 
 type PlayController struct {
@@ -122,29 +123,33 @@ func (pc *PlayController) PlayNext() {
 		media = pc.playlist.GetDefault().Next().Copy()
 		media.User = controller.PlaylistUser
 	}
-	pc.Play(media)
+	_ = pc.Play(media)
 }
 
-func (pc *PlayController) Play(media *model.Media) {
+func (pc *PlayController) Play(media *model.Media) error {
 	lg.Infof("[PlayController] prepare media %s", media.Title)
 	err := pc.provider.PrepareMedia(media)
 	if err != nil {
-		lg.Warn("[PlayController] prepare media failed. try play next")
-		pc.PlayNext()
-		return
+		lg.Warn("[PlayController] prepare media failed, try play next")
+		//pc.PlayNext()
+		return errors.New("prepare media failed")
 	}
+	pc.eventManager.CallA(model.EventPlay, model.PlayEvent{
+		Media: media,
+	})
 	pc.playing = media
 	pc.playlist.AddToHistory(media)
 	if err := pc.player.Play(media); err != nil {
 		lg.Warn("[PlayController] play failed", err)
-		return
+		return errors.New("player play failed")
 	}
-	pc.eventManager.CallA(model.EventPlay, model.PlayEvent{
+	pc.eventManager.CallA(model.EventPlayed, model.PlayEvent{
 		Media: media,
 	})
 	pc.lyric.Reload(media.Lyric)
 	// reset
 	media.Url = ""
+	return nil
 }
 
 func (pc *PlayController) Add(keyword string, user interface{}) {
@@ -178,6 +183,7 @@ func (pc *PlayController) AddWithProvider(keyword string, pname string, user int
 			lg.Infof("[PlayController] search for %s, got no result", keyword)
 			return
 		}
+
 		media = medias[0]
 	}
 	media.User = user

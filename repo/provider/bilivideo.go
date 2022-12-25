@@ -61,7 +61,7 @@ func init() {
 
 func (b *BilibiliVideo) getPage(bv string) int {
 	if page := b.PageRegex.FindString(bv); page != "" {
-		return util.StringToInt(page[2:])
+		return util.Atoi(page[2:])
 	}
 	return 0
 }

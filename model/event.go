@@ -6,6 +6,7 @@ import (
 
 const (
 	EventPlay              event.EventId = "player.play"
+	EventPlayed            event.EventId = "player.played"
 	EventPlaylistPreInsert event.EventId = "playlist.insert.pre"
 	EventPlaylistInsert    event.EventId = "playlist.insert.after"
 	EventPlaylistUpdate    event.EventId = "playlist.update"
