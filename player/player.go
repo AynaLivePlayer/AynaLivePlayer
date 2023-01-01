@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/model"
 )
 
-var lg = logger.Logger.WithField("Module", "PlayControl")
+var lg = logger.Logger.WithField("Module", "Player")
 
 type IPlayer interface {
 	Start()

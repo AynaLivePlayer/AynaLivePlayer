@@ -60,6 +60,8 @@ func createPlaylist() fyne.CanvasObject {
 					newLabelWithWrapping("user", fyne.TextTruncate)))
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
+			l().Debugf("Update playlist item: %d", id)
+			l().Debugf("Update playlist event during update %d", UserPlaylist.Playlist.Size())
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
 				UserPlaylist.Playlist.Medias[id].Title)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
@@ -85,11 +87,9 @@ func createPlaylist() fyne.CanvasObject {
 
 func registerPlaylistHandler() {
 	controller.Instance.Playlists().GetCurrent().EventManager().RegisterA(model.EventPlaylistUpdate, "gui.playlist.update", func(event *event.Event) {
-		// Read lock Playlists when updating free after updating.
-		l().Tracef("Playlist update event received: %s", event.Data.(model.PlaylistUpdateEvent).Playlist)
-		UserPlaylist.mux.RLock()
+		UserPlaylist.mux.Lock()
 		UserPlaylist.Playlist = event.Data.(model.PlaylistUpdateEvent).Playlist
 		UserPlaylist.List.Refresh()
-		UserPlaylist.mux.RUnlock()
+		UserPlaylist.mux.Unlock()
 	})
 }

@@ -241,7 +241,7 @@ func (p *corePlaylist) Get(index int) *model.Media {
 }
 
 func (p *corePlaylist) Pop() *model.Media {
-	lg.Info("[Playlists] %s pop first media", p.Playlist)
+	lg.Debugf("[Playlists] %s pop first media", p.Playlist)
 	if p.Size() == 0 {
 		return nil
 	}
@@ -262,7 +262,9 @@ func (p *corePlaylist) Pop() *model.Media {
 	}
 	p.eventManager.CallA(
 		model.EventPlaylistUpdate,
-		model.PlaylistUpdateEvent{Playlist: p.Playlist.Copy()},
+		model.PlaylistUpdateEvent{
+			Playlist: p.Playlist.Copy(),
+		},
 	)
 	return m
 }
@@ -275,7 +277,9 @@ func (p *corePlaylist) Replace(medias []*model.Media) {
 	p.Lock.Unlock()
 	p.eventManager.CallA(
 		model.EventPlaylistUpdate,
-		model.PlaylistUpdateEvent{Playlist: p.Playlist.Copy()},
+		model.PlaylistUpdateEvent{
+			Playlist: p.Playlist.Copy(),
+		},
 	)
 }
 
@@ -315,7 +319,9 @@ func (p *corePlaylist) Insert(index int, media *model.Media) {
 	p.Lock.Unlock()
 	p.eventManager.CallA(
 		model.EventPlaylistUpdate,
-		model.PlaylistUpdateEvent{Playlist: p.Playlist.Copy()},
+		model.PlaylistUpdateEvent{
+			Playlist: p.Playlist.Copy(),
+		},
 	)
 	p.eventManager.CallA(
 		model.EventPlaylistInsert,
@@ -343,7 +349,9 @@ func (p *corePlaylist) Delete(index int) *model.Media {
 	}
 	p.eventManager.CallA(
 		model.EventPlaylistUpdate,
-		model.PlaylistUpdateEvent{Playlist: p.Playlist.Copy()})
+		model.PlaylistUpdateEvent{
+			Playlist: p.Playlist.Copy(),
+		})
 	return m
 }
 
@@ -376,7 +384,9 @@ func (p *corePlaylist) Move(src int, dst int) {
 	p.Lock.Unlock()
 	p.eventManager.CallA(
 		model.EventPlaylistUpdate,
-		model.PlaylistUpdateEvent{Playlist: p.Playlist.Copy()})
+		model.PlaylistUpdateEvent{
+			Playlist: p.Playlist.Copy(),
+		})
 }
 
 func (p *corePlaylist) Next() *model.Media {

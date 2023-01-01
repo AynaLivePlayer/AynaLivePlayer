@@ -3,9 +3,10 @@ package model
 import "fmt"
 
 type LiveRoom struct {
-	ClientName  string
-	ID          string
-	AutoConnect bool
+	ClientName    string
+	ID            string
+	AutoConnect   bool
+	AutoReconnect bool
 }
 
 func (r *LiveRoom) String() string {

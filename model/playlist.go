@@ -7,6 +7,7 @@ type PlaylistMode int
 const (
 	PlaylistModeNormal PlaylistMode = iota
 	PlaylistModeRandom
+	PlaylistModeRepeat
 )
 
 type Playlist struct {
@@ -17,7 +18,7 @@ type Playlist struct {
 }
 
 func (p Playlist) String() string {
-	return fmt.Sprintf("<Playlist %s>", p.Name)
+	return fmt.Sprintf("<Playlist %s len:%d>", p.Name, len(p.Medias))
 }
 
 func (p *Playlist) Size() int {

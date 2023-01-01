@@ -10,18 +10,22 @@ type Event struct {
 	Id        EventId
 	Cancelled bool
 	Data      interface{}
+	Outdated  bool
+	lock      sync.RWMutex
 }
 
 type HandlerFunc func(event *Event)
 
 type Handler struct {
-	EventId EventId
-	Name    string
-	Handler HandlerFunc
+	EventId      EventId
+	Name         string
+	Handler      HandlerFunc
+	SkipOutdated bool
 }
 
 type Manager struct {
 	handlers   map[EventId]map[string]*Handler
+	prevEvent  map[EventId]*Event
 	queue      chan func()
 	stopSig    chan int
 	queueSize  int
@@ -32,6 +36,7 @@ type Manager struct {
 func NewManger(queueSize int, workerSize int) *Manager {
 	manager := &Manager{
 		handlers:   make(map[EventId]map[string]*Handler),
+		prevEvent:  make(map[EventId]*Event),
 		queue:      make(chan func(), queueSize),
 		stopSig:    make(chan int, workerSize),
 		queueSize:  queueSize,
@@ -55,6 +60,7 @@ func NewManger(queueSize int, workerSize int) *Manager {
 func (h *Manager) NewChildManager() *Manager {
 	return &Manager{
 		handlers:   make(map[EventId]map[string]*Handler),
+		prevEvent:  make(map[EventId]*Event),
 		queue:      h.queue,
 		stopSig:    h.stopSig,
 		queueSize:  h.queueSize,
@@ -81,9 +87,10 @@ func (h *Manager) Register(handler *Handler) {
 
 func (h *Manager) RegisterA(id EventId, name string, handler HandlerFunc) {
 	h.Register(&Handler{
-		EventId: id,
-		Name:    name,
-		Handler: handler,
+		EventId:      id,
+		Name:         name,
+		Handler:      handler,
+		SkipOutdated: true,
 	})
 }
 
@@ -104,16 +111,29 @@ func (h *Manager) Unregister(name string) {
 }
 
 func (h *Manager) Call(event *Event) {
-	h.lock.RLock()
+	h.lock.Lock()
+
 	handlers, ok := h.handlers[event.Id]
-	h.lock.RUnlock()
+	if e := h.prevEvent[event.Id]; e != nil {
+		e.lock.Lock()
+		e.Outdated = true
+		e.lock.Unlock()
+	}
+	h.prevEvent[event.Id] = event
+	h.lock.Unlock()
 	if !ok {
 		return
 	}
 	for _, eh := range handlers {
-		handler := eh.Handler
+		eventHandler := eh
 		h.queue <- func() {
-			handler(event)
+			event.lock.Lock()
+			if eventHandler.SkipOutdated && event.Outdated {
+				event.lock.Unlock()
+				return
+			}
+			eventHandler.Handler(event)
+			event.lock.Unlock()
 		}
 	}
 }

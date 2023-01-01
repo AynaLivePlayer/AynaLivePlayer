@@ -19,7 +19,7 @@ func init() {
 		HideKeys:    true,
 		NoColors:    true,
 	})
-	_ = os.Truncate(config.Log.Path, 0)
+	//_ = os.Truncate(config.Log.Path, 0)
 	file, err := os.OpenFile(config.Log.Path, os.O_CREATE|os.O_WRONLY, 0666)
 	if err == nil {
 		Logger.Out = io.MultiWriter(file, os.Stdout)
