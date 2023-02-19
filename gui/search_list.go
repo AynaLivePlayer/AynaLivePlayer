@@ -2,8 +2,7 @@ package gui
 
 import (
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/controller"
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/core/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -45,10 +44,10 @@ func createSearchList() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			btns[0].(*widget.Button).OnTapped = func() {
-				showDialogIfError(controller.Instance.PlayControl().Play(SearchResult.Items[id]))
+				showDialogIfError(API.PlayControl().Play(SearchResult.Items[id]))
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.Instance.Playlists().GetCurrent().Push(SearchResult.Items[id])
+				API.Playlists().GetCurrent().Push(SearchResult.Items[id])
 			}
 		})
 	return container.NewBorder(

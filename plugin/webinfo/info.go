@@ -1,7 +1,7 @@
 package webinfo
 
 import (
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/core/model"
 )
 
 type MediaInfo struct {

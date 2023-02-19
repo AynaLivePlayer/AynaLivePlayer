@@ -32,6 +32,14 @@
       "en": "Skip",
       "zh-CN": "跳过"
     },
+    "gui.config.basic.skip_when_error": {
+      "en": "Skip this Media On Error",
+      "zh-CN": "跳过获取失败的歌曲"
+    },
+    "gui.config.basic.skip_when_error.prompt": {
+      "en": "Skip",
+      "zh-CN": "跳过"
+  },
     "gui.config.basic.title": {
       "en": "Basic",
       "zh-CN": "基础设置"
@@ -55,6 +63,10 @@
     "gui.player.button.lrc": {
       "en": "lrc",
       "zh-CN": "歌词"
+    },
+    "gui.player.button.player": {
+      "en": "player",
+      "zh-CN": "播放器"
     },
     "gui.player.playlist.artist": {
       "en": "Artist",

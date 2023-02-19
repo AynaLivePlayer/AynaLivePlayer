@@ -1,7 +1,7 @@
 package gutil
 
 import (
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/core/model"
 	"bytes"
 	"errors"
 	"fyne.io/fyne/v2"

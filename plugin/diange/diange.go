@@ -1,27 +1,21 @@
 package diange
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/liveclient"
-	"fmt"
+	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	"github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
 
 const MODULE_CMD_DIANGE = "CMD.DianGe"
-
-func l() *logrus.Entry {
-	return logger.Logger.WithField("Module", MODULE_CMD_DIANGE)
-}
 
 type Diange struct {
 	config.BaseConfig
@@ -36,10 +30,11 @@ type Diange struct {
 	SourceCMD           []string
 	cooldowns           map[string]int
 	panel               fyne.CanvasObject
-	contro              controller.IController
+	contro              adapter.IControlBridge
+	log                 adapter.ILogger
 }
 
-func NewDiange(contr controller.IController) *Diange {
+func NewDiange(contr adapter.IControlBridge) *Diange {
 	return &Diange{
 		UserPermission:      true,
 		PrivilegePermission: true,
@@ -50,6 +45,7 @@ func NewDiange(contr controller.IController) *Diange {
 		SourceCMD:           make([]string, 0),
 		cooldowns:           make(map[string]int),
 		contro:              contr,
+		log:                 contr.Logger().WithModule(MODULE_CMD_DIANGE),
 	}
 }
 
@@ -88,7 +84,6 @@ func (d *Diange) isCMD(cmd string) int {
 	if cmd == "点歌" || cmd == d.CustomCMD {
 		return 0
 	}
-	fmt.Println(d.SourceCMD)
 	for index, c := range d.SourceCMD {
 		if cmd == c {
 			return index + 1
@@ -101,27 +96,27 @@ func (d *Diange) Match(command string) bool {
 	return d.isCMD(command) >= 0
 }
 
-func (d *Diange) Execute(command string, args []string, danmu *liveclient.DanmuMessage) {
-	l().Infof("%s(%s) Execute command: %s %s", danmu.User.Username, danmu.User.Uid, command, args)
+func (d *Diange) Execute(command string, args []string, danmu *model.DanmuMessage) {
+	d.log.Infof("%s(%s) Execute command: %s %s", danmu.User.Username, danmu.User.Uid, command, args)
 	// if queue is full, return
 	if d.contro.Playlists().GetCurrent().Size() >= d.QueueMax {
-		l().Info("Queue is full, ignore diange")
+		d.log.Info("Queue is full, ignore diange")
 		return
 	}
 	// if in user cool down, return
 	ct := int(time.Now().Unix())
 	if (ct - d.cooldowns[danmu.User.Uid]) <= d.UserCoolDown {
-		l().Infof("User %s(%s) still in cool down period, diange failed", danmu.User.Username, danmu.User.Uid)
+		d.log.Infof("User %s(%s) still in cool down period, diange failed", danmu.User.Username, danmu.User.Uid)
 		return
 	}
 	cmdType := d.isCMD(command)
 	keyword := strings.Join(args, " ")
 	perm := d.UserPermission
-	l().Trace("user permission check: ", perm)
+	d.log.Debugf("user permission check: ", perm)
 	perm = perm || (d.PrivilegePermission && (danmu.User.Privilege > 0))
-	l().Trace("privilege permission check: ", perm)
+	d.log.Debugf("privilege permission check: ", perm)
 	perm = perm || (d.AdminPermission && (danmu.User.Admin))
-	l().Trace("admin permission check: ", perm)
+	d.log.Debugf("admin permission check: ", perm)
 	// if use medal check
 	if d.MedalName != "" && d.MedalPermission >= 0 {
 		perm = perm || ((danmu.User.Medal.Name == d.MedalName) && danmu.User.Medal.Level >= d.MedalPermission)
@@ -152,9 +147,12 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 	}
 	dgPerm := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.diange.permission")),
-		widget.NewCheckWithData(i18n.T("plugin.diange.user"), binding.BindBool(&d.UserPermission)),
-		widget.NewCheckWithData(i18n.T("plugin.diange.privilege"), binding.BindBool(&d.PrivilegePermission)),
-		widget.NewCheckWithData(i18n.T("plugin.diange.admin"), binding.BindBool(&d.AdminPermission)),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.diange.user"), &d.UserPermission, d.UserPermission),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.diange.privilege"), &d.PrivilegePermission, d.PrivilegePermission),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.diange.admin"), &d.AdminPermission, d.AdminPermission),
 	)
 	dgMdPerm := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.medal.perm")), nil,

@@ -2,8 +2,9 @@ package gui
 
 import (
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/internal"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -28,16 +29,16 @@ func createSearchBar() fyne.CanvasObject {
 		keyword := SearchBar.Input.Text
 		pr := SearchBar.UseSource.Selected
 		l().Debugf("Search keyword: %s, provider: %s", keyword, pr)
-		items, err := controller.Instance.Provider().SearchWithProvider(keyword, pr)
+		items, err := API.Provider().SearchWithProvider(keyword, pr)
 		if err != nil {
 			dialog.ShowError(err, MainWindow)
 		}
-		controller.ApplyUser(items, controller.SystemUser)
+		model.ApplyUser(items, internal.SystemUser)
 		SearchResult.Items = items
 		SearchResult.List.Refresh()
 	})
-	s := make([]string, len(controller.Instance.Provider().GetPriority()))
-	copy(s, controller.Instance.Provider().GetPriority())
+	s := make([]string, len(API.Provider().GetPriority()))
+	copy(s, API.Provider().GetPriority())
 
 	SearchBar.UseSource = widget.NewSelect(s, func(s string) {})
 	if len(s) > 0 {

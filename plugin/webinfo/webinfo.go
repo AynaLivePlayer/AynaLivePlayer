@@ -1,15 +1,16 @@
 package webinfo
 
 import (
+	"AynaLivePlayer/adapters/logger"
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
 	"AynaLivePlayer/common/util"
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
-	"AynaLivePlayer/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -20,7 +21,7 @@ import (
 
 const MODULE_PLGUIN_WEBINFO = "plugin.webinfo"
 
-var lg = logger.Logger.WithField("Module", MODULE_PLGUIN_WEBINFO)
+var lg adapter.ILogger = &logger.EmptyLogger{}
 
 type WebInfo struct {
 	config.BaseConfig
@@ -28,14 +29,17 @@ type WebInfo struct {
 	Port    int
 	server  *WebInfoServer
 	panel   fyne.CanvasObject
-	ctr     controller.IController
+	ctr     adapter.IControlBridge
+	log     adapter.ILogger
 }
 
-func NewWebInfo(ctr controller.IController) *WebInfo {
+func NewWebInfo(ctr adapter.IControlBridge) *WebInfo {
+	lg = ctr.Logger().WithModule(MODULE_PLGUIN_WEBINFO)
 	return &WebInfo{
 		Enabled: true,
 		Port:    4000,
 		ctr:     ctr,
+		log:     ctr.Logger().WithModule(MODULE_PLGUIN_WEBINFO),
 	}
 }
 
@@ -53,78 +57,78 @@ func (w *WebInfo) Description() string {
 
 func (w *WebInfo) Enable() error {
 	config.LoadConfig(w)
-	w.server = NewWebInfoServer(w.Port)
+	w.server = NewWebInfoServer(w.Port, w.log)
 	w.registerHandlers()
 	gui.AddConfigLayout(w)
-	lg.Info("webinfo loaded")
+	w.log.Info("webinfo loaded")
 	if w.Enabled {
-		lg.Info("starting web backend server")
+		w.log.Info("starting web backend server")
 		w.server.Start()
 	}
 	return nil
 }
 
 func (w *WebInfo) Disable() error {
-	lg.Info("closing webinfo backend server")
+	w.log.Info("closing webinfo backend server")
 	if err := w.server.Stop(); err != nil {
-		lg.Warnf("stop webinfo server encouter an error: %s", err)
+		w.log.Warnf("stop webinfo server encouter an error: %s", err)
 	}
 	return nil
 }
 
-func (t *WebInfo) registerHandlers() {
-	t.ctr.PlayControl().EventManager().RegisterA(model.EventPlay, "plugin.webinfo.current", func(event *event.Event) {
-		t.server.Info.Current = MediaInfo{
+func (w *WebInfo) registerHandlers() {
+	w.ctr.PlayControl().EventManager().RegisterA(events.EventPlay, "plugin.webinfo.current", func(event *event.Event) {
+		w.server.Info.Current = MediaInfo{
 			Index:    0,
-			Title:    event.Data.(model.PlayEvent).Media.Title,
-			Artist:   event.Data.(model.PlayEvent).Media.Artist,
-			Album:    event.Data.(model.PlayEvent).Media.Album,
-			Cover:    event.Data.(model.PlayEvent).Media.Cover,
-			Username: event.Data.(model.PlayEvent).Media.ToUser().Name,
+			Title:    event.Data.(events.PlayEvent).Media.Title,
+			Artist:   event.Data.(events.PlayEvent).Media.Artist,
+			Album:    event.Data.(events.PlayEvent).Media.Album,
+			Cover:    event.Data.(events.PlayEvent).Media.Cover,
+			Username: event.Data.(events.PlayEvent).Media.ToUser().Name,
 		}
-		t.server.SendInfo(
+		w.server.SendInfo(
 			OutInfoC,
-			OutInfo{Current: t.server.Info.Current},
+			OutInfo{Current: w.server.Info.Current},
 		)
 	})
-	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+	if w.ctr.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropTimePos, "plugin.webinfo.timepos", func(event *event.Event) {
-			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
-				t.server.Info.CurrentTime = 0
+				w.server.Info.CurrentTime = 0
 				return
 			}
 			ct := int(data.(float64))
-			if ct == t.server.Info.CurrentTime {
+			if ct == w.server.Info.CurrentTime {
 				return
 			}
-			t.server.Info.CurrentTime = ct
-			t.server.SendInfo(
+			w.server.Info.CurrentTime = ct
+			w.server.SendInfo(
 				OutInfoCT,
-				OutInfo{CurrentTime: t.server.Info.CurrentTime},
+				OutInfo{CurrentTime: w.server.Info.CurrentTime},
 			)
 		}) != nil {
-		lg.Error("register time-pos handler failed")
+		w.log.Error("register time-pos handler failed")
 	}
-	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
+	if w.ctr.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropDuration, "plugin.webinfo.duration", func(event *event.Event) {
-			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
-				t.server.Info.TotalTime = 0
+				w.server.Info.TotalTime = 0
 				return
 			}
-			t.server.Info.TotalTime = int(data.(float64))
-			t.server.SendInfo(
+			w.server.Info.TotalTime = int(data.(float64))
+			w.server.SendInfo(
 				OutInfoTT,
-				OutInfo{TotalTime: t.server.Info.TotalTime},
+				OutInfo{TotalTime: w.server.Info.TotalTime},
 			)
 		}) != nil {
-		lg.Error("fail to register handler for total time with property duration")
+		w.log.Error("fail to register handler for total time with property duration")
 	}
-	t.ctr.Playlists().GetCurrent().EventManager().RegisterA(
-		model.EventPlaylistUpdate, "plugin.webinfo.playlist", func(event *event.Event) {
+	w.ctr.Playlists().GetCurrent().EventManager().RegisterA(
+		events.EventPlaylistUpdate, "plugin.webinfo.playlist", func(event *event.Event) {
 			pl := make([]MediaInfo, 0)
-			e := event.Data.(model.PlaylistUpdateEvent)
+			e := event.Data.(events.PlaylistUpdateEvent)
 			for index, m := range e.Playlist.Medias {
 				pl = append(pl, MediaInfo{
 					Index:    index,
@@ -134,19 +138,19 @@ func (t *WebInfo) registerHandlers() {
 					Username: m.ToUser().Name,
 				})
 			}
-			t.server.Info.Playlist = pl
-			t.server.SendInfo(
+			w.server.Info.Playlist = pl
+			w.server.SendInfo(
 				OutInfoPL,
-				OutInfo{Playlist: t.server.Info.Playlist},
+				OutInfo{Playlist: w.server.Info.Playlist},
 			)
 		})
-	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
-		model.EventLyricUpdate, "plugin.webinfo.lyric", func(event *event.Event) {
-			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
-			t.server.Info.Lyric = lrcLine.Now.Lyric
-			t.server.SendInfo(
+	w.ctr.PlayControl().GetLyric().EventManager().RegisterA(
+		events.EventLyricUpdate, "plugin.webinfo.lyric", func(event *event.Event) {
+			lrcLine := event.Data.(events.LyricUpdateEvent).Lyric
+			w.server.Info.Lyric = lrcLine.Now.Lyric
+			w.server.SendInfo(
 				OutInfoL,
-				OutInfo{Lyric: t.server.Info.Lyric},
+				OutInfo{Lyric: w.server.Info.Lyric},
 			)
 		})
 }
@@ -175,7 +179,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 	)
 	autoStart := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.webinfo.autostart")),
-		widget.NewCheckWithData("", binding.BindBool(&w.Enabled)))
+		component.NewCheckOneWayBinding("", &w.Enabled, w.Enabled))
 	statusText.SetText(w.getServerStatusText())
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.webinfo.port")), nil,
@@ -193,10 +197,10 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			if !w.server.Running {
 				return
 			}
-			lg.Info("User try stop webinfo server")
+			w.log.Info("User try stop webinfo server")
 			err := w.server.Stop()
 			if err != nil {
-				lg.Warnf("stop server have error: %s", err)
+				w.log.Warnf("stop server have error: %s", err)
 				return
 			}
 			statusText.SetText(w.getServerStatusText())
@@ -209,7 +213,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 			if w.server.Running {
 				return
 			}
-			lg.Infof("User try start webinfo server with port %d", w.Port)
+			w.log.Infof("User try start webinfo server with port %d", w.Port)
 			w.server.Port = w.Port
 			w.server.Start()
 			statusText.SetText(w.getServerStatusText())
@@ -221,10 +225,10 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 		i18n.T("plugin.webinfo.server_control.restart"),
 		theme.MediaReplayIcon(),
 		func() {
-			lg.Infof("User try restart webinfo server with port %d", w.Port)
+			w.log.Infof("User try restart webinfo server with port %d", w.Port)
 			if w.server.Running {
 				if err := w.server.Stop(); err != nil {
-					lg.Warnf("stop server have error: %s", err)
+					w.log.Warnf("stop server have error: %s", err)
 					return
 				}
 			}

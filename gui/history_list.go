@@ -3,8 +3,9 @@ package gui
 import (
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/controller"
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/internal"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -20,7 +21,7 @@ var History = &struct {
 }{}
 
 func createHistoryList() fyne.CanvasObject {
-	History.Playlist = controller.Instance.Playlists().GetHistory().Model().Copy()
+	History.Playlist = API.Playlists().GetHistory().Model().Copy()
 	History.List = widget.NewList(
 		func() int {
 			return History.Playlist.Size()
@@ -47,12 +48,12 @@ func createHistoryList() fyne.CanvasObject {
 				m.ToUser().Name)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
-			m.User = controller.HistoryUser
+			m.User = internal.HistoryUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				showDialogIfError(controller.Instance.PlayControl().Play(m))
+				showDialogIfError(API.PlayControl().Play(m))
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				controller.Instance.Playlists().GetCurrent().Push(m)
+				API.Playlists().GetCurrent().Push(m)
 			}
 		})
 	registerHistoryHandler()
@@ -69,9 +70,9 @@ func createHistoryList() fyne.CanvasObject {
 }
 
 func registerHistoryHandler() {
-	controller.Instance.Playlists().GetHistory().EventManager().RegisterA(model.EventPlaylistUpdate, "gui.history.update", func(event *event.Event) {
+	API.Playlists().GetHistory().EventManager().RegisterA(events.EventPlaylistUpdate, "gui.history.update", func(event *event.Event) {
 		History.mux.RLock()
-		History.Playlist = event.Data.(model.PlaylistUpdateEvent).Playlist
+		History.Playlist = event.Data.(events.PlaylistUpdateEvent).Playlist
 		History.List.Refresh()
 		History.mux.RUnlock()
 	})

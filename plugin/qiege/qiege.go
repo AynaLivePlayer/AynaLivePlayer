@@ -1,24 +1,17 @@
 package qiege
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/liveclient"
+	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	"github.com/sirupsen/logrus"
 )
-
-const MODULE_CMD_QieGE = "CMD.QieGe"
-
-func l() *logrus.Entry {
-	return logger.Logger.WithField("Module", MODULE_CMD_QieGE)
-}
 
 type Qiege struct {
 	config.BaseConfig
@@ -27,10 +20,10 @@ type Qiege struct {
 	AdminPermission     bool
 	CustomCMD           string
 	panel               fyne.CanvasObject
-	ctr                 controller.IController
+	ctr                 adapter.IControlBridge
 }
 
-func NewQiege(ctr controller.IController) *Qiege {
+func NewQiege(ctr adapter.IControlBridge) *Qiege {
 	return &Qiege{
 		UserPermission:      true,
 		PrivilegePermission: true,
@@ -64,7 +57,7 @@ func (d *Qiege) Match(command string) bool {
 	return false
 }
 
-func (d *Qiege) Execute(command string, args []string, danmu *liveclient.DanmuMessage) {
+func (d *Qiege) Execute(command string, args []string, danmu *model.DanmuMessage) {
 	if d.UserPermission && (d.ctr.PlayControl().GetPlaying() != nil) {
 		if d.ctr.PlayControl().GetPlaying().DanmuUser() != nil && d.ctr.PlayControl().GetPlaying().DanmuUser().Uid == danmu.User.Uid {
 			d.ctr.PlayControl().PlayNext()
@@ -95,9 +88,12 @@ func (d *Qiege) CreatePanel() fyne.CanvasObject {
 	}
 	dgPerm := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.qiege.permission")),
-		widget.NewCheckWithData(i18n.T("plugin.qiege.user"), binding.BindBool(&d.UserPermission)),
-		widget.NewCheckWithData(i18n.T("plugin.qiege.privilege"), binding.BindBool(&d.PrivilegePermission)),
-		widget.NewCheckWithData(i18n.T("plugin.qiege.admin"), binding.BindBool(&d.AdminPermission)),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.qiege.user"), &d.UserPermission, d.UserPermission),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.qiege.privilege"), &d.PrivilegePermission, d.PrivilegePermission),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.qiege.admin"), &d.AdminPermission, d.AdminPermission),
 	)
 	qgShortCut := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.qiege.custom_cmd")), nil,

@@ -4,10 +4,10 @@ import (
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/common/util"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/model"
 	"AynaLivePlayer/resource"
 	"context"
 	"fyne.io/fyne/v2"
@@ -29,6 +29,7 @@ type PlayControllerContainer struct {
 	Progress      *component.SliderPlus
 	Volume        *widget.Slider
 	ButtonLrc     *widget.Button
+	ButtonPlayer  *widget.Button
 	LrcWindowOpen bool
 	CurrentTime   *widget.Label
 	TotalTime     *widget.Label
@@ -43,13 +44,13 @@ var PlayController = &PlayControllerContainer{}
 
 func registerPlayControllerHandler() {
 	PlayController.ButtonPrev.OnTapped = func() {
-		controller.Instance.PlayControl().Seek(0, true)
+		API.PlayControl().Seek(0, true)
 	}
 	PlayController.ButtonSwitch.OnTapped = func() {
-		controller.Instance.PlayControl().Toggle()
+		API.PlayControl().Toggle()
 	}
 	PlayController.ButtonNext.OnTapped = func() {
-		controller.Instance.PlayControl().PlayNext()
+		API.PlayControl().PlayNext()
 	}
 
 	PlayController.ButtonLrc.OnTapped = func() {
@@ -59,9 +60,13 @@ func registerPlayControllerHandler() {
 		}
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	PlayController.ButtonPlayer.OnTapped = func() {
+		showPlayerWindow()
+	}
+
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropPause, "gui.play_controller.pause", func(ev *event.Event) {
-			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
 				return
@@ -75,12 +80,12 @@ func registerPlayControllerHandler() {
 		l().Error("fail to register handler for switch button with property pause")
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropPercentPos, "gui.play_controller.percent_pos", func(ev *event.Event) {
 			if PlayController.Progress.Dragging {
 				return
 			}
-			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.Progress.Value = 0
 			} else {
@@ -91,9 +96,9 @@ func registerPlayControllerHandler() {
 		l().Error("fail to register handler for progress bar with property percent-pos")
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropIdleActive, "gui.play_controller.idle_active", func(ev *event.Event) {
-			isIdle := ev.Data.(model.PlayerPropertyUpdateEvent).Value.(bool)
+			isIdle := ev.Data.(events.PlayerPropertyUpdateEvent).Value.(bool)
 			l().Debug("receive idle active ", isIdle, " set/reset info")
 			// todo: @3
 			if isIdle {
@@ -112,12 +117,12 @@ func registerPlayControllerHandler() {
 
 	PlayController.Progress.Max = 0
 	PlayController.Progress.OnDragEnd = func(f float64) {
-		controller.Instance.PlayControl().Seek(f/10, false)
+		API.PlayControl().Seek(f/10, false)
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropTimePos, "gui.play_controller.time_pos", func(ev *event.Event) {
-			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.CurrentTime.SetText("0:00")
 				return
@@ -127,9 +132,9 @@ func registerPlayControllerHandler() {
 		l().Error("fail to register handler for current time with property time-pos")
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropDuration, "gui.play_controller.duration", func(ev *event.Event) {
-			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.TotalTime.SetText("0:00")
 				return
@@ -139,9 +144,9 @@ func registerPlayControllerHandler() {
 		l().Error("fail to register handler for total time with property duration")
 	}
 
-	if controller.Instance.PlayControl().GetPlayer().ObserveProperty(
+	if API.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropVolume, "gui.play_controller.volume", func(ev *event.Event) {
-			data := ev.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				PlayController.Volume.Value = 0
 			} else {
@@ -154,12 +159,12 @@ func registerPlayControllerHandler() {
 	}
 
 	PlayController.Volume.OnChanged = func(f float64) {
-		controller.Instance.PlayControl().SetVolume(f)
+		API.PlayControl().SetVolume(f)
 	}
 
-	controller.Instance.PlayControl().EventManager().RegisterA(model.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
+	API.PlayControl().EventManager().RegisterA(events.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
 		l().Debug("receive EventPlay update player info")
-		media := event.Data.(model.PlayEvent).Media
+		media := event.Data.(events.PlayEvent).Media
 		//PlayController.Title.SetText(
 		//	util.StringNormalize(media.Title, 16, 16))
 		//PlayController.Artist.SetText(
@@ -214,19 +219,39 @@ func createPlayControllerV2() fyne.CanvasObject {
 	PlayController.ButtonSwitch = widget.NewButtonWithIcon("", theme.MediaPlayIcon(), func() {})
 	PlayController.ButtonNext = widget.NewButtonWithIcon("", theme.MediaSkipNextIcon(), func() {})
 
-	buttonsBox := container.NewHBox(PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext)
-
 	PlayController.Volume = widget.NewSlider(0, 100)
 	PlayController.ButtonLrc = widget.NewButton(i18n.T("gui.player.button.lrc"), func() {})
+	PlayController.ButtonPlayer = widget.NewButton(i18n.T("gui.player.button.player"), func() {})
 
-	controls := container.NewPadded(container.NewBorder(nil, nil,
-		buttonsBox, nil,
-		container.NewGridWithColumns(
-			2,
-			container.NewMax(),
-			container.NewBorder(nil, nil, widget.NewIcon(theme.VolumeMuteIcon()), PlayController.ButtonLrc,
-				PlayController.Volume)),
-	))
+	buttonsBox := container.NewHBox(
+		PlayController.ButtonPrev, PlayController.ButtonSwitch, PlayController.ButtonNext,
+	)
+
+	buttonBox2 := container.NewHBox(
+		PlayController.ButtonLrc, PlayController.ButtonPlayer)
+
+	volumeControl := component.NewFixedHSplitContainer(
+		widget.NewLabel(""),
+		container.NewBorder(nil, nil,
+			widget.NewIcon(theme.VolumeMuteIcon()),
+			widget.NewLabel("       "),
+			PlayController.Volume), 0.05)
+	volumeControl.SeparatorThickness = 0
+
+	controls := component.NewFixedHSplitContainer(
+		container.NewBorder(nil, nil, nil, buttonBox2, buttonsBox),
+		volumeControl,
+		0.4)
+	controls.SeparatorThickness = 0
+
+	//controls := container.NewPadded(container.NewBorder(nil, nil,
+	//	buttonsBox, nil,
+	//	container.NewGridWithColumns(
+	//		2,
+	//		container.NewMax(),
+	//		container.NewBorder(nil, nil, widget.NewIcon(theme.VolumeMuteIcon()), PlayController.ButtonLrc,
+	//			PlayController.Volume)),
+	//))
 
 	PlayController.Progress = component.NewSliderPlus(0, 1000)
 	PlayController.CurrentTime = widget.NewLabel("0:00")

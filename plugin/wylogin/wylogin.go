@@ -1,37 +1,39 @@
 package wylogin
 
 import (
+	"AynaLivePlayer/adapters/provider"
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
-	"AynaLivePlayer/config"
+	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
-	"AynaLivePlayer/repo/provider"
 	"AynaLivePlayer/resource"
 	"bytes"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	qrcode "github.com/skip2/go-qrcode"
+	"github.com/skip2/go-qrcode"
 	"net/http"
 )
 
 const MODULE_PLGUIN_NETEASELOGIN = "plugin.neteaselogin"
-
-var lg = logger.Logger.WithField("Module", MODULE_PLGUIN_NETEASELOGIN)
 
 type WYLogin struct {
 	config.BaseConfig
 	MusicU string
 	CSRF   string
 	panel  fyne.CanvasObject
+	cb     adapter.IControlBridge
+	log    adapter.ILogger
 }
 
-func NewWYLogin() *WYLogin {
+func NewWYLogin(cb adapter.IControlBridge) *WYLogin {
 	return &WYLogin{
 		MusicU: "MUSIC_U=;",
 		CSRF:   "__csrf=;",
+		cb:     cb,
+		log:    cb.Logger().WithModule(MODULE_PLGUIN_NETEASELOGIN),
 	}
 }
 
@@ -44,9 +46,9 @@ func (w *WYLogin) Enable() error {
 	w.loadCookie()
 	gui.AddConfigLayout(w)
 	go func() {
-		lg.Info("updating netease status")
+		w.log.Info("updating netease status")
 		provider.NeteaseAPI.UpdateStatus()
-		lg.Info("finish updating netease status")
+		w.log.Info("finish updating netease status")
 	}()
 	return nil
 }
@@ -122,19 +124,19 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 		i18n.T("plugin.neteaselogin.qr.new"),
 		func() {
 			qrStatus.SetText("")
-			lg.Info("getting a new qr code for login")
+			w.log.Info("getting a new qr code for login")
 			key = provider.NeteaseAPI.GetQrLoginKey()
 			if key == "" {
-				lg.Warn("fail to get qr code key")
+				w.log.Warn("fail to get qr code key")
 				return
 			}
-			lg.Debugf("trying encode url %s to qrcode", provider.NeteaseAPI.GetQrLoginUrl(key))
+			w.log.Debugf("trying encode url %s to qrcode", provider.NeteaseAPI.GetQrLoginUrl(key))
 			data, err := qrcode.Encode(provider.NeteaseAPI.GetQrLoginUrl(key), qrcode.Medium, 256)
 			if err != nil {
-				lg.Warnf("generate qr code failed: %s", err)
+				w.log.Warnf("generate qr code failed: %s", err)
 				return
 			}
-			lg.Debug("create img from raw data")
+			w.log.Debug("create img from raw data")
 			pic := canvas.NewImageFromReader(bytes.NewReader(data), "qrcode")
 			qrcodeImg.Resource = pic.Resource
 			qrcodeImg.Refresh()
@@ -146,7 +148,7 @@ func (w *WYLogin) CreatePanel() fyne.CanvasObject {
 			if key == "" {
 				return
 			}
-			lg.Info("checking qr status")
+			w.log.Info("checking qr status")
 			ok, msg := provider.NeteaseAPI.CheckQrLogin(key)
 			qrStatus.SetText(msg)
 			if ok {

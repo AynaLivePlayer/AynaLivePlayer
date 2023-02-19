@@ -3,8 +3,8 @@ package gui
 import (
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/controller"
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -26,10 +26,10 @@ func (b *playlistOperationButton) Tapped(e *fyne.PointEvent) {
 func newPlaylistOperationButton() *playlistOperationButton {
 	b := &playlistOperationButton{Index: 0}
 	deleteItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.delete"), func() {
-		controller.Instance.Playlists().GetCurrent().Delete(b.Index)
+		API.Playlists().GetCurrent().Delete(b.Index)
 	})
 	topItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.top"), func() {
-		controller.Instance.Playlists().GetCurrent().Move(b.Index, 0)
+		API.Playlists().GetCurrent().Move(b.Index, 0)
 	})
 	m := fyne.NewMenu("", deleteItem, topItem)
 	b.menu = m
@@ -46,7 +46,7 @@ var UserPlaylist = &struct {
 }{}
 
 func createPlaylist() fyne.CanvasObject {
-	UserPlaylist.Playlist = controller.Instance.Playlists().GetCurrent().Model().Copy()
+	UserPlaylist.Playlist = API.Playlists().GetCurrent().Model().Copy()
 	UserPlaylist.List = widget.NewList(
 		func() int {
 			//todo: @4
@@ -86,9 +86,9 @@ func createPlaylist() fyne.CanvasObject {
 }
 
 func registerPlaylistHandler() {
-	controller.Instance.Playlists().GetCurrent().EventManager().RegisterA(model.EventPlaylistUpdate, "gui.playlist.update", func(event *event.Event) {
+	API.Playlists().GetCurrent().EventManager().RegisterA(events.EventPlaylistUpdate, "gui.playlist.update", func(event *event.Event) {
 		UserPlaylist.mux.Lock()
-		UserPlaylist.Playlist = event.Data.(model.PlaylistUpdateEvent).Playlist
+		UserPlaylist.Playlist = event.Data.(events.PlaylistUpdateEvent).Playlist
 		UserPlaylist.List.Refresh()
 		UserPlaylist.mux.Unlock()
 	})

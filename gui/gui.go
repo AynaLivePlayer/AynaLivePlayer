@@ -1,10 +1,10 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/common/util"
+	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/resource"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -12,16 +12,16 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
-	"github.com/sirupsen/logrus"
 )
 
-const MODULE_GUI = "GUI"
-
+var API adapter.IControlBridge
 var App fyne.App
 var MainWindow fyne.Window
+var playerWindow fyne.Window
+var playerWindowHandle uintptr
 
-func l() *logrus.Entry {
-	return logger.Logger.WithField("Module", MODULE_GUI)
+func l() adapter.ILogger {
+	return API.Logger().WithModule("GUI")
 }
 
 func black_magic() {
@@ -29,7 +29,7 @@ func black_magic() {
 }
 
 func Initialize() {
-	//black_magic()
+	black_magic()
 	l().Info("Initializing GUI")
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
@@ -62,13 +62,35 @@ func Initialize() {
 	MainWindow.SetContent(tabs)
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(960, 480))
+
+	playerWindow = App.NewWindow("CorePlayerPreview")
+	playerWindow.Resize(fyne.NewSize(480, 240))
+	playerWindow.SetCloseIntercept(func() {
+		playerWindow.Hide()
+	})
+	MainWindow.SetOnClosed(func() {
+		playerWindow.Close()
+	})
+	playerWindow.Hide()
+
 	//MainWindow.SetFixedSize(true)
+}
+
+func showPlayerWindow() {
+	playerWindow.Show()
+	if playerWindowHandle == 0 {
+		playerWindowHandle = util.GetWindowHandle("CorePlayerPreview")
+		l().Infof("video output window handle: %d", playerWindowHandle)
+		if playerWindowHandle != 0 {
+			_ = API.PlayControl().GetPlayer().SetWindowHandle(playerWindowHandle)
+		}
+	}
 }
 
 func addShortCut() {
 	key := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift}
 	MainWindow.Canvas().AddShortcut(key, func(shortcut fyne.Shortcut) {
 		l().Info("Shortcut pressed: Ctrl+Shift+Right")
-		controller.Instance.PlayControl().PlayNext()
+		API.PlayControl().PlayNext()
 	})
 }

@@ -1,8 +1,8 @@
 package i18n
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/util"
-	"AynaLivePlayer/config"
 	"encoding/json"
 	"os"
 )

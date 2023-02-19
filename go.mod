@@ -21,6 +21,7 @@ require (
 	github.com/tidwall/gjson v1.14.3
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
+	golang.org/x/sys v0.1.0
 	gopkg.in/ini.v1 v1.66.4
 )
 
@@ -45,11 +46,10 @@ require (
 	github.com/tevino/abool v1.2.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/yuin/goldmark v1.4.0 // indirect
+	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd // indirect
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee // indirect
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
-	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect

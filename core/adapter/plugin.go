@@ -1,0 +1,7 @@
+package adapter
+
+type Plugin interface {
+	Name() string
+	Enable() error
+	Disable() error
+}

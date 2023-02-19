@@ -1,19 +1,18 @@
 package textinfo
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/logger"
-	"AynaLivePlayer/config"
-	"AynaLivePlayer/controller"
+	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
-	"AynaLivePlayer/model"
+	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/go-resty/resty/v2"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -21,10 +20,6 @@ import (
 )
 
 const MODULE_PLUGIN_TEXTINFO = "plugin.textinfo"
-
-func l() *logrus.Entry {
-	return logger.Logger.WithField("Module", MODULE_PLUGIN_TEXTINFO)
-}
 
 const Template_Path = "./template/"
 const Out_Path = "./txtinfo/"
@@ -60,12 +55,13 @@ type TextInfo struct {
 	templates  []*Template
 	emptyCover []byte
 	panel      fyne.CanvasObject
-	ctr        controller.IController
+	ctr        adapter.IControlBridge
+	log        adapter.ILogger
 }
 
-func NewTextInfo(ctr controller.IController) *TextInfo {
+func NewTextInfo(ctr adapter.IControlBridge) *TextInfo {
 	b, _ := ioutil.ReadFile(config.GetAssetPath("empty.png"))
-	return &TextInfo{Rendering: true, emptyCover: b, ctr: ctr}
+	return &TextInfo{Rendering: true, emptyCover: b, ctr: ctr, log: ctr.Logger().WithModule(MODULE_PLUGIN_TEXTINFO)}
 }
 
 func (t *TextInfo) Title() string {
@@ -82,7 +78,9 @@ func (t *TextInfo) CreatePanel() fyne.CanvasObject {
 	}
 	enableRendering := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.textinfo.prompt")),
-		widget.NewCheckWithData(i18n.T("plugin.textinfo.checkbox"), binding.BindBool(&t.Rendering)),
+		component.NewCheckOneWayBinding(
+			i18n.T("plugin.textinfo.checkbox"),
+			&t.Rendering, t.Rendering),
 	)
 	t.panel = container.NewVBox(enableRendering)
 	return t.panel
@@ -116,14 +114,14 @@ func (t *TextInfo) reloadTemplates() {
 	t.templates = make([]*Template, 0)
 	files, err := ioutil.ReadDir(Template_Path)
 	if err != nil {
-		l().Warn("read template directory failed: ", err)
+		t.log.Warn("read template directory failed: ", err)
 		return
 	}
 	for _, f := range files {
-		l().Info("loading template: ", f.Name())
+		t.log.Info("loading template: ", f.Name())
 		content, err := ioutil.ReadFile(filepath.Join(Template_Path, f.Name()))
 		if err != nil {
-			l().Warnf("read template file %s failed: %s", f.Name(), err)
+			t.log.Warnf("read template file %s failed: %s", f.Name(), err)
 			continue
 		}
 		parse, err := template.New("info").
@@ -137,7 +135,7 @@ func (t *TextInfo) reloadTemplates() {
 			}).
 			Parse(string(content))
 		if err != nil {
-			l().Warnf("parse template %s failed: %s", f.Name, err)
+			t.log.Warnf("parse template %s failed: %s", f.Name, err)
 			continue
 		}
 		t.templates = append(t.templates, &Template{
@@ -154,15 +152,15 @@ func (t *TextInfo) RenderTemplates() {
 		return
 	}
 	for _, tmpl := range t.templates {
-		l().Trace("rendering template: ", tmpl.Name)
+		t.log.Debug("rendering template: ", tmpl.Name)
 		out, err := os.Create(filepath.Join(Out_Path, tmpl.Name))
 		defer out.Close()
 		if err != nil {
-			l().Warnf("create output file %s failed: %s", tmpl.Name, err)
+			t.log.Warnf("create output file %s failed: %s", tmpl.Name, err)
 			continue
 		}
 		if err = tmpl.Tmpl.Execute(out, t.info); err != nil {
-			l().Warnf("rendering template %s failed: %s", tmpl.Name, err)
+			t.log.Warnf("rendering template %s failed: %s", tmpl.Name, err)
 			return
 		}
 	}
@@ -175,14 +173,14 @@ func (t *TextInfo) OutputCover() {
 	if !t.info.Current.Cover.Exists() {
 		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.emptyCover, 0666)
 		if err != nil {
-			l().Warnf("write cover file failed: %s", err)
+			t.log.Warnf("write cover file failed: %s", err)
 		}
 		return
 	}
 	if t.info.Current.Cover.Data != nil {
 		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.info.Current.Cover.Data, 0666)
 		if err != nil {
-			l().Warnf("write cover file failed: %s", err)
+			t.log.Warnf("write cover file failed: %s", err)
 		}
 		return
 	}
@@ -190,32 +188,32 @@ func (t *TextInfo) OutputCover() {
 		resp, err := resty.New().R().
 			Get(t.info.Current.Cover.Url)
 		if err != nil {
-			l().Warnf("get cover %s content failed: %s", t.info.Current.Cover.Url, err)
+			t.log.Warnf("get cover %s content failed: %s", t.info.Current.Cover.Url, err)
 			return
 		}
 		err = ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), resp.Body(), 0666)
 		if err != nil {
-			l().Warnf("write cover file failed: %s", err)
+			t.log.Warnf("write cover file failed: %s", err)
 		}
 	}()
 }
 
 func (t *TextInfo) registerHandlers() {
-	t.ctr.PlayControl().EventManager().RegisterA(model.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
+	t.ctr.PlayControl().EventManager().RegisterA(events.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
 		t.info.Current = MediaInfo{
 			Index:    0,
-			Title:    event.Data.(model.PlayEvent).Media.Title,
-			Artist:   event.Data.(model.PlayEvent).Media.Artist,
-			Album:    event.Data.(model.PlayEvent).Media.Album,
-			Cover:    event.Data.(model.PlayEvent).Media.Cover,
-			Username: event.Data.(model.PlayEvent).Media.ToUser().Name,
+			Title:    event.Data.(events.PlayEvent).Media.Title,
+			Artist:   event.Data.(events.PlayEvent).Media.Artist,
+			Album:    event.Data.(events.PlayEvent).Media.Album,
+			Cover:    event.Data.(events.PlayEvent).Media.Cover,
+			Username: event.Data.(events.PlayEvent).Media.ToUser().Name,
 		}
 		t.RenderTemplates()
 		t.OutputCover()
 	})
 	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropTimePos, "plugin.txtinfo.timepos", func(event *event.Event) {
-			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				t.info.CurrentTime = 0
 				return
@@ -227,11 +225,11 @@ func (t *TextInfo) registerHandlers() {
 			t.info.CurrentTime = ct
 			t.RenderTemplates()
 		}) != nil {
-		l().Error("register time-pos handler failed")
+		t.log.Error("register time-pos handler failed")
 	}
 	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
 		model.PlayerPropDuration, "plugin.txtinfo.duration", func(event *event.Event) {
-			data := event.Data.(model.PlayerPropertyUpdateEvent).Value
+			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
 			if data == nil {
 				t.info.TotalTime = 0
 				return
@@ -239,12 +237,12 @@ func (t *TextInfo) registerHandlers() {
 			t.info.TotalTime = int(data.(float64))
 			t.RenderTemplates()
 		}) != nil {
-		l().Error("fail to register handler for total time with property duration")
+		t.log.Error("fail to register handler for total time with property duration")
 	}
 	t.ctr.Playlists().GetCurrent().EventManager().RegisterA(
-		model.EventPlaylistUpdate, "plugin.textinfo.playlist", func(event *event.Event) {
+		events.EventPlaylistUpdate, "plugin.textinfo.playlist", func(event *event.Event) {
 			pl := make([]MediaInfo, 0)
-			e := event.Data.(model.PlaylistUpdateEvent)
+			e := event.Data.(events.PlaylistUpdateEvent)
 			for index, m := range e.Playlist.Medias {
 				pl = append(pl, MediaInfo{
 					Index:    index,
@@ -258,8 +256,8 @@ func (t *TextInfo) registerHandlers() {
 			t.RenderTemplates()
 		})
 	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
-		model.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
-			lrcLine := event.Data.(model.LyricUpdateEvent).Lyric
+		events.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
+			lrcLine := event.Data.(events.LyricUpdateEvent).Lyric
 			t.info.Lyric = lrcLine.Now.Lyric
 			t.RenderTemplates()
 		})

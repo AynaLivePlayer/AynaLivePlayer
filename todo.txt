@@ -3,7 +3,7 @@
 - @3 fix handler execution (maybe priority)
 - @4 list refresh
 - @5 delete optimization
-
+- race condition in RichText. i dont care fu
 
 beta
 - web 重连
@@ -13,6 +13,8 @@ beta
 ----
 
 Finished
+- 2023.02.19      : 修复点歌机ui卡死的bug
+- 2023.02.07@0.9.7: 添加播放器
 - 2022.12.27@0.9.6: 闪退bug修复
 - 2022.12.24@0.9.5: ui界面优化，event handler优化-新增任务池模式，歌词加载优化，新房间管理(可以自动连接)
                     本地音频搜索算法优化，

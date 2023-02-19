@@ -1,7 +1,8 @@
 package webinfo
 
 import (
-	"AynaLivePlayer/config"
+	"AynaLivePlayer/common/config"
+	"AynaLivePlayer/core/adapter"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -27,6 +28,7 @@ type WebInfoServer struct {
 	Running   bool
 	Store     *TemplateStore
 	lock      sync.Mutex
+	log       adapter.ILogger
 }
 
 type Client struct {
@@ -35,12 +37,13 @@ type Client struct {
 	Close chan byte
 }
 
-func NewWebInfoServer(port int) *WebInfoServer {
+func NewWebInfoServer(port int, log adapter.ILogger) *WebInfoServer {
 	server := &WebInfoServer{
 		Store:   newTemplateStore(WebTemplateStorePath),
 		Port:    port,
 		Info:    OutInfo{Playlist: make([]MediaInfo, 0)},
 		Clients: map[*Client]int{},
+		log:     log,
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(config.GetAssetPath("webinfo"))))
@@ -61,7 +64,7 @@ func (s *WebInfoServer) tmplList(w http.ResponseWriter, r *http.Request) {
 	d, _ := json.Marshal(s.Store.List())
 	_, err := w.Write(d)
 	if err != nil {
-		lg.Warnf("/api/template/list error: %s", err)
+		s.log.Warnf("/api/template/list error: %s", err)
 		return
 	}
 }
@@ -76,7 +79,7 @@ func (s *WebInfoServer) tmplGet(w http.ResponseWriter, r *http.Request) {
 	d, _ := json.Marshal(s.Store.Get(name))
 	_, err := w.Write(d)
 	if err != nil {
-		lg.Warnf("/api/template/get error: %s", err)
+		s.log.Warnf("/api/template/get error: %s", err)
 		return
 	}
 }
@@ -88,7 +91,7 @@ func (s *WebInfoServer) tmplSave(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Expose-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-	lg.Info(r.Method)
+	s.log.Info(r.Method)
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -98,7 +101,7 @@ func (s *WebInfoServer) tmplSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := r.ParseMultipartForm(1 << 16); err != nil {
-		lg.Warnf("ParseForm() err: %v", err)
+		s.log.Warnf("ParseForm() err: %v", err)
 		return
 	}
 	name := r.FormValue("name")
@@ -106,12 +109,12 @@ func (s *WebInfoServer) tmplSave(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		name = "default"
 	}
-	lg.Infof("change template %s", name)
+	s.log.Infof("change template %s", name)
 	s.Store.Modify(name, tmpl)
 	d, _ := json.Marshal(s.Store.Get(name))
 	_, err := w.Write(d)
 	if err != nil {
-		lg.Warnf("/api/template/save error: %s", err)
+		s.log.Warnf("/api/template/save error: %s", err)
 		return
 	}
 	s.Store.Save(WebTemplateStorePath)
@@ -124,16 +127,16 @@ func (s *WebInfoServer) getInfo(w http.ResponseWriter, r *http.Request) {
 	d, _ := json.Marshal(s.Info)
 	_, err := w.Write(d)
 	if err != nil {
-		lg.Warnf("api get info error: %s", err)
+		s.log.Warnf("api get info error: %s", err)
 		return
 	}
 }
 
 func (s *WebInfoServer) handleInfo(w http.ResponseWriter, r *http.Request) {
-	lg.Debug("connection start")
+	s.log.Debug("connection start")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		lg.Warnf("upgrade error: %s", err)
+		s.log.Warnf("upgrade error: %s", err)
 		return
 	}
 	client := &Client{
@@ -152,27 +155,27 @@ func (s *WebInfoServer) handleInfo(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 	for {
-		lg.Trace("waiting for message")
+		s.log.Debug("waiting for message")
 		select {
 		case data := <-client.Data:
 			writer, err := client.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				lg.Warn("get writer error", err)
+				s.log.Warn("get writer error", err)
 				return
 			}
 
 			if _, err = writer.Write(data); err != nil {
-				lg.Warn("send error:", err)
+				s.log.Warn("send error:", err)
 				return
 			}
 			if err = writer.Close(); err != nil {
-				lg.Warnf("can't close writer: %s", err)
+				s.log.Warnf("can't close writer: %s", err)
 				return
 			}
 		case _ = <-client.Close:
-			lg.Debug("client close")
+			s.log.Debug("client close")
 			if err := client.conn.Close(); err != nil {
-				lg.Warnf("close connection encouter an error: %s", err)
+				s.log.Warnf("close connection encouter an error: %s", err)
 			}
 			return
 		}
@@ -200,7 +203,7 @@ func (s *WebInfoServer) removeClient(c *Client) {
 }
 
 func (s *WebInfoServer) Start() {
-	lg.Debug("WebInfoServer starting...")
+	s.log.Debug("WebInfoServer starting...")
 	s.Running = true
 	go func() {
 		s.Server = &http.Server{
@@ -210,18 +213,18 @@ func (s *WebInfoServer) Start() {
 		err := s.Server.ListenAndServe()
 		s.Running = false
 		if err == http.ErrServerClosed {
-			lg.Info("WebInfoServer closed")
+			s.log.Info("WebInfoServer closed")
 			return
 		}
 		if err != nil {
-			lg.Warnf("Failed to start webinfo server: %s", err)
+			s.log.Warnf("Failed to start webinfo server: %s", err)
 			return
 		}
 	}()
 }
 
 func (s *WebInfoServer) Stop() error {
-	lg.Debug("WebInfoServer stopping...")
+	s.log.Debug("WebInfoServer stopping...")
 	s.lock.Lock()
 	s.Clients = map[*Client]int{}
 	s.lock.Unlock()
