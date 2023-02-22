@@ -5,6 +5,7 @@ import (
 )
 
 type Controller struct {
+	app      adapter.IApplication        `ini:"-"`
 	liveroom adapter.ILiveRoomController `ini:"-"`
 	player   adapter.IPlayController     `ini:"-"`
 	lyric    adapter.ILyricLoader        `ini:"-"`
@@ -24,6 +25,7 @@ func NewController(
 	provider adapter.IProviderController, plugin adapter.IPluginController,
 	log adapter.ILogger) adapter.IControlBridge {
 	cc := &Controller{
+		app:      &AppBilibiliChannel{},
 		liveroom: liveroom,
 		player:   player,
 		playlist: playlist,
@@ -32,6 +34,10 @@ func NewController(
 		log:      log,
 	}
 	return cc
+}
+
+func (c *Controller) App() adapter.IApplication {
+	return c.app
 }
 
 func (c *Controller) LiveRooms() adapter.ILiveRoomController {

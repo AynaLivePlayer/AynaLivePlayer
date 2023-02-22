@@ -5,11 +5,13 @@ import (
 	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/resource"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 )
@@ -34,7 +36,7 @@ func Initialize() {
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
 	App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver.%s", config.ProgramName, config.Version))
+	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver.%s", config.ProgramName, model.Version(config.Version)))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
@@ -74,6 +76,9 @@ func Initialize() {
 	playerWindow.Hide()
 
 	//MainWindow.SetFixedSize(true)
+	if config.General.AutoCheckUpdate {
+		go checkUpdate()
+	}
 }
 
 func showPlayerWindow() {
@@ -93,4 +98,22 @@ func addShortCut() {
 		l().Info("Shortcut pressed: Ctrl+Shift+Right")
 		API.PlayControl().PlayNext()
 	})
+}
+
+func checkUpdate() {
+	l().Info("checking updates...")
+	err := API.App().CheckUpdate()
+	if err != nil {
+		l().Warnf("check update failed", err)
+		return
+	}
+	l().Infof("latest version: v%s", API.App().LatestVersion().Version)
+	if API.App().LatestVersion().Version > API.App().Version().Version {
+		l().Info("new update available")
+		dialog.ShowCustom(
+			i18n.T("gui.update.new_version"),
+			"OK",
+			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
+			MainWindow)
+	}
 }

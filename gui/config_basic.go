@@ -1,11 +1,13 @@
 package gui
 
 import (
+	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui/component"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -79,6 +81,25 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			&API.PlayControl().Config().AutoNextWhenFail,
 			API.PlayControl().Config().AutoNextWhenFail),
 	)
-	b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr)
+	checkUpdateBox := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.auto_check_update")),
+		component.NewCheckOneWayBinding(
+			i18n.T("gui.config.basic.auto_check_update.prompt"),
+			&config.General.AutoCheckUpdate,
+			config.General.AutoCheckUpdate),
+	)
+	checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
+		err := API.App().CheckUpdate()
+		if err != nil {
+			showDialogIfError(err)
+			return
+		}
+		dialog.ShowCustom(
+			i18n.T("gui.update.new_version"),
+			"OK",
+			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
+			MainWindow)
+	})
+	b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr, checkUpdateBox, checkUpdateBtn)
 	return b.panel
 }

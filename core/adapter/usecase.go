@@ -8,6 +8,7 @@ import (
 // IControlBridge is the interface for all controller and
 // all system use cases.
 type IControlBridge interface {
+	App() IApplication
 	LiveRooms() ILiveRoomController
 	PlayControl() IPlayController
 	Playlists() IPlaylistController

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	ProgramName = "卡西米尔唱片机"
-	Version     = "beta 0.9.7"
+	ProgramName        = "卡西米尔唱片机"
+	Version     uint32 = 0x000909
 )
 
 const (

@@ -8,6 +8,18 @@
       "en": "Audio Device",
       "zh-CN": "音频输出设备"
     },
+    "gui.config.basic.auto_check_update": {
+      "en": "Check update at startup",
+      "zh-CN": "自动检查更新"
+    },
+    "gui.config.basic.auto_check_update.prompt": {
+      "en": "Yes",
+      "zh-CN": "确认"
+    },
+    "gui.config.basic.check_update": {
+      "en": "Check Update",
+      "zh-CN": "检查更新"
+    },
     "gui.config.basic.description": {
       "en": "Basic Configuration",
       "zh-CN": "基础设置"
@@ -39,7 +51,7 @@
     "gui.config.basic.skip_when_error.prompt": {
       "en": "Skip",
       "zh-CN": "跳过"
-  },
+    },
     "gui.config.basic.title": {
       "en": "Basic",
       "zh-CN": "基础设置"
@@ -255,6 +267,10 @@
     "gui.tab.search": {
       "en": "Search",
       "zh-CN": "搜索"
+    },
+    "gui.update.new_version": {
+      "en": "New Version Available",
+      "zh-CN": "有新版本可用"
     },
     "plugin.diange.admin": {
       "en": "Admin",

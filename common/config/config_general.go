@@ -2,7 +2,8 @@ package config
 
 type _GeneralConfig struct {
 	BaseConfig
-	Language string
+	Language        string
+	AutoCheckUpdate bool
 }
 
 func (c *_GeneralConfig) Name() string {
@@ -10,5 +11,6 @@ func (c *_GeneralConfig) Name() string {
 }
 
 var General = &_GeneralConfig{
-	Language: "en",
+	Language:        "en",
+	AutoCheckUpdate: true,
 }
