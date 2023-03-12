@@ -24,6 +24,7 @@ type _LogConfig struct {
 	Path           string
 	Level          adapter.LogLevel
 	RedirectStderr bool
+	MaxSize        int64
 }
 
 func (c *_LogConfig) Name() string {
@@ -34,6 +35,7 @@ var Log = &_LogConfig{
 	Path:           "./log.txt",
 	Level:          adapter.LogLevelInfo,
 	RedirectStderr: false, // this should be true if it is in production mode.
+	MaxSize:        5,
 }
 
 func createController(log adapter.ILogger) adapter.IControlBridge {
@@ -59,7 +61,7 @@ func main() {
 	config.LoadFromFile(config.ConfigPath)
 	config.LoadConfig(Log)
 	i18n.LoadLanguage(config.General.Language)
-	log := adapters.Logger.NewLogrus(Log.Path, Log.RedirectStderr)
+	log := adapters.Logger.NewLogrus(Log.Path, Log.RedirectStderr, Log.MaxSize)
 	log.SetLogLevel(Log.Level)
 	log.Info("================Program Start================")
 	log.Infof("================Current Version: %s================", config.Version)
