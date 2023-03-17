@@ -94,11 +94,13 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			showDialogIfError(err)
 			return
 		}
-		dialog.ShowCustom(
-			i18n.T("gui.update.new_version"),
-			"OK",
-			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
-			MainWindow)
+		if API.App().LatestVersion().Version > API.App().Version().Version {
+			dialog.ShowCustom(
+				i18n.T("gui.update.new_version"),
+				"OK",
+				widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
+				MainWindow)
+		}
 	})
 	b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr, checkUpdateBox, checkUpdateBtn)
 	return b.panel

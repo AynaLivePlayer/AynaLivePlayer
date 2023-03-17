@@ -29,7 +29,7 @@ func (l *LogrusLogger) SetLogLevel(level adapter.LogLevel) {
 	}
 }
 
-func NewLogrusLogger(fileName string, redirectStderr bool) *LogrusLogger {
+func NewLogrusLogger(fileName string, redirectStderr bool, maxSize int64) *LogrusLogger {
 	l := logrus.New()
 	l.SetFormatter(
 		&nested.Formatter{
@@ -40,7 +40,14 @@ func NewLogrusLogger(fileName string, redirectStderr bool) *LogrusLogger {
 	var file *os.File
 	var err error
 	if fileName != "" {
-		file, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		fi, err := os.Stat(fileName)
+		if err != nil {
+			file, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0666)
+		} else if fi.Size() > maxSize*1024*1024 {
+			file, err = os.OpenFile(fileName, os.O_TRUNC|os.O_WRONLY, 0666)
+		} else {
+			file, err = os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, 0666)
+		}
 		if err == nil {
 			l.Out = io.MultiWriter(file, os.Stdout)
 		} else {

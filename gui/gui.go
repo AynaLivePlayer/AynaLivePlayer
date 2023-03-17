@@ -104,6 +104,7 @@ func checkUpdate() {
 	l().Info("checking updates...")
 	err := API.App().CheckUpdate()
 	if err != nil {
+		showDialogIfError(err)
 		l().Warnf("check update failed", err)
 		return
 	}
