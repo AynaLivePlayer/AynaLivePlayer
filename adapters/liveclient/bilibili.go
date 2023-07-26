@@ -5,8 +5,11 @@ import (
 	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
+	"encoding/json"
 	"errors"
 	"github.com/aynakeya/blivedm"
+	"github.com/go-resty/resty/v2"
+	"github.com/tidwall/gjson"
 	"strconv"
 	"time"
 )
@@ -64,7 +67,30 @@ func (b *Bilibili) Connect() bool {
 		return true
 	}
 	b.log.Info("[Bilibili LiveChatSDK] Trying Connect Danmu Server")
-	if b.client.InitRoom() && b.client.ConnectDanmuServer() {
+	if !b.client.GetRoomInfo() {
+		b.log.Info("[Bilibili LiveChatSDK] Connect Failed")
+		return false
+	}
+	resp, err := resty.New().R().
+		SetQueryParam("room_id", strconv.Itoa(b.client.RoomId)).
+		Get("https://scene.aynakeya.com:3000/bilisrv/dminfo")
+	if err != nil {
+		b.log.Info("[Bilibili LiveChatSDK] Connect Failed")
+		return false
+	}
+	gjresult := gjson.Parse(resp.String())
+	if gjresult.Get("code").Int() != 0 {
+		b.log.Info("[Bilibili LiveChatSDK] Connect Failed")
+		return false
+	}
+	b.client.DanmuInfo = blivedm.DanmuInfoData{
+		Token: gjresult.Get("data.token").String(),
+	}
+	b.client.Account.UID = int(gjresult.Get("data.uid").Int())
+	if err := json.Unmarshal([]byte(gjresult.Get("data.host_list").String()), &b.client.DanmuInfo.HostList); err != nil {
+		return false
+	}
+	if b.client.ConnectDanmuServer() {
 		b.roomName = b.client.RoomInfo.Title
 		b.status = true
 		b.eventManager.CallA(events.LiveRoomStatusChange, events.StatusChangeEvent{Connected: true, Client: b})
