@@ -1,12 +1,12 @@
 package qiege
 
 import (
-	"AynaLivePlayer/common/config"
-	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/pkg/config"
+	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"

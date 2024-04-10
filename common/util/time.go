@@ -2,6 +2,7 @@ package util
 
 import "fmt"
 
-func FormatTime(time int) string {
-	return fmt.Sprintf("%01d:%02d", time/60, time%60)
+// FormatTime formats time in seconds to string in format "m:ss"
+func FormatTime(sec int) string {
+	return fmt.Sprintf("%01d:%02d", sec/60, sec%60)
 }

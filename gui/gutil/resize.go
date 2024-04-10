@@ -1,12 +1,12 @@
 package gutil
 
 import (
-	"AynaLivePlayer/core/model"
 	"bytes"
 	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/storage"
+	"github.com/AynaLivePlayer/miaosic"
 	"github.com/nfnt/resize"
 	"image"
 	"image/png"
@@ -27,7 +27,7 @@ func ResizeImage(resource fyne.Resource, width int, height int) fyne.Resource {
 	return fyne.NewStaticResource(resource.Name(), buf.Bytes())
 }
 
-func NewImageFromPlayerPicture(picture model.Picture) (*canvas.Image, error) {
+func NewImageFromPlayerPicture(picture miaosic.Picture) (*canvas.Image, error) {
 	var img *canvas.Image
 	if picture.Data != nil {
 		img = canvas.NewImageFromReader(bytes.NewReader(picture.Data), "cover")

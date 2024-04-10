@@ -1,13 +1,13 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/event"
-	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/core/events"
-	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
 	"context"
 	"fyne.io/fyne/v2"
@@ -44,13 +44,16 @@ var PlayController = &PlayControllerContainer{}
 
 func registerPlayControllerHandler() {
 	PlayController.ButtonPrev.OnTapped = func() {
-		API.PlayControl().Seek(0, true)
+		global.EventManager.CallA(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+			Position: 0,
+			Absolute: true,
+		})
 	}
 	PlayController.ButtonSwitch.OnTapped = func() {
-		API.PlayControl().Toggle()
+		global.EventManager.CallA(events.PlayerToggleCmd, events.PlayerToggleCmdEvent{})
 	}
 	PlayController.ButtonNext.OnTapped = func() {
-		API.PlayControl().PlayNext()
+		global.EventManager.CallA(events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
 	}
 
 	PlayController.ButtonLrc.OnTapped = func() {
@@ -64,117 +67,86 @@ func registerPlayControllerHandler() {
 		showPlayerWindow()
 	}
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropPause, "gui.play_controller.pause", func(ev *event.Event) {
-			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
-				return
-			}
-			if data.(bool) {
-				PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
-			} else {
-				PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
-			}
-		}) != nil {
-		l().Error("fail to register handler for switch button with property pause")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyPauseUpdate, "gui.player.controller.paused", func(event *event.Event) {
+		if event.Data.(events.PlayerPropertyPauseUpdateEvent).Paused {
+			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
+		} else {
+			PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
+		}
+		PlayController.ButtonSwitch.Refresh()
+	})
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropPercentPos, "gui.play_controller.percent_pos", func(ev *event.Event) {
-			if PlayController.Progress.Dragging {
-				return
-			}
-			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				PlayController.Progress.Value = 0
-			} else {
-				PlayController.Progress.Value = data.(float64) * 10
-			}
-			PlayController.Progress.Refresh()
-		}) != nil {
-		l().Error("fail to register handler for progress bar with property percent-pos")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyPercentPosUpdate, "gui.player.controller.percent_pos", func(event *event.Event) {
+		if PlayController.Progress.Dragging {
+			return
+		}
+		PlayController.Progress.Value = event.Data.(events.PlayerPropertyPercentPosUpdateEvent).PercentPos * 10
+		PlayController.Progress.Refresh()
+	})
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropIdleActive, "gui.play_controller.idle_active", func(ev *event.Event) {
-			isIdle := ev.Data.(events.PlayerPropertyUpdateEvent).Value.(bool)
-			l().Debug("receive idle active ", isIdle, " set/reset info")
-			// todo: @3
-			if isIdle {
-				PlayController.Progress.Value = 0
-				PlayController.Progress.Max = 0
-				//PlayController.Title.SetText("Title")
-				//PlayController.Artist.SetText("Artist")
-				//PlayController.Username.SetText("Username")
-				//PlayController.SetDefaultCover()
-			} else {
-				PlayController.Progress.Max = 1000
-			}
-		}) != nil {
-		l().Error("fail to register handler for progress bar with property idle-active")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyIdleActiveUpdate, "gui.player.controller.idle_active", func(event *event.Event) {
+		isIdle := event.Data.(events.PlayerPropertyIdleActiveUpdateEvent).IsIdle
+		// todo: @3
+		if isIdle {
+			PlayController.Progress.Value = 0
+			PlayController.Progress.Max = 0
+			//PlayController.Title.SetText("Title")
+			//PlayController.Artist.SetText("Artist")
+			//PlayController.Username.SetText("Username")
+			//PlayController.SetDefaultCover()
+		} else {
+			PlayController.Progress.Max = 1000
+		}
+	})
 
 	PlayController.Progress.Max = 0
 	PlayController.Progress.OnDragEnd = func(f float64) {
-		API.PlayControl().Seek(f/10, false)
+		global.EventManager.CallA(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+			Position: f / 10,
+			Absolute: false,
+		})
 	}
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropTimePos, "gui.play_controller.time_pos", func(ev *event.Event) {
-			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				PlayController.CurrentTime.SetText("0:00")
-				return
-			}
-			PlayController.CurrentTime.SetText(util.FormatTime(int(data.(float64))))
-		}) != nil {
-		l().Error("fail to register handler for current time with property time-pos")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "gui.player.controller.time_pos", func(event *event.Event) {
+		PlayController.CurrentTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos)))
+	})
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropDuration, "gui.play_controller.duration", func(ev *event.Event) {
-			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				PlayController.TotalTime.SetText("0:00")
-				return
-			}
-			PlayController.TotalTime.SetText(util.FormatTime(int(data.(float64))))
-		}) != nil {
-		l().Error("fail to register handler for total time with property duration")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyDurationUpdate, "gui.player.controller.duration", func(event *event.Event) {
+		PlayController.TotalTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyDurationUpdateEvent).Duration)))
+	})
 
-	if API.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropVolume, "gui.play_controller.volume", func(ev *event.Event) {
-			data := ev.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				PlayController.Volume.Value = 0
-			} else {
-				PlayController.Volume.Value = data.(float64)
-			}
-
-			PlayController.Volume.Refresh()
-		}) != nil {
-		l().Error("fail to register handler for progress bar with property percent-pos")
-	}
+	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "gui.player.controller.volume", func(event *event.Event) {
+		PlayController.Volume.Value = event.Data.(events.PlayerPropertyVolumeUpdateEvent).Volume
+		PlayController.Volume.Refresh()
+	})
 
 	PlayController.Volume.OnChanged = func(f float64) {
-		API.PlayControl().SetVolume(f)
+		global.EventManager.CallA(events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
+			Volume: f,
+		})
 	}
 
-	API.PlayControl().EventManager().RegisterA(events.EventPlay, "gui.player.updateinfo", func(event *event.Event) {
-		l().Debug("receive EventPlay update player info")
-		media := event.Data.(events.PlayEvent).Media
+	global.EventManager.RegisterA(events.PlayerPlayingUpdate, "gui.player.updateinfo", func(event *event.Event) {
+		if event.Data.(events.PlayerPlayingUpdateEvent).Removed {
+			PlayController.Progress.Value = 0
+			PlayController.Progress.Max = 0
+			PlayController.Title.SetText("Title")
+			PlayController.Artist.SetText("Artist")
+			PlayController.Username.SetText("Username")
+			PlayController.SetDefaultCover()
+			return
+		}
+		media := event.Data.(events.PlayerPlayingUpdateEvent).Media
 		//PlayController.Title.SetText(
 		//	util.StringNormalize(media.Title, 16, 16))
 		//PlayController.Artist.SetText(
 		//	util.StringNormalize(media.Artist, 16, 16))
 		PlayController.Title.SetText(
-			media.Title)
+			media.Info.Title)
 		PlayController.Artist.SetText(
-			media.Artist)
+			media.Info.Artist)
 		PlayController.Username.SetText(media.ToUser().Name)
-		if !media.Cover.Exists() {
+		if !media.Info.Cover.Exists() {
 			PlayController.SetDefaultCover()
 		} else {
 			if PlayController.coverLoader != nil {
@@ -185,7 +157,7 @@ func registerPlayControllerHandler() {
 			go func() {
 				ch := make(chan *canvas.Image)
 				go func() {
-					picture, err := gutil.NewImageFromPlayerPicture(media.Cover)
+					picture, err := gutil.NewImageFromPlayerPicture(media.Info.Cover)
 					if err != nil {
 						ch <- nil
 						return
@@ -207,7 +179,6 @@ func registerPlayControllerHandler() {
 			}()
 		}
 	})
-	return
 }
 
 func createPlayControllerV2() fyne.CanvasObject {
@@ -233,7 +204,7 @@ func createPlayControllerV2() fyne.CanvasObject {
 	volumeControl := component.NewFixedHSplitContainer(
 		widget.NewLabel(""),
 		container.NewBorder(nil, nil,
-			widget.NewIcon(theme.VolumeMuteIcon()),
+			widget.NewIcon(theme.VolumeUpIcon()),
 			widget.NewLabel("       "),
 			PlayController.Volume), 0.05)
 	volumeControl.SeparatorThickness = 0
@@ -243,15 +214,6 @@ func createPlayControllerV2() fyne.CanvasObject {
 		volumeControl,
 		0.4)
 	controls.SeparatorThickness = 0
-
-	//controls := container.NewPadded(container.NewBorder(nil, nil,
-	//	buttonsBox, nil,
-	//	container.NewGridWithColumns(
-	//		2,
-	//		container.NewMax(),
-	//		container.NewBorder(nil, nil, widget.NewIcon(theme.VolumeMuteIcon()), PlayController.ButtonLrc,
-	//			PlayController.Volume)),
-	//))
 
 	PlayController.Progress = component.NewSliderPlus(0, 1000)
 	PlayController.CurrentTime = widget.NewLabel("0:00")

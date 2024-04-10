@@ -1,14 +1,14 @@
 package textinfo
 
 import (
-	"AynaLivePlayer/common/config"
-	"AynaLivePlayer/common/event"
-	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/pkg/config"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"

@@ -1,20 +1,26 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/i18n"
+	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"sync"
 )
 
 var SearchResult = &struct {
 	List  *widget.List
-	Items []*model.Media
+	Items []model.Media
+	mux   sync.Mutex
 }{
-	Items: []*model.Media{},
+	Items: []model.Media{},
+	mux:   sync.Mutex{},
 }
 
 func createSearchList() fyne.CanvasObject {
@@ -36,20 +42,32 @@ func createSearchList() fyne.CanvasObject {
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				SearchResult.Items[id].Title)
+				SearchResult.Items[id].Info.Title)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
-				SearchResult.Items[id].Artist)
+				SearchResult.Items[id].Info.Artist)
 			object.(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Label).SetText(
-				SearchResult.Items[id].Meta.(model.Meta).Name)
+				SearchResult.Items[id].Info.Meta.Provider)
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			btns[0].(*widget.Button).OnTapped = func() {
-				showDialogIfError(API.PlayControl().Play(SearchResult.Items[id]))
+				global.EventManager.CallA(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
+					Media: SearchResult.Items[id],
+				})
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				API.Playlists().GetCurrent().Push(SearchResult.Items[id])
+				global.EventManager.CallA(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
+					Media:    SearchResult.Items[id],
+					Position: -1,
+				})
 			}
 		})
+	global.EventManager.RegisterA(events.SearchResultUpdate, "gui.search.update_result", func(event *event.Event) {
+		items := event.Data.(events.SearchResultUpdateEvent).Medias
+		SearchResult.Items = items
+		SearchResult.mux.Lock()
+		SearchResult.List.Refresh()
+		SearchResult.mux.Unlock()
+	})
 	return container.NewBorder(
 		container.NewBorder(nil, nil,
 			widget.NewLabel("#"), widget.NewLabel(i18n.T("gui.search.operation")),

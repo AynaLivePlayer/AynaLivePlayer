@@ -3,7 +3,6 @@ package gui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -33,12 +32,6 @@ func newContextMenuButton(label string, menu *fyne.Menu) *ContextMenuButton {
 
 	b.ExtendBaseWidget(b)
 	return b
-}
-
-func showDialogIfError(err error) {
-	if err != nil {
-		dialog.ShowError(err, MainWindow)
-	}
 }
 
 func newCheckInit(name string, changed func(bool), checked bool) *widget.Check {

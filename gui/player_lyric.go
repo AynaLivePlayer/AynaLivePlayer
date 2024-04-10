@@ -1,19 +1,21 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/core/events"
-	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/AynaLivePlayer/miaosic"
 )
 
-func createLyricObj(lyric *model.Lyric) []fyne.CanvasObject {
-	lrcs := make([]fyne.CanvasObject, len(lyric.Lyrics))
+func createLyricObj(lyric *miaosic.Lyrics) []fyne.CanvasObject {
+	lrcs := make([]fyne.CanvasObject, len(lyric.Content))
 	for i := 0; i < len(lrcs); i++ {
 		lr := widget.NewLabelWithStyle(
-			lyric.Lyrics[i].Lyric,
+			lyric.Content[i].Lyric,
 			fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 		//lr.Wrapping = fyne.TextWrapWord
 		// todo fix fyne bug
@@ -26,10 +28,10 @@ func createLyricObj(lyric *model.Lyric) []fyne.CanvasObject {
 func createLyricWindow() fyne.Window {
 
 	// create widgets
-	w := App.NewWindow("Lyric")
+	w := App.NewWindow(i18n.T("gui.lyric.title"))
 	currentLrc := newLabelWithWrapping("", fyne.TextWrapBreak)
 	currentLrc.Alignment = fyne.TextAlignCenter
-	fullLrc := container.NewVBox(createLyricObj(API.PlayControl().GetLyric().Get())...)
+	fullLrc := container.NewVBox()
 	lrcWindow := container.NewVScroll(fullLrc)
 	prevIndex := 0
 	w.SetContent(container.NewBorder(nil,
@@ -40,50 +42,44 @@ func createLyricWindow() fyne.Window {
 	w.CenterOnScreen()
 
 	// register handlers
-	API.PlayControl().GetLyric().EventManager().RegisterA(
-		events.EventLyricUpdate, "player.lyric.current_lyric", func(event *event.Event) {
-			e := event.Data.(events.LyricUpdateEvent)
-			if prevIndex >= len(fullLrc.Objects) || e.Lyric.Index >= len(fullLrc.Objects) {
+	global.EventManager.RegisterA(
+		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", func(event *event.Event) {
+			e := event.Data.(events.PlayerLyricPosUpdateEvent)
+			logger.Debugf("lyric update", e)
+			if prevIndex >= len(fullLrc.Objects) || e.CurrentIndex >= len(fullLrc.Objects) {
 				// fix race condition
 				return
 			}
-			if e.Lyric == nil {
+			if e.CurrentIndex == -1 {
 				currentLrc.SetText("")
 				return
 			}
 			fullLrc.Objects[prevIndex].(*widget.Label).TextStyle.Bold = false
 			fullLrc.Objects[prevIndex].Refresh()
-			fullLrc.Objects[e.Lyric.Index].(*widget.Label).TextStyle.Bold = true
-			fullLrc.Objects[e.Lyric.Index].Refresh()
-			prevIndex = e.Lyric.Index
-			currentLrc.SetText(e.Lyric.Now.Lyric)
+			fullLrc.Objects[e.CurrentIndex].(*widget.Label).TextStyle.Bold = true
+			fullLrc.Objects[e.CurrentIndex].Refresh()
+			prevIndex = e.CurrentIndex
+			currentLrc.SetText(e.CurrentLine.Lyric)
 			lrcWindow.Scrolled(&fyne.ScrollEvent{
 				Scrolled: fyne.Delta{
 					DX: 0,
-					DY: lrcWindow.Offset.Y - float32(e.Lyric.Index-2)/float32(e.Lyric.Total)*lrcWindow.Content.Size().Height,
+					DY: lrcWindow.Offset.Y - float32(e.CurrentIndex-2)/float32(e.Total)*lrcWindow.Content.Size().Height,
 				},
 			})
 			fullLrc.Refresh()
 		})
-	API.PlayControl().GetLyric().EventManager().RegisterA(
-		events.EventLyricReload, "player.lyric.new_media", func(event *event.Event) {
-			e := event.Data.(events.LyricReloadEvent)
-			lrcs := make([]string, len(e.Lyrics.Lyrics))
-			for i := 0; i < len(lrcs); i++ {
-				lrcs[i] = e.Lyrics.Lyrics[i].Lyric
-			}
-			fullLrc.Objects = createLyricObj(e.Lyrics)
-			//fullLrc.SetText(strings.Join(lrcs, "\n"))
-			//fullLrc.Segments[0] = &widget.TextSegment{
-			//	Style: widget.RichTextStyleInline,
-			//	Text:  strings.Join(lrcs, "\n\n"),
-			//}
-			lrcWindow.Refresh()
-		})
+
+	global.EventManager.RegisterA(events.PlayerLyricReload, "player.lyric.current_lyric", func(event *event.Event) {
+		e := event.Data.(events.PlayerLyricReloadEvent)
+		fullLrc.Objects = createLyricObj(&e.Lyrics)
+		lrcWindow.Refresh()
+	})
+
+	global.EventManager.CallA(events.PlayerLyricRequestCmd, events.PlayerLyricRequestCmdEvent{})
 
 	w.SetOnClosed(func() {
-		API.PlayControl().GetLyric().EventManager().Unregister("player.lyric.current_lyric")
-		API.PlayControl().GetLyric().EventManager().Unregister("player.lyric.new_media")
+		global.EventManager.Unregister("player.lyric.current_lyric")
+		global.EventManager.Unregister("player.lyric.new_media")
 		PlayController.LrcWindowOpen = false
 	})
 	return w

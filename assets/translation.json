@@ -4,6 +4,10 @@
     "zh-CN"
   ],
   "Messages": {
+    "default web protocol. enter room id to connect.": {
+      "en": "default web protocol. enter room id to connect.",
+      "zh-CN": "网页弹幕协议，请输入房间号"
+    },
     "gui.config.basic.audio_device": {
       "en": "Audio Device",
       "zh-CN": "音频输出设备"
@@ -71,6 +75,10 @@
     "gui.history.user": {
       "en": "User",
       "zh-CN": "用户"
+    },
+    "gui.lyric.title": {
+      "en": "Lyric",
+      "zh-CN": "歌词"
     },
     "gui.player.button.lrc": {
       "en": "lrc",
@@ -167,6 +175,10 @@
     "gui.room.add.id_url": {
       "en": "Room ID",
       "zh-CN": "房间号"
+    },
+    "gui.room.add.name": {
+      "en": "Display Name",
+      "zh-CN": "显示名"
     },
     "gui.room.add.prompt": {
       "en": "enter room id",
@@ -271,6 +283,10 @@
     "gui.update.new_version": {
       "en": "New Version Available",
       "zh-CN": "有新版本可用"
+    },
+    "open bilibili live protocol. enter client key to connect.": {
+      "en": "open bilibili live protocol. enter client key to connect.",
+      "zh-CN": "新版b站协议，输入身份码"
     },
     "plugin.diange.admin": {
       "en": "Admin",

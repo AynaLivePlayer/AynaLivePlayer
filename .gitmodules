@@ -1,0 +1,6 @@
+[submodule "pkg/miaosic"]
+	path = pkg/miaosic
+	url = git@github.com:AynaLivePlayer/miaosic.git
+[submodule "pkg/liveroom-sdk"]
+	path = pkg/liveroom-sdk
+	url = git@github.com:AynaLivePlayer/liveroom-sdk.git

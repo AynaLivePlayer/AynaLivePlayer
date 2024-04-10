@@ -1,8 +1,8 @@
 package adapter
 
 import (
-	"AynaLivePlayer/common/event"
 	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/pkg/event"
 )
 
 type PlayerCtor func(ev *event.Manager, log ILogger) IPlayer

@@ -1,40 +1,26 @@
 package model
 
-import (
-	"fmt"
-)
+import "github.com/AynaLivePlayer/liveroom-sdk"
+
+type LiveRoomConfig struct {
+	AutoConnect bool `json:"auto_connect"`
+}
 
 type LiveRoom struct {
-	ClientName    string
-	ID            string
-	Title         string
-	AutoConnect   bool
-	AutoReconnect bool
+	LiveRoom liveroom.LiveRoom `json:"live_room"`
+	Config   LiveRoomConfig    `json:"config"`
+	Title    string            `json:"title"`
+	Status   bool              `json:"-"`
 }
 
-func (r *LiveRoom) String() string {
-	return fmt.Sprintf("<LiveRooms %s:%s>", r.ClientName, r.ID)
+func (r *LiveRoom) DisplayName() string {
+	if r.Title != "" {
+		return r.Title
+	}
+	return r.LiveRoom.Identifier()
 }
 
-func (r *LiveRoom) Identifier() string {
-	return fmt.Sprintf("%s_%s", r.ClientName, r.ID)
-}
-
-type UserMedal struct {
-	Name   string
-	Level  int
-	RoomID string
-}
-
-type DanmuUser struct {
-	Uid       string
-	Username  string
-	Medal     UserMedal
-	Admin     bool
-	Privilege int
-}
-
-type DanmuMessage struct {
-	User    DanmuUser
-	Message string
+type LiveRoomProviderInfo struct {
+	Name        string
+	Description string
 }

@@ -1,3 +1,7 @@
 .idea
 assets/webinfo/*.html
 assets/webinfo/assets
+music
+liverooms.json
+playlists.json
+textinfo
