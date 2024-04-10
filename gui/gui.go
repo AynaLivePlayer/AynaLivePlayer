@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	config2 "AynaLivePlayer/pkg/config"
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
@@ -36,7 +36,7 @@ func Initialize() {
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.New()
 	App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config2.ProgramName, model.Version(config2.Version)))
+	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
@@ -63,7 +63,7 @@ func Initialize() {
 	MainWindow.SetIcon(resource.ImageIcon)
 	MainWindow.SetContent(tabs)
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
-	MainWindow.Resize(fyne.NewSize(960, 480))
+	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
 
 	setupPlayerWindow()
 
@@ -78,7 +78,7 @@ func Initialize() {
 			dialog.ShowError(err, MainWindow)
 		})
 
-	//MainWindow.SetFixedSize(true)
+	MainWindow.SetFixedSize(true)
 	//if config2.General.AutoCheckUpdate {
 	//	go checkUpdate()
 	//}

@@ -10,7 +10,7 @@ import (
 
 const (
 	ProgramName        = "卡西米尔唱片机"
-	Version     uint32 = 0x00090b
+	Version     uint32 = 0x010000
 )
 
 const (
