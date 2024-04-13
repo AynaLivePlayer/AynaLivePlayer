@@ -40,9 +40,9 @@ func createSearchBar() fyne.CanvasObject {
 		})
 	})
 
-	global.EventManager.RegisterA(events.SearchProviderUpdate,
+	global.EventManager.RegisterA(events.MediaProviderUpdate,
 		"gui.search.provider.update", func(event *event.Event) {
-			providers := event.Data.(events.SearchProviderUpdateEvent)
+			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))
 			copy(s, providers.Providers)
 			SearchBar.UseSource.Options = s

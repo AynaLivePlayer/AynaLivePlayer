@@ -29,6 +29,7 @@ func createLyricLoader() {
 		if err == nil && len(lyric) > 0 {
 			lyricManager.Lyric = lyric[0]
 		} else {
+			lyricManager.Lyric = miaosic.ParseLyrics("", "")
 			log.Errorf("failed to get lyric for %s (%s): %s", data.Media.Info.Title, data.Media.Info.Meta.ID(), err)
 		}
 		global.EventManager.CallA(events.PlayerLyricReload, events.PlayerLyricReloadEvent{

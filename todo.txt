@@ -5,9 +5,14 @@
 - @5 delete optimization
 - race condition in RichText. i dont care fu
 
+- info-server 歌词服务器，用于媒体源没有歌词的情况
+- 媒体源 - 歌单信息获取
+- web弹幕协议的断线handler
+- 架构重构
+- 黑名单
+
 beta
 - web 重连
-- 黑名单
 - bilibili 歌词来源
 
 ----

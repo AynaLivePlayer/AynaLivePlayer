@@ -34,24 +34,6 @@ var Log = &_LogConfig{
 	MaxSize:        5,
 }
 
-//func createController(log adapter.ILogger) adapter.IControlBridge {
-//	logbridge := log.WithModule("ControlBridge")
-//	em := event.MainManager.NewChildManager()
-//	liveroom := internal.NewLiveRoomController(
-//		logbridge)
-//	lyric := internal.NewLyricLoader()
-//	provider := internal.NewProviderController(logbridge)
-//	playlist := internal.NewPlaylistController(em, logbridge, provider)
-//	plugin := internal.NewPluginController(logbridge)
-//	mpvPlayer := player.NewMpvPlayer(em, logbridge)
-//	playControl := internal.NewPlayerController(mpvPlayer, playlist, lyric, provider, logbridge)
-//	ctr := internal.NewController(
-//		liveroom, playControl, playlist, provider, plugin,
-//		logbridge,
-//	)
-//	return ctr
-//}
-
 func setupGlobal() {
 	global.EventManager = event.NewManger(128, 16)
 	global.Logger = loggerRepo.NewZapColoredLogger()
@@ -66,7 +48,6 @@ func main() {
 	setupGlobal()
 	global.Logger.Info("================Program Start================")
 	global.Logger.Infof("================Current Version: %s================", model.Version(config.Version))
-	//mainController := createController(log)
 	internal.Initialize()
 	gui.Initialize()
 	global.EventManager.Start()

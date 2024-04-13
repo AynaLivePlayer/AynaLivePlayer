@@ -11,7 +11,6 @@ type User struct {
 
 var PlaylistUser = User{Name: "Playlists"}
 var SystemUser = User{Name: "System"}
-var HistoryUser = User{Name: "History"}
 
 type Media struct {
 	Info miaosic.MediaInfo

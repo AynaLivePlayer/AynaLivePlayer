@@ -1,13 +1,13 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/util"
 	"AynaLivePlayer/resource"
 	"context"
 	"fyne.io/fyne/v2"

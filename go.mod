@@ -12,14 +12,11 @@ require (
 	fyne.io/x/fyne v0.0.0-20240326131024-3ba9170cc3be
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
 	github.com/AynaLivePlayer/miaosic v0.1.5
-	github.com/XiaoMengXinX/Music163Api-Go v0.1.30
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/aynakeya/go-mpv v0.0.6
-	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-colorable v0.1.12
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/sirupsen/logrus v1.9.3
@@ -36,10 +33,12 @@ require (
 require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e // indirect
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
+	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/aynakeya/deepcolor v1.0.2 // indirect
 	github.com/aynakeya/open-bilibili-live v0.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25 // indirect
 	github.com/fredbi/uri v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe // indirect
@@ -51,9 +50,11 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect

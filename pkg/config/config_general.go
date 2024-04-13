@@ -6,6 +6,7 @@ type _GeneralConfig struct {
 	Height          float32
 	Language        string
 	AutoCheckUpdate bool
+	ShowSystemTray  bool
 }
 
 func (c *_GeneralConfig) Name() string {
@@ -14,6 +15,7 @@ func (c *_GeneralConfig) Name() string {
 
 var General = &_GeneralConfig{
 	Language:        "zh-CN",
+	ShowSystemTray:  false,
 	AutoCheckUpdate: true,
 	Width:           960,
 	Height:          480,

@@ -2,7 +2,6 @@ package webinfo
 
 import (
 	"AynaLivePlayer/adapters/logger"
-	"AynaLivePlayer/common/util"
 	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
@@ -11,6 +10,7 @@ import (
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/util"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

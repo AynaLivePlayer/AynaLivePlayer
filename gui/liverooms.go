@@ -106,6 +106,7 @@ func createRoomSelector() fyne.CanvasObject {
 		if id >= len(RoomTab.rooms) {
 			return
 		}
+		logger.Infof("Select room %s", RoomTab.rooms[id].LiveRoom.Identifier())
 		RoomTab.Index = id
 		room := RoomTab.rooms[RoomTab.Index]
 		RoomTab.RoomTitle.SetText(room.DisplayName())
@@ -141,6 +142,7 @@ func registerRoomHandlers() {
 		events.LiveRoomRoomsUpdate,
 		"gui.liveroom.rooms_update",
 		func(event *event.Event) {
+			logger.Infof("Update rooms")
 			data := event.Data.(events.LiveRoomRoomsUpdateEvent)
 			RoomTab.lock.Lock()
 			RoomTab.rooms = data.Rooms

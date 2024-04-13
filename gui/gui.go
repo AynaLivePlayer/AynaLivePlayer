@@ -34,7 +34,7 @@ func Initialize() {
 	black_magic()
 	logger.Info("Initializing GUI")
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
-	App = app.New()
+	App = app.NewWithID(config.ProgramName)
 	App.Settings().SetTheme(&myTheme{})
 	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
 
@@ -48,12 +48,12 @@ func Initialize() {
 		container.NewTabItem(i18n.T("gui.tab.room"),
 			container.NewBorder(nil, nil, createRoomSelector(), nil, createRoomController()),
 		),
-		//container.NewTabItem(i18n.T("gui.tab.playlist"),
-		//	container.NewBorder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
-		//),
-		//container.NewTabItem(i18n.T("gui.tab.history"),
-		//	container.NewBorder(nil, nil, nil, nil, createHistoryList()),
-		//),
+		container.NewTabItem(i18n.T("gui.tab.playlist"),
+			container.NewBorder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
+		),
+		container.NewTabItem(i18n.T("gui.tab.history"),
+			container.NewBorder(nil, nil, nil, nil, createHistoryList()),
+		),
 		//container.NewTabItem(i18n.T("gui.tab.config"),
 		//	createConfigLayout(),
 		//),
@@ -79,6 +79,9 @@ func Initialize() {
 		})
 
 	MainWindow.SetFixedSize(true)
+	if config.General.ShowSystemTray {
+		setupSysTray()
+	}
 	//if config2.General.AutoCheckUpdate {
 	//	go checkUpdate()
 	//}

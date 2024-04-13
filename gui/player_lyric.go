@@ -26,7 +26,6 @@ func createLyricObj(lyric *miaosic.Lyrics) []fyne.CanvasObject {
 }
 
 func createLyricWindow() fyne.Window {
-
 	// create widgets
 	w := App.NewWindow(i18n.T("gui.lyric.title"))
 	currentLrc := newLabelWithWrapping("", fyne.TextWrapBreak)
@@ -45,7 +44,7 @@ func createLyricWindow() fyne.Window {
 	global.EventManager.RegisterA(
 		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", func(event *event.Event) {
 			e := event.Data.(events.PlayerLyricPosUpdateEvent)
-			logger.Debugf("lyric update", e)
+			logger.Debug("lyric update", e)
 			if prevIndex >= len(fullLrc.Objects) || e.CurrentIndex >= len(fullLrc.Objects) {
 				// fix race condition
 				return

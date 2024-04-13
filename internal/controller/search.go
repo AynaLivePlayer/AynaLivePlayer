@@ -31,8 +31,4 @@ func handleSearch() {
 					Medias: medias,
 				})
 		})
-	global.EventManager.CallA(
-		events.SearchProviderUpdate, events.SearchProviderUpdateEvent{
-			Providers: miaosic.ListAvailableProviders(),
-		})
 }

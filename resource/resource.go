@@ -1,20 +1,11 @@
 package resource
 
-//var ProgramIcon = []byte{}
-//var EmptyImage = []byte{}
-//
-//func init() {
-//	loadResource(config.GetAssetPath("icon.jpg"), &ProgramIcon)
-//	loadResource(config.GetAssetPath("empty.png"), &EmptyImage)
-//}
-//
-//func loadResource(path string, res *[]byte) {
-//	if file, err := ioutil.ReadFile(path); err == nil {
-//		*res = file
-//	}
-//}
+import "fyne.io/fyne/v2"
 
-var ImageEmpty = resImageEmpty
+var ImageEmpty = &fyne.StaticResource{
+	StaticName:    "flat-color-icons--audio-file.svg",
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 48 48\"><path fill=\"none\" d=\"M204 0h48v48h-48z\"/><path fill=\"#90caf9\" d=\"M244 45h-32V3h22l10 10z\"/><path fill=\"#e1f5fe\" d=\"M242.5 14H233V4.5z\"/><g fill=\"#1976d2\"><circle cx=\"227\" cy=\"30\" r=\"4\"/><path d=\"m234 21l-5-2v11h2v-7.1l3 1.1z\"/></g><path fill=\"#90caf9\" d=\"M40 45H8V3h22l10 10z\"/><path fill=\"#e1f5fe\" d=\"M38.5 14H29V4.5z\"/><g fill=\"#1976d2\"><circle cx=\"23\" cy=\"30\" r=\"4\"/><path d=\"m30 21l-5-2v11h2v-7.1l3 1.1z\"/></g></svg>"),
+}
 var ImageIcon = resImageIcon
 var FontMSYaHei = resFontMSYaHei
 var FontMSYaHeiBold = resFontMSYaHeiBold

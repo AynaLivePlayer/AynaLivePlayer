@@ -1,5 +1,7 @@
 package model
 
+import "github.com/AynaLivePlayer/miaosic"
+
 type PlaylistMode int
 
 const (
@@ -11,8 +13,19 @@ const (
 type PlaylistID string
 
 const (
-	PlaylistIDPlayer    PlaylistID = "player"
-	PlaylistIDSystem    PlaylistID = "system"
-	PlaylistIDHistory   PlaylistID = "history"
-	PlaylistIDPlaylists PlaylistID = "playlists"
+	PlaylistIDPlayer  PlaylistID = "player"
+	PlaylistIDSystem  PlaylistID = "system"
+	PlaylistIDHistory PlaylistID = "history"
 )
+
+type PlaylistInfo struct {
+	Meta  miaosic.MetaData
+	Title string
+}
+
+func (p PlaylistInfo) DisplayName() string {
+	if p.Title != "" {
+		return p.Title
+	}
+	return p.Meta.ID()
+}

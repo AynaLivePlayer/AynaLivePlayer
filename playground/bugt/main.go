@@ -23,7 +23,7 @@ func main() {
 
 func Regen(w fyne.Window) {
 	tabs := container.NewDocTabs()
-	for _, datum := range generateData(100) {
+	for _, datum := range generateData(600) {
 		tabs.Append(newItemTab(&datum))
 	}
 	w.SetContent(tabs)
@@ -38,7 +38,7 @@ func generateData(n int) (result []int) {
 
 func newItemTab(i *int) *container.TabItem {
 	c := container.NewVBox(
-		BindIntWithEntry(i),
+		BindIntWithLabel(i),
 		widget.NewButton("Regen", func() {
 			Regen(w)
 		}),
