@@ -68,7 +68,7 @@ func (d *Qiege) Disable() error {
 func (d *Qiege) handleMessage(event *event.Event) {
 	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
 	msgs := strings.Split(message.Message, " ")
-	if len(msgs) < 1 || len(msgs[0]) == 0 {
+	if len(msgs) < 1 || msgs[0] != d.CustomCMD {
 		return
 	}
 	if d.UserPermission {

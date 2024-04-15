@@ -1,0 +1,12 @@
+[
+  {
+    "live_room": {
+      "provider": "biliweb",
+      "room": "3819533"
+    },
+    "config": {
+      "auto_connect": false
+    },
+    "title": "web 3819533"
+  }
+]

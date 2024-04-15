@@ -10,6 +10,7 @@ import (
 	"errors"
 	liveroomsdk "github.com/AynaLivePlayer/liveroom-sdk"
 	"github.com/AynaLivePlayer/liveroom-sdk/provider/openblive"
+	"github.com/AynaLivePlayer/liveroom-sdk/provider/webdm"
 )
 
 type liveroom struct {
@@ -26,7 +27,7 @@ func Initialize() {
 
 	liveroomsdk.RegisterProvider(openblive.NewOpenBLiveClientProvider(cfg.ApiServer, 1661006726438))
 	// ignore web danmu client
-	//liveroomsdk.RegisterProvider(webdm.NewWebDanmuClientProvider(cfg.ApiServer))
+	liveroomsdk.RegisterProvider(webdm.NewWebDanmuClientProvider(cfg.ApiServer))
 
 	liveRooms = make(map[string]*liveroom, 0)
 

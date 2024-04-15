@@ -40,14 +40,6 @@
       "en": "User Playlist",
       "zh-CN": "用户歌单"
     },
-    "gui.config.basic.skip_playlist": {
-      "en": "Skip Media From System Playlist",
-      "zh-CN": "跳过闲置歌单"
-    },
-    "gui.config.basic.skip_playlist.prompt": {
-      "en": "Skip",
-      "zh-CN": "跳过"
-    },
     "gui.config.basic.skip_when_error": {
       "en": "Skip this Media On Error",
       "zh-CN": "跳过获取失败的歌曲"
@@ -331,6 +323,14 @@
     "plugin.diange.queue_max": {
       "en": "Max Queue",
       "zh-CN": "最大点歌数"
+    },
+    "plugin.diange.skip_playlist": {
+      "en": "Skip Media From System Playlist",
+      "zh-CN": "跳过闲置歌单"
+    },
+    "plugin.diange.skip_playlist.prompt": {
+      "en": "Skip",
+      "zh-CN": "跳过"
     },
     "plugin.diange.source.command": {
       "en": "command",

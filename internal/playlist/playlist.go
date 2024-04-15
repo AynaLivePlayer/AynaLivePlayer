@@ -42,8 +42,8 @@ func (p *playlistConfig) OnSave() {
 
 var cfg = &playlistConfig{
 	PlayerPlaylistMode: model.PlaylistModeNormal,
-	SystemPlaylistMode: model.PlaylistModeNormal,
-	PlaylistsPath:      "playlists.json",
+	SystemPlaylistMode: model.PlaylistModeRandom,
+	PlaylistsPath:      "./config/playlists.json",
 	playlists:          make([]miaosic.Playlist, 0),
 }
 

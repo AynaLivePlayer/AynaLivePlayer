@@ -105,13 +105,6 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	outputDevice := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("gui.config.basic.audio_device")), nil,
 		deviceSel)
-	skipPlaylistCheck := widget.NewCheck(i18n.T("gui.config.basic.skip_playlist"), func(b bool) {
-
-	})
-	skipPlaylist := container.NewHBox(
-		widget.NewLabel(i18n.T("gui.config.basic.skip_playlist")),
-		skipPlaylistCheck,
-	)
 	//skipWhenErr := container.NewHBox(
 	//	widget.NewLabel(i18n.T("gui.config.basic.skip_when_error")),
 	//	component.NewCheckOneWayBinding(
@@ -141,6 +134,6 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	//	}
 	//})
 	//b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr, checkUpdateBox, checkUpdateBtn)
-	b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist)
+	b.panel = container.NewVBox(randomPlaylist, outputDevice)
 	return b.panel
 }

@@ -37,8 +37,10 @@ type Diange struct {
 	UserCoolDown        int
 	CustomCMD           string
 	SourceConfigPath    string
+	SkipSystemPlaylist  bool
 
 	currentQueueLength int
+	isCurrentSystem    bool
 	sourceConfigs      map[string]*sourceConfig
 	cooldowns          map[string]int
 	panel              fyne.CanvasObject
@@ -53,7 +55,7 @@ func NewDiange() *Diange {
 		QueueMax:            128,
 		UserCoolDown:        -1,
 		CustomCMD:           "点歌",
-		SourceConfigPath:    "diange.json",
+		SourceConfigPath:    "./config/diange.json",
 
 		currentQueueLength: 0,
 		sourceConfigs: map[string]*sourceConfig{
@@ -107,6 +109,17 @@ func (d *Diange) Enable() error {
 		"plugin.diange.queue.update",
 		func(event *event.Event) {
 			d.currentQueueLength = len(event.Data.(events.PlaylistDetailUpdateEvent).Medias)
+		})
+	global.EventManager.RegisterA(
+		events.PlayerPlayingUpdate,
+		"plugin.diange.check_playing",
+		func(event *event.Event) {
+			data := event.Data.(events.PlayerPlayingUpdateEvent)
+			if data.Removed {
+				d.isCurrentSystem = true
+				return
+			}
+			d.isCurrentSystem = (!data.Media.IsLiveRoomUser()) && (data.Media.ToUser().Name == model.SystemUser.Name)
 		})
 	return nil
 }
@@ -178,10 +191,22 @@ func (d *Diange) handleMessage(event *event.Event) {
 	}
 	d.cooldowns[message.User.Uid] = ct
 	keywords := strings.Join(msgs[1:], " ")
+
 	for _, source := range sources {
 		medias, err := miaosic.SearchByProvider(source, keywords, 1, 10)
 		if len(medias) == 0 || err != nil {
 			continue
+		}
+		if d.SkipSystemPlaylist && d.isCurrentSystem {
+			global.EventManager.CallA(
+				events.PlayerPlayCmd,
+				events.PlayerPlayCmdEvent{
+					Media: model.Media{
+						Info: medias[0],
+						User: message.User,
+					},
+				})
+			return
 		}
 		global.EventManager.CallA(
 			events.PlaylistInsertCmd(model.PlaylistIDPlayer),
@@ -192,7 +217,7 @@ func (d *Diange) handleMessage(event *event.Event) {
 					User: message.User,
 				},
 			})
-		break
+		return
 	}
 }
 
@@ -240,6 +265,11 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.diange.custom_cmd")), nil,
 		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
 	)
+	skipPlaylistCheck := widget.NewCheckWithData(i18n.T("plugin.diange.skip_playlist.prompt"), binding.BindBool(&d.SkipSystemPlaylist))
+	skipPlaylist := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.diange.skip_playlist")),
+		skipPlaylistCheck,
+	)
 	sourceCfgs := []fyne.CanvasObject{}
 	for source, cfg := range d.sourceConfigs {
 		sourceCfgs = append(
@@ -256,6 +286,6 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 	dgSourceCMD := container.NewBorder(
 		nil, nil, widget.NewLabel(i18n.T("plugin.diange.source_cmd")), nil,
 		container.NewVBox(sourceCfgs...))
-	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, dgSourceCMD)
+	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, skipPlaylist, dgSourceCMD)
 	return d.panel
 }

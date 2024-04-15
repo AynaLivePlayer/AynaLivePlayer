@@ -32,8 +32,10 @@ require (
 
 require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e // indirect
+	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240408074929-6565ab41764b // indirect
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect
+	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/aynakeya/deepcolor v1.0.2 // indirect
 	github.com/aynakeya/open-bilibili-live v0.0.5 // indirect
@@ -67,6 +69,7 @@ require (
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )

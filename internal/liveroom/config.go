@@ -25,6 +25,6 @@ func (c *_cfg) OnSave() {
 
 var cfg = &_cfg{
 	ApiServer:    "http://localhost:9090",
-	LiveRoomPath: "liveroom.json",
+	LiveRoomPath: "./config/liverooms.json",
 	liveRooms:    make([]model.LiveRoom, 0),
 }
