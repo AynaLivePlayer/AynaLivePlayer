@@ -7,6 +7,20 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var ConfigList = []ConfigLayout{
+	&bascicConfig{},
+}
+
+type ConfigLayout interface {
+	Title() string
+	Description() string
+	CreatePanel() fyne.CanvasObject
+}
+
+func AddConfigLayout(cfgs ...ConfigLayout) {
+	ConfigList = append(ConfigList, cfgs...)
+}
+
 func createConfigLayout() fyne.CanvasObject {
 	// initialize config panels
 	for _, c := range ConfigList {

@@ -20,7 +20,6 @@ type Qiege struct {
 	AdminPermission     bool
 	CustomCMD           string
 	panel               fyne.CanvasObject
-	ctr                 adapter.IControlBridge
 }
 
 func NewQiege(ctr adapter.IControlBridge) *Qiege {
@@ -29,7 +28,6 @@ func NewQiege(ctr adapter.IControlBridge) *Qiege {
 		PrivilegePermission: true,
 		AdminPermission:     true,
 		CustomCMD:           "skip",
-		ctr:                 ctr,
 	}
 }
 

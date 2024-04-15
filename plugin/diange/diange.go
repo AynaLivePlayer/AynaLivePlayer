@@ -1,7 +1,6 @@
 package diange
 
 import (
-	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
@@ -30,11 +29,9 @@ type Diange struct {
 	SourceCMD           []string
 	cooldowns           map[string]int
 	panel               fyne.CanvasObject
-	contro              adapter.IControlBridge
-	log                 adapter.ILogger
 }
 
-func NewDiange(contr adapter.IControlBridge) *Diange {
+func NewDiange() *Diange {
 	return &Diange{
 		UserPermission:      true,
 		PrivilegePermission: true,
@@ -44,8 +41,6 @@ func NewDiange(contr adapter.IControlBridge) *Diange {
 		CustomCMD:           "add",
 		SourceCMD:           make([]string, 0),
 		cooldowns:           make(map[string]int),
-		contro:              contr,
-		log:                 contr.Logger().WithModule(MODULE_CMD_DIANGE),
 	}
 }
 

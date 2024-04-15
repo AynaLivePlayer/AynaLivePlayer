@@ -54,9 +54,9 @@ func Initialize() {
 		container.NewTabItem(i18n.T("gui.tab.history"),
 			container.NewBorder(nil, nil, nil, nil, createHistoryList()),
 		),
-		//container.NewTabItem(i18n.T("gui.tab.config"),
-		//	createConfigLayout(),
-		//),
+		container.NewTabItem(i18n.T("gui.tab.config"),
+			createConfigLayout(),
+		),
 	)
 
 	tabs.SetTabLocation(container.TabLocationTop)
@@ -82,9 +82,6 @@ func Initialize() {
 	if config.General.ShowSystemTray {
 		setupSysTray()
 	}
-	//if config2.General.AutoCheckUpdate {
-	//	go checkUpdate()
-	//}
 }
 
 //

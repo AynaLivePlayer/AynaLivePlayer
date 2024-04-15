@@ -16,6 +16,7 @@ var SystemPlaylist *playlist = nil
 var PlaylistsPlaylist *playlist = nil
 
 type playlistConfig struct {
+	PlayerPlaylistMode model.PlaylistMode
 	SystemPlaylistMode model.PlaylistMode
 	SystemPlaylistID   string
 	PlaylistsPath      string
@@ -40,6 +41,7 @@ func (p *playlistConfig) OnSave() {
 }
 
 var cfg = &playlistConfig{
+	PlayerPlaylistMode: model.PlaylistModeNormal,
 	SystemPlaylistMode: model.PlaylistModeNormal,
 	PlaylistsPath:      "playlists.json",
 	playlists:          make([]miaosic.Playlist, 0),
@@ -54,11 +56,11 @@ func Initialize() {
 	HistoryPlaylist = newPlaylist(model.PlaylistIDHistory)
 	config.LoadConfig(cfg)
 
-	global.EventManager.RegisterA(events.PlaylistModeChangeCmd(model.PlaylistIDSystem), "internal.playlist.system_init", func(event *event.Event) {
-		cfg.SystemPlaylistMode = event.Data.(events.PlaylistModeChangeUpdateEvent).Mode
+	global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer), events.PlaylistModeChangeCmdEvent{
+		Mode: cfg.PlayerPlaylistMode,
 	})
 
-	global.EventManager.CallA(events.PlaylistModeChangeUpdate(model.PlaylistIDSystem), events.PlaylistModeChangeUpdateEvent{
+	global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDSystem), events.PlaylistModeChangeCmdEvent{
 		Mode: cfg.SystemPlaylistMode,
 	})
 
@@ -83,4 +85,6 @@ func Close() {
 	for _, v := range allPlaylists {
 		cfg.playlists = append(cfg.playlists, *v)
 	}
+	cfg.PlayerPlaylistMode = PlayerPlaylist.mode
+	cfg.SystemPlaylistMode = SystemPlaylist.mode
 }

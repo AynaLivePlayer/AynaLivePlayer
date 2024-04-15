@@ -7,7 +7,8 @@ import (
 )
 
 type playerConfig struct {
-	Volume float64
+	Volume      float64
+	AudioDevice string
 }
 
 func (p *playerConfig) Name() string {
@@ -33,5 +34,8 @@ func restoreConfig() {
 	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "player.config.volume", func(evnt *event.Event) {
 		data := evnt.Data.(events.PlayerPropertyVolumeUpdateEvent)
 		cfg.Volume = data.Volume
+	})
+	global.EventManager.CallA(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
+		Device: cfg.AudioDevice,
 	})
 }

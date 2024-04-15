@@ -40,7 +40,8 @@ func newPlaylist(id model.PlaylistID) *playlist {
 		pl.Next(event.Data.(events.PlaylistNextCmdEvent).Remove)
 	})
 	global.EventManager.RegisterA(events.PlaylistModeChangeCmd(id), "internal.playlist.mode", func(event *event.Event) {
-		pl.mode = event.Data.(events.PlaylistModeChangeUpdateEvent).Mode
+		pl.mode = event.Data.(events.PlaylistModeChangeCmdEvent).Mode
+		log.Infof("Playlist %s mode changed to %d", id, pl.mode)
 		global.EventManager.CallA(events.PlaylistModeChangeUpdate(id), events.PlaylistModeChangeUpdateEvent{
 			Mode: pl.mode,
 		})

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/AynaLivePlayer/miaosic"
 	"github.com/aynakeya/go-mpv"
+	"github.com/tidwall/gjson"
 )
 
 var running bool = false
@@ -32,6 +33,7 @@ func SetupPlayer() {
 	registerHandler()
 	registerCmdHandler()
 	restoreConfig()
+	updateAudioDeviceList()
 	log.Info("starting mpv player")
 	go func() {
 		for running {
@@ -61,6 +63,7 @@ func SetupPlayer() {
 }
 
 func StopPlayer() {
+	cfg.AudioDevice = libmpv.GetPropertyString("audio-device")
 	log.Info("stopping mpv player")
 	running = false
 	// stop player async, should be closed in the end anyway
@@ -230,6 +233,21 @@ func registerCmdHandler() {
 			log.Warn("set window handle failed", err)
 		}
 	})
+
+	global.EventManager.RegisterA(events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *event.Event) {
+		device := evnt.Data.(events.PlayerSetAudioDeviceCmdEvent).Device
+		err := libmpv.SetPropertyString("audio-device", device)
+		if err != nil {
+			global.EventManager.CallA(
+				events.ErrorUpdate,
+				events.ErrorUpdateEvent{
+					Error: err,
+				})
+			log.Warn("set audio device failed", err)
+		}
+		log.Infof("set audio device to %s", device)
+		return
+	})
 }
 
 func SetWindowHandle(handle uintptr) error {
@@ -238,35 +256,26 @@ func SetWindowHandle(handle uintptr) error {
 	return libmpv.SetOptionString("vo", "gpu")
 }
 
-//func (p *MpvPlayer) IsIdle() bool {
-//	property, err := p.libmpv.GetProperty("idle-active", mpv.FORMAT_FLAG)
-//	if err != nil {
-//		p.log.Warn("[MPV Player] get property idle-active failed", err)
-//		return false
-//	}
-//	return property.(bool)
-//}
-
-//// GetAudioDeviceList get output device for mpv
-//// return format is []AudioDevice
-//func (p *MpvPlayer) GetAudioDeviceList() ([]model.AudioDevice, error) {
-//	p.log.Debugf("[MPV Player] getting audio device list for mpv")
-//	property, err := p.libmpv.GetProperty("audio-device-list", mpv.FORMAT_STRING)
-//	if err != nil {
-//		return nil, err
-//	}
-//	dl := make([]model.AudioDevice, 0)
-//	gjson.Parse(property.(string)).ForEach(func(key, value gjson.Result) bool {
-//		dl = append(dl, model.AudioDevice{
-//			Name:        value.Get("name").String(),
-//			Description: value.Get("description").String(),
-//		})
-//		return true
-//	})
-//	return dl, nil
-//}
-//
-//func (p *MpvPlayer) SetAudioDevice(device string) error {
-//	p.log.Debugf("[MPV Player] set audio device %s for mpv", device)
-//	return p.libmpv.SetPropertyString("audio-device", device)
-//}
+// // updateAudioDeviceList get output device for mpv
+// // return format is []AudioDevice
+func updateAudioDeviceList() {
+	property, err := libmpv.GetProperty("audio-device-list", mpv.FORMAT_STRING)
+	if err != nil {
+		return
+	}
+	ad := libmpv.GetPropertyString("audio-device")
+	dl := make([]model.AudioDevice, 0)
+	gjson.Parse(property.(string)).ForEach(func(key, value gjson.Result) bool {
+		dl = append(dl, model.AudioDevice{
+			Name:        value.Get("name").String(),
+			Description: value.Get("description").String(),
+		})
+		return true
+	})
+	log.Infof("update audio device list %v, current %s", dl, ad)
+	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+		Current: ad,
+		Devices: dl,
+	})
+	return
+}

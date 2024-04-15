@@ -11,6 +11,7 @@ import (
 	"AynaLivePlayer/pkg/logger"
 	loggerRepo "AynaLivePlayer/pkg/logger/repository"
 	"flag"
+	"time"
 )
 
 var dev = flag.Bool("dev", false, "dev")
@@ -50,7 +51,12 @@ func main() {
 	global.Logger.Infof("================Current Version: %s================", model.Version(config.Version))
 	internal.Initialize()
 	gui.Initialize()
-	global.EventManager.Start()
+	go func() {
+		// temporary fix for gui not render correctly.
+		// wait until gui rendered then start event dispatching
+		time.Sleep(1 * time.Second)
+		global.EventManager.Start()
+	}()
 	//plugins := []adapter.Plugin{diange.NewDiange(mainController), qiege.NewQiege(mainController),
 	//	textinfo.NewTextInfo(mainController), webinfo.NewWebInfo(mainController),
 	//	wylogin.NewWYLogin(mainController)}
