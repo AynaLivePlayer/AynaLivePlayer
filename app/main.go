@@ -57,10 +57,6 @@ func main() {
 		time.Sleep(1 * time.Second)
 		global.EventManager.Start()
 	}()
-	//plugins := []adapter.Plugin{diange.NewDiange(mainController), qiege.NewQiege(mainController),
-	//	textinfo.NewTextInfo(mainController), webinfo.NewWebInfo(mainController),
-	//	wylogin.NewWYLogin(mainController)}
-	//mainController.LoadPlugins(plugins...)
 	gui.MainWindow.ShowAndRun()
 	internal.Stop()
 	global.EventManager.Stop()
@@ -70,30 +66,3 @@ func main() {
 	_ = config.SaveToConfigFile(config.ConfigPath)
 	global.Logger.Info("================Program End================")
 }
-
-////go:embed all:../webgui/frontend/dist
-//var assets embed.FS
-//
-//func main() {
-//	// Create an instance of the app structure
-//	app := webgui.NewApp()
-//
-//	// Create application with options
-//	err := wails.Run(&options.App{
-//		Title:  "AynaLivePlayer",
-//		Width:  1024,
-//		Height: 768,
-//		AssetServer: &assetserver.Options{
-//			Assets: assets,
-//		},
-//		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-//		OnStartup:        app.Startup,
-//		Bind: []interface{}{
-//			app,
-//		},
-//	})
-//
-//	if err != nil {
-//		println("Error:", err.Error())
-//	}
-//}

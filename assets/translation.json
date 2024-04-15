@@ -332,6 +332,18 @@
       "en": "Max Queue",
       "zh-CN": "最大点歌数"
     },
+    "plugin.diange.source.command": {
+      "en": "command",
+      "zh-CN": "命令"
+    },
+    "plugin.diange.source.enable": {
+      "en": "enable",
+      "zh-CN": "启用"
+    },
+    "plugin.diange.source.priority": {
+      "en": "priority",
+      "zh-CN": "优先级"
+    },
     "plugin.diange.source_cmd": {
       "en": "Source Command",
       "zh-CN": "来源点歌命令"
@@ -381,8 +393,8 @@
       "zh-CN": "管理员"
     },
     "plugin.qiege.custom_cmd": {
-      "en": "Custom Command (Default one still works)",
-      "zh-CN": "自定义命令 (默认的依然可用)"
+      "en": "Custom Command",
+      "zh-CN": "自定义命令"
     },
     "plugin.qiege.description": {
       "en": "Basic Qiege configuration",
