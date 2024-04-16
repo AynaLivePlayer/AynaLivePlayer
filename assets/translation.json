@@ -288,6 +288,30 @@
       "en": "Admin",
       "zh-CN": "管理员"
     },
+    "plugin.diange.blacklist.btn.add": {
+      "en": "Add",
+      "zh-CN": "添加"
+    },
+    "plugin.diange.blacklist.description": {
+      "en": "Blacklist Configuration",
+      "zh-CN": "点歌黑名单设置"
+    },
+    "plugin.diange.blacklist.input.placeholder": {
+      "en": "enter word",
+      "zh-CN": "输入黑名单词"
+    },
+    "plugin.diange.blacklist.option.contains": {
+      "en": "Contains",
+      "zh-CN": "包含"
+    },
+    "plugin.diange.blacklist.option.exact": {
+      "en": "Exact Match",
+      "zh-CN": "相等"
+    },
+    "plugin.diange.blacklist.title": {
+      "en": "Blacklist",
+      "zh-CN": "点歌黑名单"
+    },
     "plugin.diange.cooldown": {
       "en": "Cooldown",
       "zh-CN": "点歌冷却"

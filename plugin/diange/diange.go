@@ -37,18 +37,22 @@ type Diange struct {
 	UserCoolDown        int
 	CustomCMD           string
 	SourceConfigPath    string
+	BlackListItemPath   string
 	SkipSystemPlaylist  bool
 
 	currentQueueLength int
 	isCurrentSystem    bool
 	sourceConfigs      map[string]*sourceConfig
+	blacklist          []blacklistItem
 	cooldowns          map[string]int
 	panel              fyne.CanvasObject
 	log                logger.ILogger
 }
 
+var diange *Diange
+
 func NewDiange() *Diange {
-	return &Diange{
+	diange = &Diange{
 		UserPermission:      true,
 		PrivilegePermission: true,
 		AdminPermission:     true,
@@ -56,6 +60,7 @@ func NewDiange() *Diange {
 		UserCoolDown:        -1,
 		CustomCMD:           "点歌",
 		SourceConfigPath:    "./config/diange.json",
+		BlackListItemPath:   "./config/diange_blacklist.json",
 
 		currentQueueLength: 0,
 		sourceConfigs: map[string]*sourceConfig{
@@ -83,6 +88,7 @@ func NewDiange() *Diange {
 		cooldowns: make(map[string]int),
 		log:       global.Logger.WithPrefix("Plugin.Logger"),
 	}
+	return diange
 }
 
 func (d *Diange) Name() string {
@@ -91,15 +97,18 @@ func (d *Diange) Name() string {
 
 func (c *Diange) OnLoad() {
 	_ = config.LoadJson(c.SourceConfigPath, &c.sourceConfigs)
+	_ = config.LoadJson(c.BlackListItemPath, &c.blacklist)
 }
 
 func (c *Diange) OnSave() {
 	_ = config.SaveJson(c.SourceConfigPath, c.sourceConfigs)
+	_ = config.SaveJson(c.BlackListItemPath, c.blacklist)
 }
 
 func (d *Diange) Enable() error {
 	config.LoadConfig(d)
 	gui.AddConfigLayout(d)
+	gui.AddConfigLayout(&blacklist{})
 	global.EventManager.RegisterA(
 		events.LiveRoomMessageReceive,
 		"plugin.diange.message",
@@ -189,13 +198,36 @@ func (d *Diange) handleMessage(event *event.Event) {
 	if !perm {
 		return
 	}
-	d.cooldowns[message.User.Uid] = ct
 	keywords := strings.Join(msgs[1:], " ")
+	// blacklist check
+	for _, item := range d.blacklist {
+		if item.Exact && item.Value == keywords {
+			d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+			return
+		}
+		if !item.Exact && strings.Contains(keywords, item.Value) {
+			d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+			return
+		}
+	}
+
+	d.cooldowns[message.User.Uid] = ct
 
 	for _, source := range sources {
 		medias, err := miaosic.SearchByProvider(source, keywords, 1, 10)
 		if len(medias) == 0 || err != nil {
 			continue
+		}
+		// double check blacklist
+		for _, item := range d.blacklist {
+			if item.Exact && item.Value == medias[0].Title {
+				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+				return
+			}
+			if !item.Exact && strings.Contains(medias[0].Title, item.Value) {
+				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+				return
+			}
 		}
 		if d.SkipSystemPlaylist && d.isCurrentSystem {
 			global.EventManager.CallA(

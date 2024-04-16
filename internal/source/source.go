@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
 	"github.com/AynaLivePlayer/miaosic"
-	_ "github.com/AynaLivePlayer/miaosic/providers/bilibili"
+	//_ "github.com/AynaLivePlayer/miaosic/providers/bilibili"
 	_ "github.com/AynaLivePlayer/miaosic/providers/bilivideo"
 	_ "github.com/AynaLivePlayer/miaosic/providers/kuwo"
 	"github.com/AynaLivePlayer/miaosic/providers/local"

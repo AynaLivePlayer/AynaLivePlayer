@@ -45,7 +45,7 @@ func createConfigLayout() fyne.CanvasObject {
 			}
 		}
 		content.Objects = []fyne.CanvasObject{
-			container.NewVScroll(container.NewVBox(desc, widget.NewSeparator(), ConfigList[id].CreatePanel())),
+			container.NewVScroll(container.NewBorder(container.NewVBox(desc, widget.NewSeparator()), nil, nil, nil, ConfigList[id].CreatePanel())),
 		}
 		content.Refresh()
 	}
