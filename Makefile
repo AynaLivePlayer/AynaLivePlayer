@@ -32,6 +32,7 @@ prebuild: bundle
 	$(COPY) ./assets/translation.json ./release/assets/translation.json
 	$(COPY) ./assets/config ./release/config
 	$(COPY) ./music ./release/music
+	go mod tidy
 
 
 $(LINUX): prebuild
