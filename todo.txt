@@ -5,17 +5,24 @@
 - @5 delete optimization
 - race condition in RichText. i dont care fu
 
-- info-server 歌词服务器，用于媒体源没有歌词的情况
+- info-server 歌词服务器，用于媒体源没有歌词的情况 （bilibili 歌词来源)
 - 媒体源 - 歌单信息获取
-- web弹幕协议的断线handler
-
-beta
-- web 重连
-- bilibili 歌词来源
+- web弹幕协议的断线handler (web 重连)
+- 歌词event发送全部歌词，前端处理不同版本
+- 文本输出，网页输出重写，使用网页版本，不绑定在点歌机内（点歌机不需要启动网页服务)
+- 歌曲来源统一登录
 
 ----
 
 Finished
+- 2024.04.17      : 1. 弹幕拿不到的问题，尽量使用身份码，网页协议随时可能爆炸
+                    2. 酷我音乐复活
+                    3. 黑名单
+                    4. 网页输出和文本输出还在修复当中，也就是说没有。
+                    5. 网易云登录没了，还在修复中，也就是说没有。
+                    6. 全平台mpv播放器支持
+                    7. 支持最小化到托盘，需要手动开启，在config.ini中把ShowSystemTray  = false 改成 ShowSystemTray  = true
+                    8. 架构重写。
 - 2023.02.20      : 检查更新
 - 2023.02.19      : 修复点歌机ui卡死的bug
 - 2023.02.07@0.9.7: 添加播放器
