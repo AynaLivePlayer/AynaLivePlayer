@@ -41,7 +41,8 @@ git submodule set-url pkg/miaosic https://github.com/AynaLivePlayer/miaosic.git
 git submodule set-url pkg/liveroom-sdk https://github.com/AynaLivePlayer/liveroom-sdk.git
 git submodule update
 ```
-6. now you can build
-```
+6. now you can build (please check makefile for more details)
+```bash
+# ... more setup, see makefile
 go build -o AynaLivePlayer -ldflags -H=windowsgui app/main.go
 ```
