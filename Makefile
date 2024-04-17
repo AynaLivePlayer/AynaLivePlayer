@@ -26,7 +26,6 @@ bundle:
 
 prebuild: bundle
 	$(RRM) ./release
-	$(RRM) ./release/assets
 	$(MKDIR) ./release
 	$(MKDIR) ./release/assets
 	$(COPY) LICENSE.md ./release/LICENSE.md
