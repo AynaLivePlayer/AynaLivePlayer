@@ -11,8 +11,8 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("SysTray")
 
-	//icon, _ := fyne.LoadResourceFromPath("./assets/icon.jpg")
-	icon, _ := fyne.LoadResourceFromPath("./assets/icon.png")
+	icon, _ := fyne.LoadResourceFromPath("./assets/icon.jpg")
+	//icon, _ := fyne.LoadResourceFromPath("./assets/icon.png")
 
 	if desk, ok := a.(desktop.App); ok {
 		m := fyne.NewMenu("MyApp",

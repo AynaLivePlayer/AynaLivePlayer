@@ -11,6 +11,7 @@ var ImageEmptyQrCode = &fyne.StaticResource{
 	StaticName:    "flat-color-icons--qr-code.svg",
 	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"black\" d=\"M1 1h10v10H1zm2 2v6h6V3z\"/><path fill=\"black\" fill-rule=\"evenodd\" d=\"M5 5h2v2H5z\"/><path fill=\"black\" d=\"M13 1h10v10H13zm2 2v6h6V3z\"/><path fill=\"black\" fill-rule=\"evenodd\" d=\"M17 5h2v2h-2z\"/><path fill=\"black\" d=\"M1 13h10v10H1zm2 2v6h6v-6z\"/><path fill=\"black\" fill-rule=\"evenodd\" d=\"M5 17h2v2H5z\"/><path fill=\"black\" d=\"M23 19h-4v4h-6V13h1h-1v6h2v2h2v-6h-2v-2h-1h3v2h2v2h2v-4h2zm0 2v2h-2v-2z\"/></svg>"),
 }
+
 var ImageIcon = resImageIcon
 var FontMSYaHei = resFontMSYaHei
 var FontMSYaHeiBold = resFontMSYaHeiBold

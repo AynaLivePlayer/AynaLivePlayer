@@ -10,6 +10,7 @@ import (
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/sourcelogin"
+	"AynaLivePlayer/plugin/textinfo"
 )
 
 func Initialize() {
@@ -19,7 +20,10 @@ func Initialize() {
 	controller.Initialize()
 	liveroom.Initialize()
 	plugins.Initialize()
-	plugins.LoadPlugins(diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin())
+	plugins.LoadPlugins(
+		diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin(),
+		textinfo.NewTextInfo(),
+	)
 }
 
 func Stop() {

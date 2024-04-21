@@ -1,17 +1,20 @@
 package textinfo
 
 import (
-	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/logger"
+	"bytes"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/ajstarks/svgo"
 	"github.com/go-resty/resty/v2"
 	"io/ioutil"
 	"os"
@@ -30,24 +33,6 @@ type Template struct {
 	Tmpl *template.Template
 }
 
-type MediaInfo struct {
-	Index    int
-	Title    string
-	Artist   string
-	Album    string
-	Username string
-	Cover    model.Picture
-}
-
-type OutInfo struct {
-	Current       MediaInfo
-	CurrentTime   int
-	TotalTime     int
-	Lyric         string
-	Playlist      []MediaInfo
-	PlaylistCount int
-}
-
 type TextInfo struct {
 	config.BaseConfig
 	Rendering  bool
@@ -55,13 +40,19 @@ type TextInfo struct {
 	templates  []*Template
 	emptyCover []byte
 	panel      fyne.CanvasObject
-	ctr        adapter.IControlBridge
-	log        adapter.ILogger
+	log        logger.ILogger
 }
 
-func NewTextInfo(ctr adapter.IControlBridge) *TextInfo {
-	b, _ := ioutil.ReadFile(config.GetAssetPath("empty.png"))
-	return &TextInfo{Rendering: true, emptyCover: b, ctr: ctr, log: ctr.Logger().WithModule(MODULE_PLUGIN_TEXTINFO)}
+func NewTextInfo() *TextInfo {
+	buf := bytes.NewBuffer([]byte{})
+	canvas := svg.New(buf)
+	canvas.Start(256, 256)
+	canvas.Image(0, 0, 256, 256, "cover.jpg")
+	canvas.End()
+	return &TextInfo{Rendering: true,
+		emptyCover: buf.Bytes(),
+		log:        global.Logger.WithPrefix(MODULE_PLUGIN_TEXTINFO),
+	}
 }
 
 func (t *TextInfo) Title() string {
@@ -171,14 +162,14 @@ func (t *TextInfo) OutputCover() {
 		return
 	}
 	if !t.info.Current.Cover.Exists() {
-		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.emptyCover, 0666)
+		err := os.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.emptyCover, 0666)
 		if err != nil {
 			t.log.Warnf("write cover file failed: %s", err)
 		}
 		return
 	}
 	if t.info.Current.Cover.Data != nil {
-		err := ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.info.Current.Cover.Data, 0666)
+		err := os.WriteFile(filepath.Join(Out_Path, "cover.jpg"), t.info.Current.Cover.Data, 0666)
 		if err != nil {
 			t.log.Warnf("write cover file failed: %s", err)
 		}
@@ -191,7 +182,7 @@ func (t *TextInfo) OutputCover() {
 			t.log.Warnf("get cover %s content failed: %s", t.info.Current.Cover.Url, err)
 			return
 		}
-		err = ioutil.WriteFile(filepath.Join(Out_Path, "cover.jpg"), resp.Body(), 0666)
+		err = os.WriteFile(filepath.Join(Out_Path, "cover.jpg"), resp.Body(), 0666)
 		if err != nil {
 			t.log.Warnf("write cover file failed: %s", err)
 		}
@@ -199,66 +190,52 @@ func (t *TextInfo) OutputCover() {
 }
 
 func (t *TextInfo) registerHandlers() {
-	t.ctr.PlayControl().EventManager().RegisterA(events.EventPlay, "plugin.textinfo.current", func(event *event.Event) {
-		t.info.Current = MediaInfo{
-			Index:    0,
-			Title:    event.Data.(events.PlayEvent).Media.Title,
-			Artist:   event.Data.(events.PlayEvent).Media.Artist,
-			Album:    event.Data.(events.PlayEvent).Media.Album,
-			Cover:    event.Data.(events.PlayEvent).Media.Cover,
-			Username: event.Data.(events.PlayEvent).Media.ToUser().Name,
-		}
-		t.RenderTemplates()
-		t.OutputCover()
-	})
-	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropTimePos, "plugin.txtinfo.timepos", func(event *event.Event) {
-			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				t.info.CurrentTime = 0
-				return
+	global.EventManager.RegisterA(
+		events.PlayerPlayingUpdate, "plugin.textinfo.playing", func(event *event.Event) {
+			data := event.Data.(events.PlayerPlayingUpdateEvent)
+			if data.Removed {
+				t.info.Current = MediaInfo{}
+			} else {
+				t.info.Current = NewMediaInfo(0, data.Media)
 			}
-			ct := int(data.(float64))
-			if ct == t.info.CurrentTime {
-				return
-			}
-			t.info.CurrentTime = ct
 			t.RenderTemplates()
-		}) != nil {
-		t.log.Error("register time-pos handler failed")
-	}
-	if t.ctr.PlayControl().GetPlayer().ObserveProperty(
-		model.PlayerPropDuration, "plugin.txtinfo.duration", func(event *event.Event) {
-			data := event.Data.(events.PlayerPropertyUpdateEvent).Value
-			if data == nil {
-				t.info.TotalTime = 0
+			t.OutputCover()
+		})
+	global.EventManager.RegisterA(
+		events.PlayerPropertyTimePosUpdate, "plugin.txtinfo.timepos", func(event *event.Event) {
+			data := event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos
+			ct := int(data)
+			if ct == t.info.CurrentTime.TotalSeconds {
 				return
 			}
-			t.info.TotalTime = int(data.(float64))
-			t.RenderTemplates()
-		}) != nil {
-		t.log.Error("fail to register handler for total time with property duration")
-	}
-	t.ctr.Playlists().GetCurrent().EventManager().RegisterA(
-		events.EventPlaylistUpdate, "plugin.textinfo.playlist", func(event *event.Event) {
-			pl := make([]MediaInfo, 0)
-			e := event.Data.(events.PlaylistUpdateEvent)
-			for index, m := range e.Playlist.Medias {
-				pl = append(pl, MediaInfo{
-					Index:    index,
-					Title:    m.Title,
-					Artist:   m.Artist,
-					Album:    m.Album,
-					Username: m.ToUser().Name,
-				})
-			}
-			t.info.Playlist = pl
+			t.info.CurrentTime = NewTimeFromSec(ct)
 			t.RenderTemplates()
 		})
-	t.ctr.PlayControl().GetLyric().EventManager().RegisterA(
-		events.EventLyricUpdate, "plugin.textinfo.lyric", func(event *event.Event) {
-			lrcLine := event.Data.(events.LyricUpdateEvent).Lyric
-			t.info.Lyric = lrcLine.Now.Lyric
+	global.EventManager.RegisterA(
+		events.PlayerPropertyDurationUpdate, "plugin.txtinfo.duration", func(event *event.Event) {
+			data := event.Data.(events.PlayerPropertyDurationUpdateEvent).Duration
+			ct := int(data)
+			if ct == t.info.TotalTime.TotalSeconds {
+				return
+			}
+			t.info.TotalTime = NewTimeFromSec(ct)
+			t.RenderTemplates()
+		})
+	global.EventManager.RegisterA(
+		events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "plugin.textinfo.playlist", func(event *event.Event) {
+			pl := make([]MediaInfo, 0)
+			data := event.Data.(events.PlaylistDetailUpdateEvent)
+			for index, m := range data.Medias {
+				pl = append(pl, NewMediaInfo(index, m))
+			}
+			t.info.Playlist = pl
+			t.info.PlaylistLength = len(pl)
+			t.RenderTemplates()
+		})
+	global.EventManager.RegisterA(
+		events.PlayerLyricPosUpdate, "plugin.textinfo.lyricpos", func(event *event.Event) {
+			data := event.Data.(events.PlayerLyricPosUpdateEvent)
+			t.info.Lyric = data.CurrentLine.Lyric
 			t.RenderTemplates()
 		})
 

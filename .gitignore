@@ -3,7 +3,7 @@ assets/webinfo/*.html
 assets/webinfo/assets
 resource/bundle.go
 music
-textinfo
+/txtinfo/
 CMakeCache.txt
 /config/
 /release/

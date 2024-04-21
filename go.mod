@@ -12,6 +12,7 @@ require (
 	fyne.io/x/fyne v0.0.0-20240326131024-3ba9170cc3be
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
 	github.com/AynaLivePlayer/miaosic v0.1.5
+	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/aynakeya/go-mpv v0.0.6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240306074159-ea2d69986ecb
