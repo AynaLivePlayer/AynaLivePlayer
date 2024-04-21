@@ -380,38 +380,6 @@
       "en": "User",
       "zh-CN": "普通用户"
     },
-    "plugin.neteaselogin.current_user": {
-      "en": "Current User:",
-      "zh-CN": "当前用户:"
-    },
-    "plugin.neteaselogin.current_user.notlogin": {
-      "en": "Not Login",
-      "zh-CN": "未登录"
-    },
-    "plugin.neteaselogin.description": {
-      "en": "Netease User Login",
-      "zh-CN": "网易云登录"
-    },
-    "plugin.neteaselogin.logout": {
-      "en": "Logout",
-      "zh-CN": "登出"
-    },
-    "plugin.neteaselogin.qr.finish": {
-      "en": "Finish Scan",
-      "zh-CN": "完成扫描后按我"
-    },
-    "plugin.neteaselogin.qr.new": {
-      "en": "Get a new qr code",
-      "zh-CN": "获取新二维码"
-    },
-    "plugin.neteaselogin.refresh": {
-      "en": "Refresh",
-      "zh-CN": "刷新状态"
-    },
-    "plugin.neteaselogin.title": {
-      "en": "Netease Login",
-      "zh-CN": "网易云登录"
-    },
     "plugin.qiege.admin": {
       "en": "Admin",
       "zh-CN": "管理员"
@@ -439,6 +407,42 @@
     "plugin.qiege.user": {
       "en": "User",
       "zh-CN": "切自己"
+    },
+    "plugin.sourcelogin.current_user": {
+      "en": "Current Status:",
+      "zh-CN": "当前状态:"
+    },
+    "plugin.sourcelogin.current_user.loggedin": {
+      "en": "Logged In",
+      "zh-CN": "已登录"
+    },
+    "plugin.sourcelogin.current_user.notlogin": {
+      "en": "Not Login",
+      "zh-CN": "未登录"
+    },
+    "plugin.sourcelogin.description": {
+      "en": "Netease User Login",
+      "zh-CN": "来源登录"
+    },
+    "plugin.sourcelogin.logout": {
+      "en": "Logout",
+      "zh-CN": "登出"
+    },
+    "plugin.sourcelogin.qr.finish": {
+      "en": "Finish Scan",
+      "zh-CN": "完成扫描后按我"
+    },
+    "plugin.sourcelogin.qr.new": {
+      "en": "Get a new qr code",
+      "zh-CN": "获取新二维码"
+    },
+    "plugin.sourcelogin.refresh": {
+      "en": "Refresh",
+      "zh-CN": "刷新状态"
+    },
+    "plugin.sourcelogin.title": {
+      "en": "Netease Login",
+      "zh-CN": "来源登录"
     },
     "plugin.textinfo.checkbox": {
       "en": "Enable",
