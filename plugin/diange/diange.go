@@ -213,28 +213,49 @@ func (d *Diange) handleMessage(event *event.Event) {
 
 	d.cooldowns[message.User.Uid] = ct
 
-	for _, source := range sources {
-		medias, err := miaosic.SearchByProvider(source, keywords, 1, 10)
-		if len(medias) == 0 || err != nil {
-			continue
-		}
-		// double check blacklist
-		for _, item := range d.blacklist {
-			if item.Exact && item.Value == medias[0].Title {
-				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
-				return
+	// match media first
+
+	mediaMeta, found := miaosic.MatchMedia(keywords)
+
+	var media miaosic.MediaInfo
+
+	if !found {
+		for _, source := range sources {
+			medias, err := miaosic.SearchByProvider(source, keywords, 1, 10)
+			if len(medias) == 0 || err != nil {
+				continue
 			}
-			if !item.Exact && strings.Contains(medias[0].Title, item.Value) {
-				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
-				return
+			// double check blacklist
+			for _, item := range d.blacklist {
+				if item.Exact && item.Value == medias[0].Title {
+					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+					return
+				}
+				if !item.Exact && strings.Contains(medias[0].Title, item.Value) {
+					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+					return
+				}
 			}
+			media = medias[0]
+			found = true
+			break
 		}
+	} else {
+		m, err := miaosic.GetMediaInfo(mediaMeta)
+		if err != nil {
+			d.log.Error("Get media info failed: ", err)
+			found = false
+		}
+		media = m
+	}
+
+	if found {
 		if d.SkipSystemPlaylist && d.isCurrentSystem {
 			global.EventManager.CallA(
 				events.PlayerPlayCmd,
 				events.PlayerPlayCmdEvent{
 					Media: model.Media{
-						Info: medias[0],
+						Info: media,
 						User: message.User,
 					},
 				})
@@ -245,12 +266,13 @@ func (d *Diange) handleMessage(event *event.Event) {
 			events.PlaylistInsertCmdEvent{
 				Position: -1,
 				Media: model.Media{
-					Info: medias[0],
+					Info: media,
 					User: message.User,
 				},
 			})
 		return
 	}
+
 }
 
 func (d *Diange) Title() string {
