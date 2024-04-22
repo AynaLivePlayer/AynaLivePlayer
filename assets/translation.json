@@ -380,6 +380,30 @@
       "en": "User",
       "zh-CN": "普通用户"
     },
+    "plugin.maxduration.description": {
+      "en": "Set the maximum duration of a song",
+      "zh-CN": "设置歌曲最长能播多久"
+    },
+    "plugin.maxduration.enable": {
+      "en": "Enable",
+      "zh-CN": "开启"
+    },
+    "plugin.maxduration.maxduration": {
+      "en": "Max Duration (seconds)",
+      "zh-CN": "最大时长 (秒)"
+    },
+    "plugin.maxduration.skiponplay": {
+      "en": "Skip on play",
+      "zh-CN": "播放时跳过"
+    },
+    "plugin.maxduration.skiponreach": {
+      "en": "Skip when reach max duration",
+      "zh-CN": "播放到最大时长时跳过"
+    },
+    "plugin.maxduration.title": {
+      "en": "Audio Duration Control",
+      "zh-CN": "歌曲时长控制"
+    },
     "plugin.qiege.admin": {
       "en": "Admin",
       "zh-CN": "管理员"

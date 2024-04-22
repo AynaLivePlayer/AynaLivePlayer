@@ -8,6 +8,7 @@ import (
 	"AynaLivePlayer/internal/plugins"
 	"AynaLivePlayer/internal/source"
 	"AynaLivePlayer/plugin/diange"
+	"AynaLivePlayer/plugin/durationmgmt"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/sourcelogin"
 	"AynaLivePlayer/plugin/textinfo"
@@ -23,6 +24,7 @@ func Initialize() {
 	plugins.LoadPlugins(
 		diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin(),
 		textinfo.NewTextInfo(),
+		durationmgmt.NewMaxDuration(),
 	)
 }
 
