@@ -3,6 +3,7 @@ package repository
 import (
 	"AynaLivePlayer/pkg/logger"
 	"github.com/mattn/go-colorable"
+	"github.com/virtuald/go-paniclog"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"time"
@@ -98,7 +99,8 @@ func NewZapLogger() logger.ILogger {
 	return &zapLoggerImpl{SugaredLogger: sugar}
 }
 
-func NewZapColoredLogger() logger.ILogger {
+func NewZapColoredLogger(outPath string, redirectPanic bool) logger.ILogger {
+	f, err := getLogOut(outPath, 5)
 	cfg := zap.NewProductionEncoderConfig()
 	level := zap.NewAtomicLevel()
 	level.SetLevel(zapcore.DebugLevel)
@@ -106,11 +108,30 @@ func NewZapColoredLogger() logger.ILogger {
 	cfg.EncodeTime = syslogTimeEncoder
 	cfg.EncodeName = customNamedEncoder
 	cfg.ConsoleSeparator = " "
-	zapLog := zap.New(zapcore.NewCore(
-		zapcore.NewConsoleEncoder(cfg),
-		zapcore.AddSync(colorable.NewColorableStdout()),
-		level,
-	))
+	var zapLog *zap.Logger
+	if err == nil {
+		zapLog = zap.New(
+			zapcore.NewTee(zapcore.NewCore(
+				zapcore.NewConsoleEncoder(cfg),
+				zapcore.AddSync(colorable.NewColorableStdout()),
+				level),
+				zapcore.NewCore(
+					zapcore.NewConsoleEncoder(cfg),
+					zapcore.AddSync(f),
+					level),
+			),
+		)
+	} else {
+		zapLog = zap.New(
+			zapcore.NewCore(
+				zapcore.NewConsoleEncoder(cfg),
+				zapcore.AddSync(colorable.NewColorableStdout()),
+				level),
+		)
+	}
+	if redirectPanic {
+		_, _ = paniclog.RedirectStderr(f)
+	}
 	sugar := zapLog.Sugar()
 	return &zapLoggerImpl{SugaredLogger: sugar, level: level}
 }

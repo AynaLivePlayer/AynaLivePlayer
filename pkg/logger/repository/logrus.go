@@ -15,6 +15,51 @@ type LogrusLogger struct {
 	module string
 }
 
+func (l *LogrusLogger) DebugW(message string, keysAndValues ...interface{}) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) DebugS(message string, fields logger.LogField) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) InfoW(message string, keysAndValues ...interface{}) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) InfoS(message string, fields logger.LogField) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) WarnW(message string, keysAndValues ...interface{}) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) WarnS(message string, fields logger.LogField) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) ErrorW(message string, keysAndValues ...interface{}) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) ErrorS(message string, fields logger.LogField) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *LogrusLogger) WithPrefix(prefix string) logger.ILogger {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (l *LogrusLogger) SetLogLevel(level logger.LogLevel) {
 	switch level {
 	case logger.LogLevelDebug:

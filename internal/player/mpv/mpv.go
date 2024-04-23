@@ -180,11 +180,6 @@ func registerCmdHandler() {
 				return
 			}
 		}
-		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
-		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
-			log.Warn("[MPV PlayControl] mpv load media failed", mediaInfo)
-			return
-		}
 		media := evnt.Data.(events.PlayerPlayCmdEvent).Media
 		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
 			media.Info = m
@@ -193,6 +188,11 @@ func registerCmdHandler() {
 			Media:   media,
 			Removed: false,
 		})
+		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
+		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
+			log.Warn("[MPV PlayControl] mpv load media failed", mediaInfo)
+			return
+		}
 	})
 	global.EventManager.RegisterA(events.PlayerToggleCmd, "player.toggle", func(evnt *event.Event) {
 		property, err := libmpv.GetProperty("pause", mpv.FORMAT_FLAG)
