@@ -1,46 +1,37 @@
 package model
 
 import (
-	"github.com/jinzhu/copier"
+	"github.com/AynaLivePlayer/liveroom-sdk"
+	"github.com/AynaLivePlayer/miaosic"
 )
 
-type Picture struct {
-	Url  string
-	Data []byte
+type User struct {
+	Name string
 }
 
-func (p Picture) Exists() bool {
-	return p.Url != "" || p.Data != nil
-}
+var PlaylistUser = User{Name: "Playlists"}
+var SystemUser = User{Name: "System"}
 
 type Media struct {
-	Title  string
-	Artist string
-	Cover  Picture
-	Album  string
-	Lyric  string
-	Url    string
-	Header map[string]string
-	User   interface{}
-	Meta   interface{}
+	Info miaosic.MediaInfo
+	User interface{}
 }
 
-func (m *Media) ToUser() *User {
-	if u, ok := m.User.(*User); ok {
+func (m *Media) IsLiveRoomUser() bool {
+	_, ok := m.User.(liveroom.User)
+	return ok
+}
+
+func (m *Media) ToUser() User {
+	if u, ok := m.User.(User); ok {
 		return u
 	}
-	return &User{Name: m.DanmuUser().Username}
+	return User{Name: m.DanmuUser().Username}
 }
 
-func (m *Media) DanmuUser() *DanmuUser {
-	if u, ok := m.User.(*DanmuUser); ok {
+func (m *Media) DanmuUser() liveroom.User {
+	if u, ok := m.User.(liveroom.User); ok {
 		return u
 	}
-	return nil
-}
-
-func (m *Media) Copy() *Media {
-	newMedia := &Media{}
-	copier.Copy(newMedia, m)
-	return newMedia
+	return liveroom.User{}
 }

@@ -3,8 +3,9 @@ package gui
 import (
 	"AynaLivePlayer/resource"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 	"image/color"
+
+	xtheme "fyne.io/x/fyne/theme"
 )
 
 type myTheme struct{}
@@ -18,7 +19,6 @@ func (*myTheme) Font(s fyne.TextStyle) fyne.Resource {
 	}
 	if s.Bold {
 		if s.Italic {
-			//return theme.DefaultTheme().Font(s)
 			return resource.FontMSYaHeiBold
 		}
 		return resource.FontMSYaHei
@@ -30,13 +30,13 @@ func (*myTheme) Font(s fyne.TextStyle) fyne.Resource {
 }
 
 func (*myTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	return theme.DefaultTheme().Color(n, v)
+	return xtheme.AdwaitaTheme().Color(n, v)
 }
 
 func (*myTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
-	return theme.DefaultTheme().Icon(n)
+	return xtheme.AdwaitaTheme().Icon(n)
 }
 
 func (*myTheme) Size(n fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(n)
+	return xtheme.AdwaitaTheme().Size(n)
 }

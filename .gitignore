@@ -1,3 +1,9 @@
 .idea
 assets/webinfo/*.html
 assets/webinfo/assets
+resource/bundle.go
+music
+/txtinfo/
+CMakeCache.txt
+/config/
+/release/

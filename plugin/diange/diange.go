@@ -1,21 +1,30 @@
 package diange
 
 import (
-	"AynaLivePlayer/common/config"
-	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/pkg/config"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
+	"github.com/AynaLivePlayer/miaosic"
+	"sort"
 	"strings"
 	"time"
 )
 
-const MODULE_CMD_DIANGE = "CMD.DianGe"
+type sourceConfig struct {
+	Enable   bool   `json:"enable"`
+	Command  string `json:"command"`
+	Priority int    `json:"priority"`
+}
 
 type Diange struct {
 	config.BaseConfig
@@ -27,37 +36,100 @@ type Diange struct {
 	QueueMax            int
 	UserCoolDown        int
 	CustomCMD           string
-	SourceCMD           []string
-	cooldowns           map[string]int
-	panel               fyne.CanvasObject
-	contro              adapter.IControlBridge
-	log                 adapter.ILogger
+	SourceConfigPath    string
+	BlackListItemPath   string
+	SkipSystemPlaylist  bool
+
+	currentQueueLength int
+	isCurrentSystem    bool
+	sourceConfigs      map[string]*sourceConfig
+	blacklist          []blacklistItem
+	cooldowns          map[string]int
+	panel              fyne.CanvasObject
+	log                logger.ILogger
 }
 
-func NewDiange(contr adapter.IControlBridge) *Diange {
-	return &Diange{
+var diange *Diange
+
+func NewDiange() *Diange {
+	diange = &Diange{
 		UserPermission:      true,
 		PrivilegePermission: true,
 		AdminPermission:     true,
 		QueueMax:            128,
 		UserCoolDown:        -1,
-		CustomCMD:           "add",
-		SourceCMD:           make([]string, 0),
-		cooldowns:           make(map[string]int),
-		contro:              contr,
-		log:                 contr.Logger().WithModule(MODULE_CMD_DIANGE),
+		CustomCMD:           "点歌",
+		SourceConfigPath:    "./config/diange.json",
+		BlackListItemPath:   "./config/diange_blacklist.json",
+
+		currentQueueLength: 0,
+		sourceConfigs: map[string]*sourceConfig{
+			"netease": {
+				Enable:   true,
+				Command:  "点w歌",
+				Priority: 1,
+			},
+			"kuwo": {
+				Enable:   true,
+				Command:  "点k歌",
+				Priority: 2,
+			},
+			"bilibili-video": {
+				Enable:   true,
+				Command:  "点b歌",
+				Priority: 3,
+			},
+			"local": {
+				Enable:   true,
+				Command:  "点l歌",
+				Priority: 4,
+			},
+		},
+		cooldowns: make(map[string]int),
+		log:       global.Logger.WithPrefix("Plugin.Logger"),
 	}
+	return diange
 }
 
 func (d *Diange) Name() string {
 	return "Diange"
 }
 
+func (c *Diange) OnLoad() {
+	_ = config.LoadJson(c.SourceConfigPath, &c.sourceConfigs)
+	_ = config.LoadJson(c.BlackListItemPath, &c.blacklist)
+}
+
+func (c *Diange) OnSave() {
+	_ = config.SaveJson(c.SourceConfigPath, c.sourceConfigs)
+	_ = config.SaveJson(c.BlackListItemPath, c.blacklist)
+}
+
 func (d *Diange) Enable() error {
 	config.LoadConfig(d)
-	d.initCMD()
-	d.contro.LiveRooms().AddDanmuCommand(d)
 	gui.AddConfigLayout(d)
+	gui.AddConfigLayout(&blacklist{})
+	global.EventManager.RegisterA(
+		events.LiveRoomMessageReceive,
+		"plugin.diange.message",
+		d.handleMessage)
+	global.EventManager.RegisterA(
+		events.PlaylistDetailUpdate(model.PlaylistIDPlayer),
+		"plugin.diange.queue.update",
+		func(event *event.Event) {
+			d.currentQueueLength = len(event.Data.(events.PlaylistDetailUpdateEvent).Medias)
+		})
+	global.EventManager.RegisterA(
+		events.PlayerPlayingUpdate,
+		"plugin.diange.check_playing",
+		func(event *event.Event) {
+			data := event.Data.(events.PlayerPlayingUpdateEvent)
+			if data.Removed {
+				d.isCurrentSystem = true
+				return
+			}
+			d.isCurrentSystem = (!data.Media.IsLiveRoomUser()) && (data.Media.ToUser().Name == model.SystemUser.Name)
+		})
 	return nil
 }
 
@@ -65,72 +137,142 @@ func (d *Diange) Disable() error {
 	return nil
 }
 
-func (d *Diange) initCMD() {
-	if len(d.SourceCMD) == len(d.contro.Provider().GetPriority()) {
-		return
-	}
-	if len(d.SourceCMD) > len(d.contro.Provider().GetPriority()) {
-		d.SourceCMD = d.SourceCMD[:len(d.contro.Provider().GetPriority())]
-		return
-	}
-	for i := len(d.SourceCMD); i < len(d.contro.Provider().GetPriority()); i++ {
-		d.SourceCMD = append(d.SourceCMD, "点歌"+d.contro.Provider().GetPriority()[i])
-	}
-}
-
-// isCMD return int if the commmand name matches our command
-// -1 = not match, 0 = normal command, 1+ = source command
-func (d *Diange) isCMD(cmd string) int {
-	if cmd == "点歌" || cmd == d.CustomCMD {
-		return 0
-	}
-	for index, c := range d.SourceCMD {
-		if cmd == c {
-			return index + 1
+func (d *Diange) getSources() []string {
+	sources := []string{}
+	for source, c := range d.sourceConfigs {
+		if c.Enable {
+			sources = append(sources, source)
 		}
 	}
-	return -1
+	sort.Slice(sources, func(i, j int) bool {
+		return d.sourceConfigs[sources[i]].Priority < d.sourceConfigs[sources[j]].Priority
+	})
+	return sources
 }
 
-func (d *Diange) Match(command string) bool {
-	return d.isCMD(command) >= 0
+func (d *Diange) getSource(cmd string) []string {
+	if cmd == d.CustomCMD {
+		return d.getSources()
+	}
+	sources := []string{}
+	for source, c := range d.sourceConfigs {
+		if c.Command == cmd {
+			sources = append(sources, source)
+		}
+	}
+	return sources
 }
 
-func (d *Diange) Execute(command string, args []string, danmu *model.DanmuMessage) {
-	d.log.Infof("%s(%s) Execute command: %s %s", danmu.User.Username, danmu.User.Uid, command, args)
+func (d *Diange) handleMessage(event *event.Event) {
+	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
+	msgs := strings.Split(message.Message, " ")
+	if len(msgs) < 2 || len(msgs[0]) == 0 || len(msgs[1]) == 0 {
+		return
+	}
+	sources := d.getSource(msgs[0])
+	if len(sources) == 0 {
+		return
+	}
 	// if queue is full, return
-	if d.contro.Playlists().GetCurrent().Size() >= d.QueueMax {
+	if d.currentQueueLength >= d.QueueMax {
 		d.log.Info("Queue is full, ignore diange")
 		return
 	}
+
 	// if in user cool down, return
 	ct := int(time.Now().Unix())
-	if (ct - d.cooldowns[danmu.User.Uid]) <= d.UserCoolDown {
-		d.log.Infof("User %s(%s) still in cool down period, diange failed", danmu.User.Username, danmu.User.Uid)
+	if (ct - d.cooldowns[message.User.Uid]) <= d.UserCoolDown {
+		d.log.Infof("User %s(%s) still in cool down period, diange failed", message.User.Username, message.User.Uid)
 		return
 	}
-	cmdType := d.isCMD(command)
-	keyword := strings.Join(args, " ")
 	perm := d.UserPermission
-	d.log.Debugf("user permission check: ", perm)
-	perm = perm || (d.PrivilegePermission && (danmu.User.Privilege > 0))
-	d.log.Debugf("privilege permission check: ", perm)
-	perm = perm || (d.AdminPermission && (danmu.User.Admin))
-	d.log.Debugf("admin permission check: ", perm)
+	d.log.Debug("user permission check: ", perm)
+	perm = perm || (d.PrivilegePermission && (message.User.Privilege > 0))
+	d.log.Debug("privilege permission check: ", perm)
+	perm = perm || (d.AdminPermission && (message.User.Admin))
+	d.log.Debug("admin permission check: ", perm)
 	// if use medal check
 	if d.MedalName != "" && d.MedalPermission >= 0 {
-		perm = perm || ((danmu.User.Medal.Name == d.MedalName) && danmu.User.Medal.Level >= d.MedalPermission)
+		perm = perm || ((message.User.Medal.Name == d.MedalName) && message.User.Medal.Level >= d.MedalPermission)
 	}
 	if !perm {
 		return
 	}
-	// reset cool down
-	d.cooldowns[danmu.User.Uid] = ct
-	if cmdType == 0 {
-		d.contro.PlayControl().Add(keyword, &danmu.User)
-	} else {
-		d.contro.PlayControl().AddWithProvider(keyword, d.contro.Provider().GetPriority()[cmdType-1], &danmu.User)
+	keywords := strings.Join(msgs[1:], " ")
+	// blacklist check
+	for _, item := range d.blacklist {
+		if item.Exact && item.Value == keywords {
+			d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+			return
+		}
+		if !item.Exact && strings.Contains(keywords, item.Value) {
+			d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+			return
+		}
 	}
+
+	d.cooldowns[message.User.Uid] = ct
+
+	// match media first
+
+	mediaMeta, found := miaosic.MatchMedia(keywords)
+
+	var media miaosic.MediaInfo
+
+	if !found {
+		for _, source := range sources {
+			medias, err := miaosic.SearchByProvider(source, keywords, 1, 10)
+			if len(medias) == 0 || err != nil {
+				continue
+			}
+			// double check blacklist
+			for _, item := range d.blacklist {
+				if item.Exact && item.Value == medias[0].Title {
+					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+					return
+				}
+				if !item.Exact && strings.Contains(medias[0].Title, item.Value) {
+					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+					return
+				}
+			}
+			media = medias[0]
+			found = true
+			break
+		}
+	} else {
+		m, err := miaosic.GetMediaInfo(mediaMeta)
+		if err != nil {
+			d.log.Error("Get media info failed: ", err)
+			found = false
+		}
+		media = m
+	}
+
+	if found {
+		if d.SkipSystemPlaylist && d.isCurrentSystem {
+			global.EventManager.CallA(
+				events.PlayerPlayCmd,
+				events.PlayerPlayCmdEvent{
+					Media: model.Media{
+						Info: media,
+						User: message.User,
+					},
+				})
+			return
+		}
+		global.EventManager.CallA(
+			events.PlaylistInsertCmd(model.PlaylistIDPlayer),
+			events.PlaylistInsertCmdEvent{
+				Position: -1,
+				Media: model.Media{
+					Info: media,
+					User: message.User,
+				},
+			})
+		return
+	}
+
 }
 
 func (d *Diange) Title() string {
@@ -177,17 +319,27 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.diange.custom_cmd")), nil,
 		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
 	)
-	sourceCmds := []fyne.CanvasObject{}
-	for i, _ := range d.SourceCMD {
-		sourceCmds = append(
-			sourceCmds,
-			container.NewBorder(
-				nil, nil, widget.NewLabel(d.contro.Provider().GetPriority()[i]), nil,
-				widget.NewEntryWithData(binding.BindString(&d.SourceCMD[i]))))
+	skipPlaylistCheck := widget.NewCheckWithData(i18n.T("plugin.diange.skip_playlist.prompt"), binding.BindBool(&d.SkipSystemPlaylist))
+	skipPlaylist := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.diange.skip_playlist")),
+		skipPlaylistCheck,
+	)
+	sourceCfgs := []fyne.CanvasObject{}
+	for source, cfg := range d.sourceConfigs {
+		sourceCfgs = append(
+			sourceCfgs, container.NewGridWithColumns(2,
+				widget.NewLabel(source),
+				widget.NewCheckWithData(i18n.T("plugin.diange.source.enable"), binding.BindBool(&cfg.Enable)),
+				widget.NewLabel(i18n.T("plugin.diange.source.priority")),
+				widget.NewEntryWithData(binding.IntToString(binding.BindInt(&cfg.Priority))),
+				widget.NewLabel(i18n.T("plugin.diange.source.command")),
+				widget.NewEntryWithData(binding.BindString(&cfg.Command)),
+			),
+		)
 	}
 	dgSourceCMD := container.NewBorder(
 		nil, nil, widget.NewLabel(i18n.T("plugin.diange.source_cmd")), nil,
-		container.NewVBox(sourceCmds...))
-	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, dgSourceCMD)
+		container.NewVBox(sourceCfgs...))
+	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, skipPlaylist, dgSourceCMD)
 	return d.panel
 }

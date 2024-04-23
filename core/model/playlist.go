@@ -1,6 +1,6 @@
 package model
 
-import "fmt"
+import "github.com/AynaLivePlayer/miaosic"
 
 type PlaylistMode int
 
@@ -10,28 +10,22 @@ const (
 	PlaylistModeRepeat
 )
 
-type Playlist struct {
-	Title  string // can be same, display name
-	Medias []*Media
-	Mode   PlaylistMode
-	Meta   Meta
+type PlaylistID string
+
+const (
+	PlaylistIDPlayer  PlaylistID = "player"
+	PlaylistIDSystem  PlaylistID = "system"
+	PlaylistIDHistory PlaylistID = "history"
+)
+
+type PlaylistInfo struct {
+	Meta  miaosic.MetaData
+	Title string
 }
 
-func (p Playlist) String() string {
-	return fmt.Sprintf("<Playlist %s len:%d>", p.Title, len(p.Medias))
-}
-
-func (p *Playlist) Size() int {
-	return len(p.Medias)
-}
-
-func (p *Playlist) Copy() *Playlist {
-	medias := make([]*Media, len(p.Medias))
-	copy(medias, p.Medias)
-	return &Playlist{
-		Title:  p.Title,
-		Medias: medias,
-		Mode:   p.Mode,
-		Meta:   p.Meta,
+func (p PlaylistInfo) DisplayName() string {
+	if p.Title != "" {
+		return p.Title
 	}
+	return p.Meta.ID()
 }

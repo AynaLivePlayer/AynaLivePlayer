@@ -1,14 +1,17 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/event"
-	"AynaLivePlayer/common/i18n"
 	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"sync"
 )
 
 var RoomTab = &struct {
@@ -22,23 +25,40 @@ var RoomTab = &struct {
 	AutoConnect   *widget.Check
 	ConnectBtn    *widget.Button
 	DisConnectBtn *widget.Button
+	providers     []model.LiveRoomProviderInfo
+	rooms         []model.LiveRoom
+	lock          sync.RWMutex
 }{}
 
 func createRoomSelector() fyne.CanvasObject {
 	RoomTab.Rooms = widget.NewList(
 		func() int {
-			return API.LiveRooms().Size()
+			return len(RoomTab.rooms)
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("AAAAAAAAAAAAAAAA")
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
 			object.(*widget.Label).SetText(
-				API.LiveRooms().Get(id).DisplayName())
+				RoomTab.rooms[id].DisplayName())
 		})
 	RoomTab.AddBtn = widget.NewButton(i18n.T("gui.room.button.add"), func() {
-		clientNameEntry := widget.NewSelect(API.LiveRooms().GetAllClientNames(), nil)
+		providerNames := make([]string, len(RoomTab.providers))
+		for i := 0; i < len(RoomTab.providers); i++ {
+			providerNames[i] = RoomTab.providers[i].Name
+		}
+		descriptionLabel := widget.NewLabel(i18n.T("gui.room.add.prompt"))
+		clientNameEntry := widget.NewSelect(providerNames, func(s string) {
+			for i := 0; i < len(RoomTab.providers); i++ {
+				if RoomTab.providers[i].Name == s {
+					descriptionLabel.SetText(i18n.T(RoomTab.providers[i].Description))
+					break
+				}
+				descriptionLabel.SetText("")
+			}
+		})
 		idEntry := widget.NewEntry()
+		nameEntry := widget.NewEntry()
 		dia := dialog.NewCustomConfirm(
 			i18n.T("gui.room.add.title"),
 			i18n.T("gui.room.add.confirm"),
@@ -46,18 +66,25 @@ func createRoomSelector() fyne.CanvasObject {
 			container.NewVBox(
 				container.New(
 					layout.NewFormLayout(),
+					widget.NewLabel(i18n.T("gui.room.add.name")),
+					nameEntry,
 					widget.NewLabel(i18n.T("gui.room.add.client_name")),
 					clientNameEntry,
 					widget.NewLabel(i18n.T("gui.room.add.id_url")),
 					idEntry,
 				),
-				widget.NewLabel(i18n.T("gui.room.add.prompt")),
+				descriptionLabel,
 			),
 			func(b bool) {
 				if b && len(clientNameEntry.Selected) > 0 && len(idEntry.Text) > 0 {
-					_, err := API.LiveRooms().AddRoom(clientNameEntry.Selected, idEntry.Text)
-					showDialogIfError(err)
-					RoomTab.Rooms.Refresh()
+					logger.Infof("Add room %s %s", clientNameEntry.Selected, idEntry.Text)
+					global.EventManager.CallA(
+						events.LiveRoomAddCmd,
+						events.LiveRoomAddCmdEvent{
+							Title:    nameEntry.Text,
+							Provider: clientNameEntry.Selected,
+							RoomKey:  idEntry.Text,
+						})
 				}
 			},
 			MainWindow,
@@ -66,36 +93,33 @@ func createRoomSelector() fyne.CanvasObject {
 		dia.Show()
 	})
 	RoomTab.RemoveBtn = widget.NewButton(i18n.T("gui.room.button.remove"), func() {
-		showDialogIfError(API.LiveRooms().DeleteRoom(PlaylistManager.Index))
-		RoomTab.Rooms.Select(0)
-		RoomTab.Rooms.Refresh()
+		if len(RoomTab.rooms) == 0 {
+			return
+		}
+		global.EventManager.CallA(
+			events.LiveRoomRemoveCmd,
+			events.LiveRoomRemoveCmdEvent{
+				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
+			})
 	})
 	RoomTab.Rooms.OnSelected = func(id widget.ListItemID) {
-		rom := API.LiveRooms().Get(PlaylistManager.Index)
-		if rom != nil {
-			rom.EventManager().Unregister("gui.liveroom.status")
+		if id >= len(RoomTab.rooms) {
+			return
 		}
+		logger.Infof("Select room %s", RoomTab.rooms[id].LiveRoom.Identifier())
 		RoomTab.Index = id
-		rom = API.LiveRooms().Get(RoomTab.Index)
-		rom.EventManager().RegisterA(events.LiveRoomStatusChange, "gui.liveroom.status", func(event *event.Event) {
-			d := event.Data.(events.StatusChangeEvent)
-			if d.Connected {
-				RoomTab.Status.SetText(i18n.T("gui.room.status.connected"))
-			} else {
-				RoomTab.Status.SetText(i18n.T("gui.room.status.disconnected"))
-			}
-			RoomTab.Status.Refresh()
-		})
-		RoomTab.RoomTitle.SetText(rom.DisplayName())
-		RoomTab.RoomID.SetText(rom.Identifier())
-		RoomTab.AutoConnect.SetChecked(rom.Model().AutoConnect)
-		if API.LiveRooms().GetRoomStatus(RoomTab.Index) {
+		room := RoomTab.rooms[RoomTab.Index]
+		RoomTab.RoomTitle.SetText(room.DisplayName())
+		RoomTab.RoomID.SetText(room.LiveRoom.Identifier())
+		RoomTab.AutoConnect.SetChecked(room.Config.AutoConnect)
+		if room.Status {
 			RoomTab.Status.SetText(i18n.T("gui.room.status.connected"))
 		} else {
 			RoomTab.Status.SetText(i18n.T("gui.room.status.disconnected"))
 		}
 		RoomTab.Status.Refresh()
 	}
+	registerRoomHandlers()
 	return container.NewHBox(
 		container.NewBorder(
 			nil, container.NewCenter(container.NewHBox(RoomTab.AddBtn, RoomTab.RemoveBtn)),
@@ -106,25 +130,108 @@ func createRoomSelector() fyne.CanvasObject {
 	)
 }
 
+func registerRoomHandlers() {
+	global.EventManager.RegisterA(
+		events.LiveRoomProviderUpdate,
+		"gui.liveroom.provider_update",
+		func(event *event.Event) {
+			RoomTab.providers = event.Data.(events.LiveRoomProviderUpdateEvent).Providers
+			RoomTab.Rooms.Refresh()
+		})
+	global.EventManager.RegisterA(
+		events.LiveRoomRoomsUpdate,
+		"gui.liveroom.rooms_update",
+		func(event *event.Event) {
+			logger.Infof("Update rooms")
+			data := event.Data.(events.LiveRoomRoomsUpdateEvent)
+			RoomTab.lock.Lock()
+			RoomTab.rooms = data.Rooms
+			RoomTab.Rooms.Select(0)
+			RoomTab.Rooms.Refresh()
+			RoomTab.lock.Unlock()
+		})
+	global.EventManager.RegisterA(
+		events.LiveRoomStatusUpdate,
+		"gui.liveroom.room_status_update",
+		func(event *event.Event) {
+			room := event.Data.(events.LiveRoomStatusUpdateEvent).Room
+			index := -1
+			for i := 0; i < len(RoomTab.rooms); i++ {
+				if RoomTab.rooms[i].LiveRoom.Identifier() == room.LiveRoom.Identifier() {
+					index = i
+					break
+				}
+			}
+			if index == -1 {
+				return
+			}
+			RoomTab.rooms[index] = room
+			RoomTab.Rooms.Refresh()
+			if index == RoomTab.Index {
+				RoomTab.RoomTitle.SetText(room.DisplayName())
+				RoomTab.RoomID.SetText(room.LiveRoom.Identifier())
+				RoomTab.AutoConnect.SetChecked(room.Config.AutoConnect)
+				if room.Status {
+					RoomTab.Status.SetText(i18n.T("gui.room.status.connected"))
+				} else {
+					RoomTab.Status.SetText(i18n.T("gui.room.status.disconnected"))
+				}
+				RoomTab.Status.Refresh()
+			}
+		})
+
+}
+
 func createRoomController() fyne.CanvasObject {
 	RoomTab.ConnectBtn = widget.NewButton(i18n.T("gui.room.btn.connect"), func() {
+		if RoomTab.Index >= len(RoomTab.rooms) {
+			return
+		}
 		RoomTab.ConnectBtn.Disable()
-		go func() {
-			_ = API.LiveRooms().Connect(RoomTab.Index)
-			RoomTab.ConnectBtn.Enable()
-		}()
+		logger.Infof("Connect to room %s", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier())
+		global.EventManager.CallA(
+			events.LiveRoomOperationCmd,
+			events.LiveRoomOperationCmdEvent{
+				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
+				SetConnect: true,
+			})
 	})
 	RoomTab.DisConnectBtn = widget.NewButton(i18n.T("gui.room.btn.disconnect"), func() {
-		_ = API.LiveRooms().Disconnect(RoomTab.Index)
+		if RoomTab.Index >= len(RoomTab.rooms) {
+			return
+		}
+		RoomTab.DisConnectBtn.Disable()
+		logger.Infof("Disconnect from room %s", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier())
+		global.EventManager.CallA(
+			events.LiveRoomOperationCmd,
+			events.LiveRoomOperationCmdEvent{
+				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
+				SetConnect: false,
+			})
 	})
+	global.EventManager.RegisterA(
+		events.LiveRoomOperationFinish,
+		"gui.liveroom.operation_finish",
+		func(event *event.Event) {
+			RoomTab.ConnectBtn.Enable()
+			RoomTab.DisConnectBtn.Enable()
+		})
 	RoomTab.Status = widget.NewLabel(i18n.T("gui.room.waiting"))
 	RoomTab.RoomTitle = widget.NewLabel("")
 	RoomTab.RoomID = widget.NewLabel("")
 	RoomTab.AutoConnect = widget.NewCheck(i18n.T("gui.room.check.autoconnect"), func(b bool) {
-		rom := API.LiveRooms().Get(RoomTab.Index)
-		if rom != nil {
-			rom.Model().AutoConnect = b
+		if RoomTab.Index >= len(RoomTab.rooms) {
+			return
 		}
+		logger.Infof("Change room %s autoconnect to %v", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(), b)
+		global.EventManager.CallA(
+			events.LiveRoomConfigChangeCmd,
+			events.LiveRoomConfigChangeCmdEvent{
+				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
+				Config: model.LiveRoomConfig{
+					AutoConnect: b,
+				},
+			})
 		return
 	})
 	RoomTab.Rooms.Select(0)

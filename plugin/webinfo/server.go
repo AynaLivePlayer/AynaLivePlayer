@@ -1,8 +1,8 @@
 package webinfo
 
 import (
-	"AynaLivePlayer/common/config"
 	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/pkg/config"
 	"context"
 	"encoding/json"
 	"fmt"

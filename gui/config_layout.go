@@ -7,6 +7,20 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var ConfigList = []ConfigLayout{
+	&bascicConfig{},
+}
+
+type ConfigLayout interface {
+	Title() string
+	Description() string
+	CreatePanel() fyne.CanvasObject
+}
+
+func AddConfigLayout(cfgs ...ConfigLayout) {
+	ConfigList = append(ConfigList, cfgs...)
+}
+
 func createConfigLayout() fyne.CanvasObject {
 	// initialize config panels
 	for _, c := range ConfigList {
@@ -31,7 +45,7 @@ func createConfigLayout() fyne.CanvasObject {
 			}
 		}
 		content.Objects = []fyne.CanvasObject{
-			container.NewVScroll(container.NewVBox(desc, widget.NewSeparator(), ConfigList[id].CreatePanel())),
+			container.NewVScroll(container.NewBorder(container.NewVBox(desc, widget.NewSeparator()), nil, nil, nil, ConfigList[id].CreatePanel())),
 		}
 		content.Refresh()
 	}

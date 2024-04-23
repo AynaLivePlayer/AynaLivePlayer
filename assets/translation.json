@@ -4,6 +4,10 @@
     "zh-CN"
   ],
   "Messages": {
+    "default web protocol. enter room id to connect.": {
+      "en": "default web protocol. enter room id to connect.",
+      "zh-CN": "网页弹幕协议，请输入房间号"
+    },
     "gui.config.basic.audio_device": {
       "en": "Audio Device",
       "zh-CN": "音频输出设备"
@@ -36,14 +40,6 @@
       "en": "User Playlist",
       "zh-CN": "用户歌单"
     },
-    "gui.config.basic.skip_playlist": {
-      "en": "Skip Media From System Playlist",
-      "zh-CN": "跳过闲置歌单"
-    },
-    "gui.config.basic.skip_playlist.prompt": {
-      "en": "Skip",
-      "zh-CN": "跳过"
-    },
     "gui.config.basic.skip_when_error": {
       "en": "Skip this Media On Error",
       "zh-CN": "跳过获取失败的歌曲"
@@ -71,6 +67,10 @@
     "gui.history.user": {
       "en": "User",
       "zh-CN": "用户"
+    },
+    "gui.lyric.title": {
+      "en": "Lyric",
+      "zh-CN": "歌词"
     },
     "gui.player.button.lrc": {
       "en": "lrc",
@@ -167,6 +167,10 @@
     "gui.room.add.id_url": {
       "en": "Room ID",
       "zh-CN": "房间号"
+    },
+    "gui.room.add.name": {
+      "en": "Display Name",
+      "zh-CN": "显示名"
     },
     "gui.room.add.prompt": {
       "en": "enter room id",
@@ -268,13 +272,45 @@
       "en": "Search",
       "zh-CN": "搜索"
     },
+    "gui.tray.btn.show": {
+      "en": "Show",
+      "zh-CN": "打开"
+    },
     "gui.update.new_version": {
       "en": "New Version Available",
       "zh-CN": "有新版本可用"
     },
+    "open bilibili live protocol. enter client key to connect.": {
+      "en": "open bilibili live protocol. enter client key to connect.",
+      "zh-CN": "新版b站协议，输入身份码"
+    },
     "plugin.diange.admin": {
       "en": "Admin",
       "zh-CN": "管理员"
+    },
+    "plugin.diange.blacklist.btn.add": {
+      "en": "Add",
+      "zh-CN": "添加"
+    },
+    "plugin.diange.blacklist.description": {
+      "en": "Blacklist Configuration",
+      "zh-CN": "点歌黑名单设置"
+    },
+    "plugin.diange.blacklist.input.placeholder": {
+      "en": "enter word",
+      "zh-CN": "输入黑名单词"
+    },
+    "plugin.diange.blacklist.option.contains": {
+      "en": "Contains",
+      "zh-CN": "包含"
+    },
+    "plugin.diange.blacklist.option.exact": {
+      "en": "Exact Match",
+      "zh-CN": "相等"
+    },
+    "plugin.diange.blacklist.title": {
+      "en": "Blacklist",
+      "zh-CN": "点歌黑名单"
     },
     "plugin.diange.cooldown": {
       "en": "Cooldown",
@@ -312,6 +348,26 @@
       "en": "Max Queue",
       "zh-CN": "最大点歌数"
     },
+    "plugin.diange.skip_playlist": {
+      "en": "Skip Media From System Playlist",
+      "zh-CN": "跳过闲置歌单"
+    },
+    "plugin.diange.skip_playlist.prompt": {
+      "en": "Skip",
+      "zh-CN": "跳过"
+    },
+    "plugin.diange.source.command": {
+      "en": "command",
+      "zh-CN": "命令"
+    },
+    "plugin.diange.source.enable": {
+      "en": "enable",
+      "zh-CN": "启用"
+    },
+    "plugin.diange.source.priority": {
+      "en": "priority",
+      "zh-CN": "优先级"
+    },
     "plugin.diange.source_cmd": {
       "en": "Source Command",
       "zh-CN": "来源点歌命令"
@@ -324,45 +380,37 @@
       "en": "User",
       "zh-CN": "普通用户"
     },
-    "plugin.neteaselogin.current_user": {
-      "en": "Current User:",
-      "zh-CN": "当前用户:"
+    "plugin.maxduration.description": {
+      "en": "Set the maximum duration of a song",
+      "zh-CN": "设置歌曲最长能播多久"
     },
-    "plugin.neteaselogin.current_user.notlogin": {
-      "en": "Not Login",
-      "zh-CN": "未登录"
+    "plugin.maxduration.enable": {
+      "en": "Enable",
+      "zh-CN": "开启"
     },
-    "plugin.neteaselogin.description": {
-      "en": "Netease User Login",
-      "zh-CN": "网易云登录"
+    "plugin.maxduration.maxduration": {
+      "en": "Max Duration (seconds)",
+      "zh-CN": "最大时长 (秒)"
     },
-    "plugin.neteaselogin.logout": {
-      "en": "Logout",
-      "zh-CN": "登出"
+    "plugin.maxduration.skiponplay": {
+      "en": "Skip on play",
+      "zh-CN": "播放时跳过"
     },
-    "plugin.neteaselogin.qr.finish": {
-      "en": "Finish Scan",
-      "zh-CN": "完成扫描后按我"
+    "plugin.maxduration.skiponreach": {
+      "en": "Skip when reach max duration",
+      "zh-CN": "播放到最大时长时跳过"
     },
-    "plugin.neteaselogin.qr.new": {
-      "en": "Get a new qr code",
-      "zh-CN": "获取新二维码"
-    },
-    "plugin.neteaselogin.refresh": {
-      "en": "Refresh",
-      "zh-CN": "刷新状态"
-    },
-    "plugin.neteaselogin.title": {
-      "en": "Netease Login",
-      "zh-CN": "网易云登录"
+    "plugin.maxduration.title": {
+      "en": "Audio Duration Control",
+      "zh-CN": "歌曲时长控制"
     },
     "plugin.qiege.admin": {
       "en": "Admin",
       "zh-CN": "管理员"
     },
     "plugin.qiege.custom_cmd": {
-      "en": "Custom Command (Default one still works)",
-      "zh-CN": "自定义命令 (默认的依然可用)"
+      "en": "Custom Command",
+      "zh-CN": "自定义命令"
     },
     "plugin.qiege.description": {
       "en": "Basic Qiege configuration",
@@ -383,6 +431,42 @@
     "plugin.qiege.user": {
       "en": "User",
       "zh-CN": "切自己"
+    },
+    "plugin.sourcelogin.current_user": {
+      "en": "Current Status:",
+      "zh-CN": "当前状态:"
+    },
+    "plugin.sourcelogin.current_user.loggedin": {
+      "en": "Logged In",
+      "zh-CN": "已登录"
+    },
+    "plugin.sourcelogin.current_user.notlogin": {
+      "en": "Not Login",
+      "zh-CN": "未登录"
+    },
+    "plugin.sourcelogin.description": {
+      "en": "Netease User Login",
+      "zh-CN": "来源登录"
+    },
+    "plugin.sourcelogin.logout": {
+      "en": "Logout",
+      "zh-CN": "登出"
+    },
+    "plugin.sourcelogin.qr.finish": {
+      "en": "Finish Scan",
+      "zh-CN": "完成扫描后按我"
+    },
+    "plugin.sourcelogin.qr.new": {
+      "en": "Get a new qr code",
+      "zh-CN": "获取新二维码"
+    },
+    "plugin.sourcelogin.refresh": {
+      "en": "Refresh",
+      "zh-CN": "刷新状态"
+    },
+    "plugin.sourcelogin.title": {
+      "en": "Netease Login",
+      "zh-CN": "来源登录"
     },
     "plugin.textinfo.checkbox": {
       "en": "Enable",

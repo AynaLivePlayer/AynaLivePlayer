@@ -1,42 +1,42 @@
 package gui
 
 import (
-	"AynaLivePlayer/common/config"
-	"AynaLivePlayer/common/i18n"
-	"AynaLivePlayer/common/util"
-	"AynaLivePlayer/core/adapter"
+	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
+	"AynaLivePlayer/global"
+	"AynaLivePlayer/pkg/config"
+	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
+
+	_logger "AynaLivePlayer/pkg/logger"
 )
 
-var API adapter.IControlBridge
 var App fyne.App
 var MainWindow fyne.Window
 var playerWindow fyne.Window
 var playerWindowHandle uintptr
 
-func l() adapter.ILogger {
-	return API.Logger().WithModule("GUI")
-}
+var logger _logger.ILogger = nil
 
 func black_magic() {
 	widget.RichTextStyleStrong.TextStyle.Bold = false
 }
 
 func Initialize() {
+	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
-	l().Info("Initializing GUI")
+	logger.Info("Initializing GUI")
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
-	App = app.New()
+	App = app.NewWithID(config.ProgramName)
 	App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver.%s", config.ProgramName, model.Version(config.Version)))
+	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
@@ -63,58 +63,43 @@ func Initialize() {
 	MainWindow.SetIcon(resource.ImageIcon)
 	MainWindow.SetContent(tabs)
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
-	MainWindow.Resize(fyne.NewSize(960, 480))
+	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
 
-	playerWindow = App.NewWindow("CorePlayerPreview")
-	playerWindow.Resize(fyne.NewSize(480, 240))
-	playerWindow.SetCloseIntercept(func() {
-		playerWindow.Hide()
-	})
-	MainWindow.SetOnClosed(func() {
-		playerWindow.Close()
-	})
-	playerWindow.Hide()
+	setupPlayerWindow()
 
-	//MainWindow.SetFixedSize(true)
-	if config.General.AutoCheckUpdate {
-		go checkUpdate()
+	// register error
+	global.EventManager.RegisterA(
+		events.ErrorUpdate, "gui.show_error", func(e *event.Event) {
+			err := e.Data.(events.ErrorUpdateEvent).Error
+			logger.Warnf("gui received error event: %v, %v", err, err == nil)
+			if err == nil {
+				return
+			}
+			dialog.ShowError(err, MainWindow)
+		})
+
+	MainWindow.SetFixedSize(true)
+	if config.General.ShowSystemTray {
+		setupSysTray()
 	}
 }
 
-func showPlayerWindow() {
-	playerWindow.Show()
-	if playerWindowHandle == 0 {
-		playerWindowHandle = util.GetWindowHandle("CorePlayerPreview")
-		l().Infof("video output window handle: %d", playerWindowHandle)
-		if playerWindowHandle != 0 {
-			_ = API.PlayControl().GetPlayer().SetWindowHandle(playerWindowHandle)
-		}
-	}
-}
-
-func addShortCut() {
-	key := &desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift}
-	MainWindow.Canvas().AddShortcut(key, func(shortcut fyne.Shortcut) {
-		l().Info("Shortcut pressed: Ctrl+Shift+Right")
-		API.PlayControl().PlayNext()
-	})
-}
-
-func checkUpdate() {
-	l().Info("checking updates...")
-	err := API.App().CheckUpdate()
-	if err != nil {
-		showDialogIfError(err)
-		l().Warnf("check update failed", err)
-		return
-	}
-	l().Infof("latest version: v%s", API.App().LatestVersion().Version)
-	if API.App().LatestVersion().Version > API.App().Version().Version {
-		l().Info("new update available")
-		dialog.ShowCustom(
-			i18n.T("gui.update.new_version"),
-			"OK",
-			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
-			MainWindow)
-	}
-}
+//
+//func checkUpdate() {
+//	l().Info("checking updates...")
+//	err := API.App().CheckUpdate()
+//	if err != nil {
+//		showDialogIfError(err)
+//		l().Warnf("check update failed", err)
+//		return
+//	}
+//	l().Infof("latest version: v%s", API.App().LatestVersion().Version)
+//	if API.App().LatestVersion().Version > API.App().Version().Version {
+//		l().Info("new update available")
+//		dialog.ShowCustom(
+//			i18n.T("gui.update.new_version"),
+//			"OK",
+//			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
+//			MainWindow)
+//	}
+//}
