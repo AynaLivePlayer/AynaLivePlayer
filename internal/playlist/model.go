@@ -40,11 +40,21 @@ func newPlaylist(id model.PlaylistID) *playlist {
 		pl.Next(event.Data.(events.PlaylistNextCmdEvent).Remove)
 	})
 	global.EventManager.RegisterA(events.PlaylistModeChangeCmd(id), "internal.playlist.mode", func(event *event.Event) {
+		if pl.mode == model.PlaylistModeRandom {
+			pl.Index = 0
+		}
 		pl.mode = event.Data.(events.PlaylistModeChangeCmdEvent).Mode
 		log.Infof("Playlist %s mode changed to %d", id, pl.mode)
 		global.EventManager.CallA(events.PlaylistModeChangeUpdate(id), events.PlaylistModeChangeUpdateEvent{
 			Mode: pl.mode,
 		})
+	})
+	global.EventManager.RegisterA(events.PlaylistSetIndexCmd(id), "internal.playlist.setindex", func(event *event.Event) {
+		index := event.Data.(events.PlaylistSetIndexCmdEvent).Index
+		if index >= pl.Size() || index < 0 {
+			index = 0
+		}
+		pl.Index = index
 	})
 	return pl
 }
@@ -144,6 +154,10 @@ func (p *playlist) Next(delete bool) {
 	}
 	var index int
 	index = p.Index
+	// add guard
+	if index >= p.Size() {
+		index = 0
+	}
 	if p.mode == model.PlaylistModeRandom {
 		p.Index = rand.Intn(p.Size())
 	} else if p.mode == model.PlaylistModeNormal {

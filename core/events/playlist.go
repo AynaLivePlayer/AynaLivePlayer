@@ -22,6 +22,14 @@ type PlaylistMoveCmdEvent struct {
 	To   int
 }
 
+func PlaylistSetIndexCmd(id model.PlaylistID) event.EventId {
+	return event.EventId("cmd.playlist.setindex." + id)
+}
+
+type PlaylistSetIndexCmdEvent struct {
+	Index int
+}
+
 func PlaylistDeleteCmd(id model.PlaylistID) event.EventId {
 	return event.EventId("cmd.playlist.delete." + id)
 }
