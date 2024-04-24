@@ -317,8 +317,8 @@
       "zh-CN": "点歌冷却"
     },
     "plugin.diange.custom_cmd": {
-      "en": "Custom Command (Default one still works)",
-      "zh-CN": "自定义命令 (默认的依然可用)"
+      "en": "Custom Command",
+      "zh-CN": "自定义命令"
     },
     "plugin.diange.description": {
       "en": "Basic Diange Configuration",
