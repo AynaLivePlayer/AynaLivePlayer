@@ -16,6 +16,12 @@ type PlayerPlayCmdEvent struct {
 	Media model.Media
 }
 
+const PlayerPlayErrorUpdate = "update.player.play.error"
+
+type PlayerPlayErrorUpdateEvent struct {
+	Error error
+}
+
 const PlayerSeekCmd = "cmd.player.op.seek"
 
 type PlayerSeekCmdEvent struct {

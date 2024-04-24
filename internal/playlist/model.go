@@ -37,6 +37,7 @@ func newPlaylist(id model.PlaylistID) *playlist {
 		pl.Delete(e.Index)
 	})
 	global.EventManager.RegisterA(events.PlaylistNextCmd(id), "internal.playlist.next", func(event *event.Event) {
+		log.Infof("Playlist %s recieve next", id)
 		pl.Next(event.Data.(events.PlaylistNextCmdEvent).Remove)
 	})
 	global.EventManager.RegisterA(events.PlaylistModeChangeCmd(id), "internal.playlist.mode", func(event *event.Event) {

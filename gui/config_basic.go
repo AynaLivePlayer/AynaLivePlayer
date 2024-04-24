@@ -4,6 +4,8 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
@@ -105,13 +107,13 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	outputDevice := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("gui.config.basic.audio_device")), nil,
 		deviceSel)
-	//skipWhenErr := container.NewHBox(
-	//	widget.NewLabel(i18n.T("gui.config.basic.skip_when_error")),
-	//	component.NewCheckOneWayBinding(
-	//		i18n.T("gui.config.basic.skip_when_error.prompt"),
-	//		&API.PlayControl().Config().AutoNextWhenFail,
-	//		API.PlayControl().Config().AutoNextWhenFail),
-	//)
+	skipWhenErr := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.skip_when_error")),
+		component.NewCheckOneWayBinding(
+			i18n.T("gui.config.basic.skip_when_error.prompt"),
+			&config.General.PlayNextOnFail,
+			config.General.PlayNextOnFail),
+	)
 	//checkUpdateBox := container.NewHBox(
 	//	widget.NewLabel(i18n.T("gui.config.basic.auto_check_update")),
 	//	component.NewCheckOneWayBinding(
@@ -134,6 +136,6 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	//	}
 	//})
 	//b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr, checkUpdateBox, checkUpdateBtn)
-	b.panel = container.NewVBox(randomPlaylist, outputDevice)
+	b.panel = container.NewVBox(randomPlaylist, skipWhenErr, outputDevice)
 	return b.panel
 }

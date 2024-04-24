@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/internal/playlist"
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 )
 
@@ -36,7 +37,17 @@ func handlePlayNext() {
 
 	global.EventManager.RegisterA(
 		events.PlaylistInsertUpdate(model.PlaylistIDPlayer),
-		"internal.controller.playcontrol.playnext_when_insert",
+		"internal.controller.playcontrol.playnext_when_insert.player",
+		func(event *event.Event) {
+			if isIdle {
+				global.EventManager.CallA(events.PlayerPlayNextCmd,
+					events.PlayerPlayNextCmdEvent{})
+			}
+		})
+
+	global.EventManager.RegisterA(
+		events.PlaylistInsertUpdate(model.PlaylistIDSystem),
+		"internal.controller.playcontrol.playnext_when_insert.system",
 		func(event *event.Event) {
 			if isIdle {
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
@@ -49,17 +60,27 @@ func handlePlayNext() {
 		"internal.controller.playcontrol.playnext",
 		func(event *event.Event) {
 			if playlist.PlayerPlaylist.Size() > 0 {
+				log.Infof("Try to play next media in player playlist")
 				global.EventManager.CallA(events.PlaylistNextCmd(model.PlaylistIDPlayer),
 					events.PlaylistNextCmdEvent{
 						Remove: true,
 					})
 			} else {
+				log.Infof("Try to play next media in system playlist")
 				global.EventManager.CallA(events.PlaylistNextCmd(model.PlaylistIDSystem),
 					events.PlaylistNextCmdEvent{
-						Remove: true,
+						Remove: false,
 					})
 			}
+		})
 
+	global.EventManager.RegisterA(
+		events.PlayerPlayErrorUpdate,
+		"internal.controller.playcontrol.playnext_on_error",
+		func(event *event.Event) {
+			if isIdle && config.General.PlayNextOnFail {
+				global.EventManager.CallA(events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
+			}
 		})
 
 	global.EventManager.RegisterA(events.PlaylistNextUpdate(model.PlaylistIDPlayer),

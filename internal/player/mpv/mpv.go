@@ -160,6 +160,11 @@ func registerCmdHandler() {
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
 			log.Warn("[MPV PlayControl] get media url failed", err)
+			global.EventManager.CallA(
+				events.PlayerPlayErrorUpdate,
+				events.PlayerPlayErrorUpdateEvent{
+					Error: err,
+				})
 			return
 		}
 		mediaUrl := mediaUrls[0]
@@ -191,6 +196,11 @@ func registerCmdHandler() {
 		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
 		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
 			log.Warn("[MPV PlayControl] mpv load media failed", mediaInfo)
+			global.EventManager.CallA(
+				events.PlayerPlayErrorUpdate,
+				events.PlayerPlayErrorUpdateEvent{
+					Error: err,
+				})
 			return
 		}
 	})

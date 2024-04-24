@@ -7,6 +7,7 @@ type _GeneralConfig struct {
 	Language        string
 	AutoCheckUpdate bool
 	ShowSystemTray  bool
+	PlayNextOnFail  bool
 }
 
 func (c *_GeneralConfig) Name() string {
@@ -19,4 +20,5 @@ var General = &_GeneralConfig{
 	AutoCheckUpdate: true,
 	Width:           960,
 	Height:          480,
+	PlayNextOnFail:  false,
 }
