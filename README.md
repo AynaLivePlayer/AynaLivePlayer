@@ -42,7 +42,9 @@ git submodule set-url pkg/liveroom-sdk https://github.com/AynaLivePlayer/liveroo
 git submodule update
 ```
 6. now you can build (please check makefile for more details)
-```bash
+```powershell
+$env:CGO_LDFLAGS="-LC:\Users\vboxuser\Desktop\AynaLivePlayer\libmpv\lib"
+$env:CGO_CFLAGS="-IC:\Users\vboxuser\Desktop\AynaLivePlayer\libmpv\include"
 # ... more setup, see makefile
 go build -o AynaLivePlayer -ldflags -H=windowsgui app/main.go
 ```
