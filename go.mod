@@ -33,13 +33,13 @@ require (
 
 require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e // indirect
-	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240408074929-6565ab41764b // indirect
+	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240427021204-4a59ec1fa840 // indirect
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/aynakeya/deepcolor v1.0.2 // indirect
-	github.com/aynakeya/open-bilibili-live v0.0.5 // indirect
+	github.com/aynakeya/open-bilibili-live v0.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25 // indirect
 	github.com/fredbi/uri v1.0.0 // indirect
