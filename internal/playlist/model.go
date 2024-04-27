@@ -148,9 +148,11 @@ func (p *playlist) Move(src int, dst int) {
 }
 
 func (p *playlist) Next(delete bool) {
+	p.Lock.Lock()
 	if p.Size() == 0 {
 		// no media in the playlist
 		// do not issue any event
+		p.Lock.Unlock()
 		return
 	}
 	var index int
@@ -167,17 +169,26 @@ func (p *playlist) Next(delete bool) {
 		p.Index = index
 	}
 	m := p.Medias[index]
-	global.EventManager.CallA(events.PlaylistNextUpdate(p.playlistId), events.PlaylistNextUpdateEvent{
-		Media: m,
-	})
+	// fix race condition
+	currentSize := p.Size() - 1
 	if delete {
-		p.Delete(index)
 		if p.mode == model.PlaylistModeRandom {
-			p.Index = rand.Intn(p.Size())
+			if currentSize == 0 {
+				p.Index = 0
+			} else {
+				p.Index = rand.Intn(currentSize)
+			}
 		} else if p.mode == model.PlaylistModeNormal {
 			p.Index = index
 		} else {
 			p.Index = index
 		}
+	}
+	p.Lock.Unlock()
+	global.EventManager.CallA(events.PlaylistNextUpdate(p.playlistId), events.PlaylistNextUpdateEvent{
+		Media: m,
+	})
+	if delete {
+		p.Delete(index)
 	}
 }
