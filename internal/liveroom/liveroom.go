@@ -50,6 +50,15 @@ func StopAndSave() {
 func addLiveRoom(roomModel model.LiveRoom) {
 	log.Info("Add live room")
 	room, err := liveroomsdk.CreateLiveRoom(roomModel.LiveRoom)
+	// handle failed to create liveroom
+	if err != nil {
+		log.Errorf("Create live room failed: %s", err)
+		global.EventManager.CallA(
+			events.ErrorUpdate, events.ErrorUpdateEvent{
+				Error: err,
+			})
+		return
+	}
 	if _, ok := liveRooms[room.Config().Identifier()]; ok {
 		log.Errorf("fail to add, room %s already exists", room.Config().Identifier())
 		global.EventManager.CallA(
