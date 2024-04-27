@@ -166,7 +166,10 @@ func registerRoomHandlers() {
 				return
 			}
 			RoomTab.rooms[index] = room
+			// add lock to avoid race condition
+			RoomTab.lock.Lock()
 			RoomTab.Rooms.Refresh()
+			RoomTab.lock.Unlock()
 			if index == RoomTab.Index {
 				RoomTab.RoomTitle.SetText(room.DisplayName())
 				RoomTab.RoomID.SetText(room.LiveRoom.Identifier())
