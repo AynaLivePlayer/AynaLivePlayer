@@ -127,6 +127,7 @@ func registerHandlers() {
 			}
 			_ = room.room.Disconnect()
 			room.room.OnStatusChange(nil)
+			room.room.OnMessage(nil)
 			delete(liveRooms, data.Identifier)
 			log.Infof("success remove live room %s", data.Identifier)
 			sendRoomsUpdateEvent()
