@@ -86,7 +86,7 @@ func NewDiange() *Diange {
 			},
 		},
 		cooldowns: make(map[string]int),
-		log:       global.Logger.WithPrefix("Plugin.Logger"),
+		log:       global.Logger.WithPrefix("Plugin.Diange"),
 	}
 	return diange
 }
@@ -215,7 +215,14 @@ func (d *Diange) handleMessage(event *event.Event) {
 
 	// match media first
 
-	mediaMeta, found := miaosic.MatchMedia(keywords)
+	var mediaMeta miaosic.MetaData
+	found := false
+	for _, source := range sources {
+		mediaMeta, found = miaosic.MatchMediaByProvider(source, keywords)
+		if found {
+			break
+		}
+	}
 
 	var media miaosic.MediaInfo
 
@@ -241,6 +248,7 @@ func (d *Diange) handleMessage(event *event.Event) {
 			break
 		}
 	} else {
+		d.log.Info("Match media: ", mediaMeta)
 		m, err := miaosic.GetMediaInfo(mediaMeta)
 		if err != nil {
 			d.log.Error("Get media info failed: ", err)
