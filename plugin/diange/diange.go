@@ -232,17 +232,6 @@ func (d *Diange) handleMessage(event *event.Event) {
 			if len(medias) == 0 || err != nil {
 				continue
 			}
-			// double check blacklist
-			for _, item := range d.blacklist {
-				if item.Exact && item.Value == medias[0].Title {
-					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
-					return
-				}
-				if !item.Exact && strings.Contains(medias[0].Title, item.Value) {
-					d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
-					return
-				}
-			}
 			media = medias[0]
 			found = true
 			break
@@ -258,6 +247,17 @@ func (d *Diange) handleMessage(event *event.Event) {
 	}
 
 	if found {
+		// double check blacklist
+		for _, item := range d.blacklist {
+			if item.Exact && item.Value == media.Title {
+				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+				return
+			}
+			if !item.Exact && strings.Contains(media.Title, item.Value) {
+				d.log.Warnf("User %s(%s) diange %s is in blacklist %s, ignore", message.User.Username, message.User.Uid, keywords, item.Value)
+				return
+			}
+		}
 		if d.SkipSystemPlaylist && d.isCurrentSystem {
 			global.EventManager.CallA(
 				events.PlayerPlayCmd,
