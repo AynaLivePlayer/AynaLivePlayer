@@ -484,53 +484,53 @@
       "en": "Text Output",
       "zh-CN": "文本输出"
     },
-    "plugin.webinfo.autostart": {
+    "plugin.wshub.autostart": {
       "en": "Auto start",
       "zh-CN": "自动启用"
     },
-    "plugin.webinfo.description": {
-      "en": "Web output configuration",
-      "zh-CN": "web输出设置"
+    "plugin.wshub.description": {
+      "en": "Websocket Hub Configuration",
+      "zh-CN": "Websocket服务器设置"
     },
-    "plugin.webinfo.port": {
+    "plugin.wshub.port": {
       "en": "Port",
       "zh-CN": "服务器端口"
     },
-    "plugin.webinfo.server_control": {
+    "plugin.wshub.server_control": {
       "en": "Control",
       "zh-CN": "操作"
     },
-    "plugin.webinfo.server_control.restart": {
+    "plugin.wshub.server_control.restart": {
       "en": "Restart",
       "zh-CN": "重启"
     },
-    "plugin.webinfo.server_control.start": {
+    "plugin.wshub.server_control.start": {
       "en": "Start",
       "zh-CN": "启动"
     },
-    "plugin.webinfo.server_control.stop": {
+    "plugin.wshub.server_control.stop": {
       "en": "Stop",
       "zh-CN": "停止"
     },
-    "plugin.webinfo.server_preview": {
-      "en": "Server Preview",
-      "zh-CN": "效果预览"
+    "plugin.wshub.server_link": {
+      "en": "Websocket Server Link",
+      "zh-CN": "Websocket服务器链接"
     },
-    "plugin.webinfo.server_status": {
+    "plugin.wshub.server_status": {
       "en": "Server Status",
       "zh-CN": "服务器状态"
     },
-    "plugin.webinfo.server_status.running": {
+    "plugin.wshub.server_status.running": {
       "en": "Running",
       "zh-CN": "运行中"
     },
-    "plugin.webinfo.server_status.stopped": {
+    "plugin.wshub.server_status.stopped": {
       "en": "Stopped",
       "zh-CN": "已停止"
     },
-    "plugin.webinfo.title": {
-      "en": "Web Output",
-      "zh-CN": "Web输出"
+    "plugin.wshub.title": {
+      "en": "Websocket Hub",
+      "zh-CN": "Websocket服务器"
     }
   }
 }

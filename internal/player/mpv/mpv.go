@@ -12,6 +12,7 @@ import (
 	"github.com/AynaLivePlayer/miaosic"
 	"github.com/aynakeya/go-mpv"
 	"github.com/tidwall/gjson"
+	"math"
 )
 
 var running bool = false
@@ -71,6 +72,9 @@ func StopPlayer() {
 	log.Info("mpv player stopped")
 }
 
+var prevPercentPos float64 = 0
+var prevTimePos float64 = 0
+
 var mpvPropertyHandler = map[string]func(value any){
 	"pause": func(value any) {
 		var data events.PlayerPropertyPauseUpdateEvent
@@ -89,6 +93,11 @@ var mpvPropertyHandler = map[string]func(value any){
 		if data.PercentPos < 0.1 {
 			return
 		}
+		// ignore small change
+		if math.Abs(data.PercentPos-prevPercentPos) < 0.5 {
+			return
+		}
+		prevPercentPos = data.PercentPos
 		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, data)
 
 	},
@@ -120,6 +129,11 @@ var mpvPropertyHandler = map[string]func(value any){
 		if data.TimePos < 0.1 {
 			return
 		}
+		// ignore small change
+		if math.Abs(data.TimePos-prevTimePos) < 0.5 {
+			return
+		}
+		prevTimePos = data.TimePos
 		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, data)
 	},
 	"duration": func(value any) {

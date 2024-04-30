@@ -12,6 +12,7 @@ import (
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/sourcelogin"
 	"AynaLivePlayer/plugin/textinfo"
+	"AynaLivePlayer/plugin/wshub"
 )
 
 func Initialize() {
@@ -25,6 +26,7 @@ func Initialize() {
 		diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin(),
 		textinfo.NewTextInfo(),
 		durationmgmt.NewMaxDuration(),
+		wshub.NewWsHub(),
 	)
 }
 
