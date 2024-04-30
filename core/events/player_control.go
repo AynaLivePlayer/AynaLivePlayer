@@ -37,6 +37,12 @@ const PlayerToggleCmd = "cmd.player.op.toggle"
 type PlayerToggleCmdEvent struct {
 }
 
+const PlayerSetPauseCmd = "cmd.player.op.pause"
+
+type PlayerSetPauseCmdEvent struct {
+	Pause bool
+}
+
 const PlayerPlayNextCmd = "cmd.player.op.next"
 
 type PlayerPlayNextCmdEvent struct {

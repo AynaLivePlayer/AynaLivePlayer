@@ -217,6 +217,12 @@ func registerCmdHandler() {
 				})
 			return
 		}
+		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
+			TimePos: 0,
+		})
+		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
+			PercentPos: 0,
+		})
 	})
 	global.EventManager.RegisterA(events.PlayerToggleCmd, "player.toggle", func(evnt *event.Event) {
 		property, err := libmpv.GetProperty("pause", mpv.FORMAT_FLAG)
@@ -227,6 +233,13 @@ func registerCmdHandler() {
 		err = libmpv.SetProperty("pause", mpv.FORMAT_FLAG, !property.(bool))
 		if err != nil {
 			log.Warn("[MPV PlayControl] toggle pause failed", err)
+		}
+	})
+	global.EventManager.RegisterA(events.PlayerSetPauseCmd, "player.set_paused", func(evnt *event.Event) {
+		data := evnt.Data.(events.PlayerSetPauseCmdEvent)
+		err := libmpv.SetProperty("pause", mpv.FORMAT_FLAG, data.Pause)
+		if err != nil {
+			log.Warn("[MPV PlayControl] set pause failed", err)
 		}
 	})
 	global.EventManager.RegisterA(events.PlayerSeekCmd, "player.seek", func(evnt *event.Event) {

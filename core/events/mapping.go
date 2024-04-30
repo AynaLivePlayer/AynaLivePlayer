@@ -21,6 +21,7 @@ var EventsMapping = map[event.EventId]any{
 	PlayerPlayErrorUpdate:               PlayerPlayErrorUpdateEvent{},
 	PlayerSeekCmd:                       PlayerSeekCmdEvent{},
 	PlayerToggleCmd:                     PlayerToggleCmdEvent{},
+	PlayerSetPauseCmd:                   PlayerSetPauseCmdEvent{},
 	PlayerPlayNextCmd:                   PlayerPlayNextCmdEvent{},
 	PlayerLyricRequestCmd:               PlayerLyricRequestCmdEvent{},
 	PlayerLyricReload:                   PlayerLyricReloadEvent{},

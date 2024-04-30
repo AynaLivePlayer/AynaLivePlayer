@@ -19,24 +19,26 @@ import (
 
 type WsHub struct {
 	config.BaseConfig
-	Enabled bool
-	Port    int
-	panel   fyne.CanvasObject
-	server  *wsServer
-	log     logger.ILogger
+	Enabled       bool
+	Port          int
+	LocalHostOnly bool
+	panel         fyne.CanvasObject
+	server        *wsServer
+	log           logger.ILogger
 }
 
 func NewWsHub() *WsHub {
 	return &WsHub{
-		Enabled: false,
-		Port:    29629,
-		log:     global.Logger.WithPrefix("plugin.wshub"),
+		Enabled:       false,
+		Port:          29629,
+		LocalHostOnly: true,
+		log:           global.Logger.WithPrefix("plugin.wshub"),
 	}
 }
 
 func (w *WsHub) Enable() error {
 	config.LoadConfig(w)
-	w.server = newWsServer(&w.Port)
+	w.server = newWsServer(&w.Port, &w.LocalHostOnly)
 	gui.AddConfigLayout(w)
 	w.registerEvents()
 	w.log.Info("webinfo loaded")
@@ -89,6 +91,9 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 	autoStart := container.NewHBox(
 		widget.NewLabel(i18n.T("plugin.wshub.autostart")),
 		component.NewCheckOneWayBinding("", &w.Enabled, w.Enabled))
+	localHostOnly := container.NewHBox(
+		widget.NewLabel(i18n.T("plugin.wshub.local_host_only")),
+		component.NewCheckOneWayBinding("", &w.LocalHostOnly, w.LocalHostOnly))
 	freshStatusText()
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.wshub.port")), nil,
@@ -152,7 +157,7 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.wshub.server_control")),
 		startBtn, stopBtn, restartBtn,
 	)
-	w.panel = container.NewVBox(serverStatus, autoStart, serverPreview, serverPort, ctrlBtns)
+	w.panel = container.NewVBox(serverStatus, autoStart, localHostOnly, serverPreview, serverPort, ctrlBtns)
 	return nil
 }
 

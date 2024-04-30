@@ -34,7 +34,7 @@ func (c *wsClient) start() {
 			c.Close <- 1
 			return
 		}
-		if msgType == websocket.TextMessage {
+		if msgType != websocket.TextMessage {
 			return
 		}
 		var data EventDataReceived
@@ -53,23 +53,25 @@ func (c *wsClient) start() {
 }
 
 type wsServer struct {
-	Running bool
-	Server  *http.Server
-	clients map[*wsClient]bool
-	mux     *http.ServeMux
-	lock    sync.RWMutex
-	port    *int
-	log     logger.ILogger
+	Running       bool
+	Server        *http.Server
+	clients       map[*wsClient]bool
+	mux           *http.ServeMux
+	lock          sync.RWMutex
+	port          *int
+	localhostOnly *bool
+	log           logger.ILogger
 }
 
-func newWsServer(port *int) *wsServer {
+func newWsServer(port *int, localhostOnly *bool) *wsServer {
 	mux := http.NewServeMux()
 	s := &wsServer{
-		Running: false,
-		clients: make(map[*wsClient]bool),
-		mux:     mux,
-		port:    port,
-		log:     global.Logger.WithPrefix("plugin.wshub.server"),
+		Running:       false,
+		clients:       make(map[*wsClient]bool),
+		mux:           mux,
+		port:          port,
+		localhostOnly: localhostOnly,
+		log:           global.Logger.WithPrefix("plugin.wshub.server"),
 	}
 	mux.HandleFunc("/wsinfo", s.handleWsInfo)
 	return s
@@ -132,8 +134,14 @@ func (s *wsServer) Start() {
 	s.log.Debug("WebInfoServer starting...")
 	s.Running = true
 	go func() {
+		var addr string
+		if *s.localhostOnly {
+			addr = fmt.Sprintf("localhost:%d", *s.port)
+		} else {
+			addr = fmt.Sprintf("0.0.0.0:%d", *s.port)
+		}
 		s.Server = &http.Server{
-			Addr:    fmt.Sprintf("localhost:%d", *s.port),
+			Addr:    addr,
 			Handler: s.mux,
 		}
 		err := s.Server.ListenAndServe()
@@ -161,5 +169,8 @@ func (s *wsServer) Stop() error {
 }
 
 func (s *wsServer) getWsUrl() string {
-	return fmt.Sprintf("ws://localhost:%d/wsinfo", *s.port)
+	if *s.localhostOnly {
+		return fmt.Sprintf("ws://localhost:%d/wsinfo", *s.port)
+	}
+	return fmt.Sprintf("ws://0.0.0.0:%d/wsinfo", *s.port)
 }

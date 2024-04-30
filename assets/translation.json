@@ -492,6 +492,10 @@
       "en": "Websocket Hub Configuration",
       "zh-CN": "Websocket服务器设置"
     },
+    "plugin.wshub.local_host_only": {
+      "en": "only allow local host connection",
+      "zh-CN": "只允许本地连接"
+    },
     "plugin.wshub.port": {
       "en": "Port",
       "zh-CN": "服务器端口"
