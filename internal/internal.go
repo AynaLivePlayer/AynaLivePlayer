@@ -7,6 +7,7 @@ import (
 	"AynaLivePlayer/internal/playlist"
 	"AynaLivePlayer/internal/plugins"
 	"AynaLivePlayer/internal/source"
+	"AynaLivePlayer/internal/updater"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/durationmgmt"
 	"AynaLivePlayer/plugin/qiege"
@@ -28,6 +29,7 @@ func Initialize() {
 		durationmgmt.NewMaxDuration(),
 		wshub.NewWsHub(),
 	)
+	updater.Initialize()
 }
 
 func Stop() {
