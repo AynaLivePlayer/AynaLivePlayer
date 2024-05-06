@@ -162,6 +162,7 @@ func registerPlayControllerHandler() {
 					picture, err := gutil.NewImageFromPlayerPicture(media.Info.Cover)
 					if err != nil {
 						ch <- nil
+						logger.Errorf("fail to load cover: %v", err)
 						return
 					}
 					ch <- picture

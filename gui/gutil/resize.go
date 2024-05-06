@@ -45,10 +45,13 @@ func NewImageFromPlayerPicture(picture miaosic.Picture) (*canvas.Image, error) {
 			return nil, errors.New("fail to fail url")
 		}
 		img = canvas.NewImageFromURI(uri)
-		if img == nil {
+		if img == nil || (img.File == "" && img.Resource == nil) {
 			// bug fix, return a new error to indicate fail to read an image
 			return nil, errors.New("fail to read image")
 		}
+	}
+	if img.Resource == nil {
+		return nil, errors.New("fail to read image")
 	}
 	// compress image, so it won't be too large
 	img.Resource = ResizeImage(img.Resource, 128, 128)
