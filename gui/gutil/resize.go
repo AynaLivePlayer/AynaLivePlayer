@@ -44,6 +44,7 @@ func NewImageFromPlayerPicture(picture miaosic.Picture) (*canvas.Image, error) {
 		if uri == nil {
 			return nil, errors.New("fail to fail url")
 		}
+		// NewImageFromURI will return an image with empty resource and file
 		img = canvas.NewImageFromURI(uri)
 		if img == nil || (img.File == "" && img.Resource == nil) {
 			// bug fix, return a new error to indicate fail to read an image
