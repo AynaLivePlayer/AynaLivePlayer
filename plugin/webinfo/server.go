@@ -1,7 +1,6 @@
 package webinfo
 
 import (
-	"AynaLivePlayer/core/adapter"
 	"AynaLivePlayer/pkg/config"
 	"context"
 	"encoding/json"

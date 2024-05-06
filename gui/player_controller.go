@@ -130,6 +130,8 @@ func registerPlayControllerHandler() {
 		if event.Data.(events.PlayerPlayingUpdateEvent).Removed {
 			PlayController.Progress.Value = 0
 			PlayController.Progress.Max = 0
+			PlayController.TotalTime.SetText("0:00")
+			PlayController.CurrentTime.SetText("0:00")
 			PlayController.Title.SetText("Title")
 			PlayController.Artist.SetText("Artist")
 			PlayController.Username.SetText("Username")
@@ -160,6 +162,7 @@ func registerPlayControllerHandler() {
 					picture, err := gutil.NewImageFromPlayerPicture(media.Info.Cover)
 					if err != nil {
 						ch <- nil
+						logger.Errorf("fail to load cover: %v", err)
 						return
 					}
 					ch <- picture

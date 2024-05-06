@@ -4,6 +4,8 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
@@ -105,35 +107,23 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	outputDevice := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("gui.config.basic.audio_device")), nil,
 		deviceSel)
-	//skipWhenErr := container.NewHBox(
-	//	widget.NewLabel(i18n.T("gui.config.basic.skip_when_error")),
-	//	component.NewCheckOneWayBinding(
-	//		i18n.T("gui.config.basic.skip_when_error.prompt"),
-	//		&API.PlayControl().Config().AutoNextWhenFail,
-	//		API.PlayControl().Config().AutoNextWhenFail),
-	//)
-	//checkUpdateBox := container.NewHBox(
-	//	widget.NewLabel(i18n.T("gui.config.basic.auto_check_update")),
-	//	component.NewCheckOneWayBinding(
-	//		i18n.T("gui.config.basic.auto_check_update.prompt"),
-	//		&config.General.AutoCheckUpdate,
-	//		config.General.AutoCheckUpdate),
-	//)
-	//checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
-	//	err := API.App().CheckUpdate()
-	//	if err != nil {
-	//		showDialogIfError(err)
-	//		return
-	//	}
-	//	if API.App().LatestVersion().Version > API.App().Version().Version {
-	//		dialog.ShowCustom(
-	//			i18n.T("gui.update.new_version"),
-	//			"OK",
-	//			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
-	//			MainWindow)
-	//	}
-	//})
-	//b.panel = container.NewVBox(randomPlaylist, outputDevice, skipPlaylist, skipWhenErr, checkUpdateBox, checkUpdateBtn)
-	b.panel = container.NewVBox(randomPlaylist, outputDevice)
+	skipWhenErr := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.skip_when_error")),
+		component.NewCheckOneWayBinding(
+			i18n.T("gui.config.basic.skip_when_error.prompt"),
+			&config.General.PlayNextOnFail,
+			config.General.PlayNextOnFail),
+	)
+	checkUpdateBox := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.auto_check_update")),
+		component.NewCheckOneWayBinding(
+			i18n.T("gui.config.basic.auto_check_update.prompt"),
+			&config.General.AutoCheckUpdate,
+			config.General.AutoCheckUpdate),
+	)
+	checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
+		global.EventManager.CallA(events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
+	})
+	b.panel = container.NewVBox(randomPlaylist, skipWhenErr, outputDevice, checkUpdateBox, checkUpdateBtn)
 	return b.panel
 }

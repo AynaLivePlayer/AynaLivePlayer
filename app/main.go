@@ -37,7 +37,7 @@ var Log = &_LogConfig{
 
 func setupGlobal() {
 	global.EventManager = event.NewManger(128, 16)
-	global.Logger = loggerRepo.NewZapColoredLogger()
+	global.Logger = loggerRepo.NewZapColoredLogger(Log.Path, !*dev)
 	global.Logger.SetLogLevel(Log.Level)
 }
 

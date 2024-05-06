@@ -12,6 +12,7 @@ import (
 	"github.com/AynaLivePlayer/miaosic"
 	"github.com/aynakeya/go-mpv"
 	"github.com/tidwall/gjson"
+	"math"
 )
 
 var running bool = false
@@ -71,6 +72,9 @@ func StopPlayer() {
 	log.Info("mpv player stopped")
 }
 
+var prevPercentPos float64 = 0
+var prevTimePos float64 = 0
+
 var mpvPropertyHandler = map[string]func(value any){
 	"pause": func(value any) {
 		var data events.PlayerPropertyPauseUpdateEvent
@@ -89,6 +93,11 @@ var mpvPropertyHandler = map[string]func(value any){
 		if data.PercentPos < 0.1 {
 			return
 		}
+		// ignore small change
+		if math.Abs(data.PercentPos-prevPercentPos) < 0.5 {
+			return
+		}
+		prevPercentPos = data.PercentPos
 		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, data)
 
 	},
@@ -120,6 +129,11 @@ var mpvPropertyHandler = map[string]func(value any){
 		if data.TimePos < 0.1 {
 			return
 		}
+		// ignore small change
+		if math.Abs(data.TimePos-prevTimePos) < 0.5 {
+			return
+		}
+		prevTimePos = data.TimePos
 		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, data)
 	},
 	"duration": func(value any) {
@@ -160,6 +174,11 @@ func registerCmdHandler() {
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
 			log.Warn("[MPV PlayControl] get media url failed", err)
+			global.EventManager.CallA(
+				events.PlayerPlayErrorUpdate,
+				events.PlayerPlayErrorUpdateEvent{
+					Error: err,
+				})
 			return
 		}
 		mediaUrl := mediaUrls[0]
@@ -180,11 +199,6 @@ func registerCmdHandler() {
 				return
 			}
 		}
-		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
-		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
-			log.Warn("[MPV PlayControl] mpv load media failed", mediaInfo)
-			return
-		}
 		media := evnt.Data.(events.PlayerPlayCmdEvent).Media
 		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
 			media.Info = m
@@ -192,6 +206,22 @@ func registerCmdHandler() {
 		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
 			Media:   media,
 			Removed: false,
+		})
+		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
+		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
+			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo)
+			global.EventManager.CallA(
+				events.PlayerPlayErrorUpdate,
+				events.PlayerPlayErrorUpdateEvent{
+					Error: err,
+				})
+			return
+		}
+		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
+			TimePos: 0,
+		})
+		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
+			PercentPos: 0,
 		})
 	})
 	global.EventManager.RegisterA(events.PlayerToggleCmd, "player.toggle", func(evnt *event.Event) {
@@ -203,6 +233,13 @@ func registerCmdHandler() {
 		err = libmpv.SetProperty("pause", mpv.FORMAT_FLAG, !property.(bool))
 		if err != nil {
 			log.Warn("[MPV PlayControl] toggle pause failed", err)
+		}
+	})
+	global.EventManager.RegisterA(events.PlayerSetPauseCmd, "player.set_paused", func(evnt *event.Event) {
+		data := evnt.Data.(events.PlayerSetPauseCmdEvent)
+		err := libmpv.SetProperty("pause", mpv.FORMAT_FLAG, data.Pause)
+		if err != nil {
+			log.Warn("[MPV PlayControl] set pause failed", err)
 		}
 	})
 	global.EventManager.RegisterA(events.PlayerSeekCmd, "player.seek", func(evnt *event.Event) {

@@ -7,11 +7,13 @@ import (
 	"AynaLivePlayer/internal/playlist"
 	"AynaLivePlayer/internal/plugins"
 	"AynaLivePlayer/internal/source"
+	"AynaLivePlayer/internal/updater"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/durationmgmt"
 	"AynaLivePlayer/plugin/qiege"
 	"AynaLivePlayer/plugin/sourcelogin"
 	"AynaLivePlayer/plugin/textinfo"
+	"AynaLivePlayer/plugin/wshub"
 )
 
 func Initialize() {
@@ -25,7 +27,9 @@ func Initialize() {
 		diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin(),
 		textinfo.NewTextInfo(),
 		durationmgmt.NewMaxDuration(),
+		wshub.NewWsHub(),
 	)
+	updater.Initialize()
 }
 
 func Stop() {

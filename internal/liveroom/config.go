@@ -20,7 +20,10 @@ func (c *_cfg) OnLoad() {
 }
 
 func (c *_cfg) OnSave() {
-	_ = config.SaveJson(c.LiveRoomPath, &c.liveRooms)
+	err := config.SaveJson(c.LiveRoomPath, &c.liveRooms)
+	if err != nil {
+		log.Errorf("fail to save live rooms: %v", err)
+	}
 }
 
 var cfg = &_cfg{

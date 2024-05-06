@@ -78,28 +78,9 @@ func Initialize() {
 			dialog.ShowError(err, MainWindow)
 		})
 
+	checkUpdate()
 	MainWindow.SetFixedSize(true)
 	if config.General.ShowSystemTray {
 		setupSysTray()
 	}
 }
-
-//
-//func checkUpdate() {
-//	l().Info("checking updates...")
-//	err := API.App().CheckUpdate()
-//	if err != nil {
-//		showDialogIfError(err)
-//		l().Warnf("check update failed", err)
-//		return
-//	}
-//	l().Infof("latest version: v%s", API.App().LatestVersion().Version)
-//	if API.App().LatestVersion().Version > API.App().Version().Version {
-//		l().Info("new update available")
-//		dialog.ShowCustom(
-//			i18n.T("gui.update.new_version"),
-//			"OK",
-//			widget.NewRichTextFromMarkdown(API.App().LatestVersion().Info),
-//			MainWindow)
-//	}
-//}
