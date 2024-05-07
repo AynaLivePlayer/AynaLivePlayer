@@ -8,6 +8,7 @@ import (
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -23,6 +24,7 @@ type Qiege struct {
 	CustomCMD           string
 	currentUid          string
 	panel               fyne.CanvasObject
+	log                 logger.ILogger
 }
 
 func NewQiege() *Qiege {
@@ -31,6 +33,7 @@ func NewQiege() *Qiege {
 		PrivilegePermission: true,
 		AdminPermission:     true,
 		CustomCMD:           "切歌",
+		log:                 global.Logger.WithPrefix("plugin.qiege"),
 	}
 }
 
@@ -71,6 +74,7 @@ func (d *Qiege) handleMessage(event *event.Event) {
 	if len(msgs) < 1 || msgs[0] != d.CustomCMD {
 		return
 	}
+	d.log.Infof("recieve diange command")
 	if d.UserPermission {
 		if d.currentUid == message.User.Uid {
 			global.EventManager.CallA(
