@@ -14,3 +14,9 @@ type EventDataReceived struct {
 	EventID event.EventId
 	Data    json.RawMessage
 }
+
+var eventCache []*EventData
+
+func init() {
+	eventCache = make([]*EventData, 0)
+}

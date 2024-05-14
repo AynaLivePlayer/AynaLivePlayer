@@ -162,19 +162,25 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 }
 
 func (w *WsHub) registerEvents() {
+	i := 0
 	for eid, _ := range events.EventsMapping {
+		eventCache = append(eventCache, &EventData{})
+		currentIdx := i
 		global.EventManager.RegisterA(eid,
 			"plugin.wshub.event."+string(eid),
 			func(e *event.Event) {
-				val, err := json.Marshal(EventData{
+				ed := EventData{
 					EventID: e.Id,
 					Data:    e.Data,
-				})
+				}
+				val, err := json.Marshal(ed)
 				if err != nil {
 					w.log.Errorf("failed to marshal event data %v", err)
 					return
 				}
+				eventCache[currentIdx] = &ed
 				w.server.broadcast(val)
 			})
+		i++
 	}
 }

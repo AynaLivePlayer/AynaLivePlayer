@@ -112,6 +112,20 @@ func (s *wsServer) handleWsInfo(w http.ResponseWriter, r *http.Request) {
 	s.register(client)
 	defer s.unregister(client)
 	go client.start()
+	// send initial data
+	for _, data := range eventCache {
+		// ignore empty
+		if data.EventID == "" {
+			continue
+		}
+		eventCacheData, _ := json.Marshal(data)
+		err := client.conn.WriteMessage(websocket.TextMessage, eventCacheData)
+		if err != nil {
+			s.log.Warn("write message failed", err)
+			return
+		}
+	}
+	// start message loop
 	for {
 		select {
 		case data := <-client.Data:
