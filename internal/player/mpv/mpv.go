@@ -209,7 +209,7 @@ func registerCmdHandler() {
 		})
 		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
 		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
-			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo)
+			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo, err)
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
