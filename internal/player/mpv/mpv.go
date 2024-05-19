@@ -208,7 +208,12 @@ func registerCmdHandler() {
 			Removed: false,
 		})
 		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
-		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
+		cmd := []string{"loadfile", mediaUrl.Url}
+		if media.Info.Cover.Url != "" {
+			// add media cover to video channel.
+			cmd = append(cmd, "replace", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+		}
+		if err := libmpv.Command(cmd); err != nil {
 			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo, err)
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
@@ -263,7 +268,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.next", func(evnt *event.Event) {
+	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *event.Event) {
 		handle := evnt.Data.(events.PlayerVideoPlayerSetWindowHandleCmdEvent).Handle
 		err := SetWindowHandle(handle)
 		if err != nil {
