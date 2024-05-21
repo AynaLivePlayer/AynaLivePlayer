@@ -214,7 +214,7 @@ func registerCmdHandler() {
 			cmd = append(cmd, "replace", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
 		}
 		if err := libmpv.Command(cmd); err != nil {
-			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo, err)
+			log.Error("[MPV PlayControl] mpv load media failed", cmd, mediaInfo, err)
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
