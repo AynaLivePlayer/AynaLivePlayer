@@ -18,6 +18,7 @@ import (
 var running bool = false
 var libmpv *mpv.Mpv = nil
 var log logger.ILogger = nil
+var mpvClientVersion uint32 = 0
 
 func SetupPlayer() {
 	running = true
@@ -29,6 +30,8 @@ func SetupPlayer() {
 		log.Error("initialize libmpv failed")
 		return
 	}
+	mpvClientVersion = mpv.ClientApiVersion()
+	log.Infof("libmpv version %d", mpv.ClientApiVersion())
 	_ = libmpv.SetOptionString("vo", "null")
 	log.Info("initialize libmpv success")
 	registerHandler()
@@ -211,7 +214,13 @@ func registerCmdHandler() {
 		cmd := []string{"loadfile", mediaUrl.Url}
 		if media.Info.Cover.Url != "" {
 			// add media cover to video channel.
-			cmd = append(cmd, "replace", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+			// https://mpv.io/manual/master/#command-interface-[<options>]]]
+			// api changes after client version 2.3 (0.38.0
+			if mpvClientVersion >= ((2 << 16) | 3) {
+				cmd = append(cmd, "replace", "0", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+			} else {
+				cmd = append(cmd, "replace", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+			}
 		}
 		log.Debug("[MPV PlayControl] mpv command", cmd)
 		if err := libmpv.Command(cmd); err != nil {
