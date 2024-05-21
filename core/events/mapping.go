@@ -47,6 +47,7 @@ var EventsMapping = map[event.EventId]any{
 	MediaProviderUpdate:                 MediaProviderUpdateEvent{},
 	SearchCmd:                           SearchCmdEvent{},
 	SearchResultUpdate:                  SearchResultUpdateEvent{},
+	GUISetPlayerWindowOpenCmd:           GUISetPlayerWindowOpenCmdEvent{},
 }
 
 func init() {
