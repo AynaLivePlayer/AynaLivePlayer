@@ -18,11 +18,11 @@ jobs:
             goarch: amd64
             executable_ext: ".exe"
             install_deps: ""
-          - os: macos-latest
-            goos: darwin
-            goarch: amd64
-            executable_ext: ""
-            install_deps: brew install mpv
+#          - os: macos-latest
+#            goos: darwin
+#            goarch: amd64
+#            executable_ext: ""
+#            install_deps: brew install mpv
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -68,7 +68,6 @@ jobs:
 
       - name: Bundle assets
         run: |
-          export PATH=${PATH}:`go env GOPATH`/bin
           fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
           fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
           fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
