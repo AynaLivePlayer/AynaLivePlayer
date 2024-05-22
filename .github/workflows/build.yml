@@ -42,7 +42,9 @@ jobs:
           echo "GOOS=linux" >> $GITHUB_ENV
           echo "GOARCH=amd64" >> $GITHUB_ENV
           echo "EXECUTABLE=$EXECUTABLE_NAME" >> $GITHUB_ENV
-          sudo apt-get update && sudo apt-get install -y libmpv-dev
+          sudo apt-get update -y
+          sudo apt-get install -y libmpv-dev
+        continue-on-error: true
 
       - name: Set up environment variables
         if: matrix.os == 'macos-latest'
