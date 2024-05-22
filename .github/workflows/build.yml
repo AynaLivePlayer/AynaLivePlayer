@@ -43,7 +43,7 @@ jobs:
           echo "GOOS=linux" >> $GITHUB_ENV
           echo "GOARCH=amd64" >> $GITHUB_ENV
           echo "EXECUTABLE=$EXECUTABLE_NAME" >> $GITHUB_ENV
-          sudo apt-get install -y libmpv-dev libgl-dev
+          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev
         continue-on-error: true
 
       - name: Set up environment variables
