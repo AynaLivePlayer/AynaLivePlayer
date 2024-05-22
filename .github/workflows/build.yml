@@ -40,7 +40,7 @@ jobs:
           echo "GOOS=linux" >> $GITHUB_ENV
           echo "GOARCH=amd64" >> $GITHUB_ENV
           echo "EXECUTABLE=$EXECUTABLE_NAME" >> $GITHUB_ENV
-          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
 
       - name: Set up environment variables
         if: matrix.os == 'macos-latest'
