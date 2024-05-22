@@ -4,14 +4,28 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    timeout-minutes: 10
-
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            executable_ext: ""
+            install_deps: sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            executable_ext: ".exe"
+            install_deps: choco install mpv
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            executable_ext: ""
+            install_deps: brew install mpv
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
 
     env:
       EXECUTABLE_NAME: AynaLivePlayer
@@ -28,27 +42,13 @@ jobs:
           go-version: '1.20'
 
       - name: Set up environment variables
-        if: matrix.os == 'windows-latest'
         run: |
-          echo "GOOS=windows" >> $GITHUB_ENV
-          echo "GOARCH=amd64" >> $GITHUB_ENV
-          echo "EXECUTABLE=$EXECUTABLE_NAME.exe" >> $GITHUB_ENV
+          echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
+          echo "EXECUTABLE=${EXECUTABLE_NAME}${{ matrix.executable_ext }}" >> $GITHUB_ENV
 
-      - name: Set up environment variables
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          echo "GOOS=linux" >> $GITHUB_ENV
-          echo "GOARCH=amd64" >> $GITHUB_ENV
-          echo "EXECUTABLE=$EXECUTABLE_NAME" >> $GITHUB_ENV
-          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
-
-      - name: Set up environment variables
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo "GOOS=darwin" >> $GITHUB_ENV
-          echo "GOARCH=amd64" >> $GITHUB_ENV
-          echo "EXECUTABLE=$EXECUTABLE_NAME" >> $GITHUB_ENV
-          brew install mpv
+      - name: Install dependencies
+        run: ${{ matrix.install_deps }}
 
       - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
