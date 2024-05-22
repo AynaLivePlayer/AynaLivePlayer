@@ -18,8 +18,8 @@ jobs:
             goarch: amd64
             executable_ext: ".exe"
             install_deps: |
-              echo "CGO_CFLAGS=-I$(cygpath -w /mingw64/include)" >> $GITHUB_ENV
-              echo "CGO_LDFLAGS=-L$(cygpath -w /mingw64/lib) -lmpv" >> $GITHUB_ENV
+              echo "CGO_CFLAGS=-IC:/msys64/mingw64/include" >> $GITHUB_ENV
+              echo "CGO_LDFLAGS=-LC:/msys64/mingw64/lib" >> $GITHUB_ENV
               echo "PATH=/mingw64/bin:$PATH" >> $GITHUB_ENV
 #          - os: macos-latest
 #            goos: darwin
@@ -58,7 +58,7 @@ jobs:
           install: >-
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-mpv
-      
+
       - name: Install dependencies
         run: ${{ matrix.install_deps }}
 
