@@ -17,7 +17,10 @@ jobs:
             goos: windows
             goarch: amd64
             executable_ext: ".exe"
-            install_deps: ""
+            install_deps: |
+              echo "CGO_CFLAGS=-I$(cygpath -w /mingw64/include)" >> $GITHUB_ENV
+              echo "CGO_LDFLAGS=-L$(cygpath -w /mingw64/lib) -lmpv" >> $GITHUB_ENV
+              echo "PATH=/mingw64/bin:$PATH" >> $GITHUB_ENV
 #          - os: macos-latest
 #            goos: darwin
 #            goarch: amd64
@@ -47,9 +50,6 @@ jobs:
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
           echo "EXECUTABLE=${EXECUTABLE_NAME}${{ matrix.executable_ext }}" >> $GITHUB_ENV
 
-      - name: Install dependencies
-        run: ${{ matrix.install_deps }}
-
       - name: Install dependencies (Windows)
         if: matrix.goos == 'windows'
         uses: msys2/setup-msys2@v2
@@ -57,8 +57,10 @@ jobs:
           msystem: MINGW64
           install: >-
             mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-go
             mingw-w64-x86_64-mpv
+      
+      - name: Install dependencies
+        run: ${{ matrix.install_deps }}
 
       - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
