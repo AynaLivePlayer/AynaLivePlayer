@@ -18,6 +18,7 @@ import (
 var running bool = false
 var libmpv *mpv.Mpv = nil
 var log logger.ILogger = nil
+var mpvClientVersion uint32 = 0
 
 func SetupPlayer() {
 	running = true
@@ -29,6 +30,8 @@ func SetupPlayer() {
 		log.Error("initialize libmpv failed")
 		return
 	}
+	mpvClientVersion = mpv.ClientApiVersion()
+	log.Infof("libmpv version %d", mpv.ClientApiVersion())
 	_ = libmpv.SetOptionString("vo", "null")
 	log.Info("initialize libmpv success")
 	registerHandler()
@@ -207,9 +210,21 @@ func registerCmdHandler() {
 			Media:   media,
 			Removed: false,
 		})
-		log.Debugf("mpv command load file %s %s", mediaInfo.Title, mediaUrl.Url)
-		if err := libmpv.Command([]string{"loadfile", mediaUrl.Url}); err != nil {
-			log.Error("[MPV PlayControl] mpv load media failed", mediaInfo)
+		log.Debugf("mpv command loadfile %s %s", mediaInfo.Title, mediaUrl.Url)
+		cmd := []string{"loadfile", mediaUrl.Url}
+		if media.Info.Cover.Url != "" {
+			// add media cover to video channel.
+			// https://mpv.io/manual/master/#command-interface-[<options>]]]
+			// api changes after client version 2.3 (0.38.0
+			if mpvClientVersion >= ((2 << 16) | 3) {
+				cmd = append(cmd, "replace", "0", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+			} else {
+				cmd = append(cmd, "replace", "external-files-append=\""+media.Info.Cover.Url+"\",vid=1")
+			}
+		}
+		log.Debug("[MPV PlayControl] mpv command", cmd)
+		if err := libmpv.Command(cmd); err != nil {
+			log.Error("[MPV PlayControl] mpv load media failed", cmd, mediaInfo, err)
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
@@ -263,7 +278,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.next", func(evnt *event.Event) {
+	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *event.Event) {
 		handle := evnt.Data.(events.PlayerVideoPlayerSetWindowHandleCmdEvent).Handle
 		err := SetWindowHandle(handle)
 		if err != nil {

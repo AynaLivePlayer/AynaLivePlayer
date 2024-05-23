@@ -1,0 +1,104 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    env:
+      GOOS: windows
+      GOARCH: amd64
+      EXECUTABLE: AynaLivePlayer.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-mpv
+
+      - name: Set up MSYS2 environment for Go build
+        shell: msys2 {0}
+        run: |
+          mkdir -p D:/libmpv/include/mpv
+          cp -r /mingw64/include/mpv/* D:/libmpv/include/mpv/
+          echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Tidy go.mod
+        run: go mod tidy
+
+      - name: Bundle assets
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
+
+      - name: Build application
+        run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: ./${{ env.EXECUTABLE }}
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      GOOS: linux
+      GOARCH: amd64
+      EXECUTABLE: AynaLivePlayer
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Tidy go.mod
+        run: go mod tidy
+
+      - name: Bundle assets
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
+
+      - name: Build application
+        run: go build -o ./${{ env.EXECUTABLE }} app/main.go
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-build
+          path: ./${{ env.EXECUTABLE }}

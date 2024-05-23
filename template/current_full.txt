@@ -4,4 +4,4 @@ Album: {{ .Current.Album}}
 Username: {{ .Current.Username }}
 Progress(in seconds):  {{.CurrentTime.TotalSeconds}} / {{.TotalTime.TotalSeconds}}
 Progress(in minutes:seconds):  {{ .CurrentTime.Minutes}}:{{ .CurrentTime.Seconds}} / {{ .TotalTime.Minutes}}:{{ .TotalTime.Seconds}}
-Lyric: {{.Lyric}}
+Lyric: {{ .Lyric}}
