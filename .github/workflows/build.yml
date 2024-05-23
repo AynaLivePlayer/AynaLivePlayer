@@ -59,7 +59,8 @@ jobs:
           echo "CGO_CFLAGS=$(pkgconf --cflags mpv)" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=$(pkgconf --libs mpv)" >> $GITHUB_ENV
           echo "CGO_ENABLED=1" >> $GITHUB_ENV
-          echo "/mingw64/bin" >> $GITHUB_PATH
+          echo "export CC=/mingw64/bin/gcc" >> $GITHUB_ENV
+          echo "export CXX=/mingw64/bin/g++" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: ${{ matrix.install_deps }}
