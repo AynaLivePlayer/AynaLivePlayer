@@ -3,28 +3,14 @@ name: Build
 on: [push]
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-            executable_ext: ""
-            install_deps: sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-            executable_ext: ".exe"
-            install_deps: ""
-
-
-    runs-on: ${{ matrix.os }}
+  build-windows:
+    runs-on: windows-latest
     timeout-minutes: 20
 
     env:
-      EXECUTABLE_NAME: AynaLivePlayer
+      GOOS: windows
+      GOARCH: amd64
+      EXECUTABLE: AynaLivePlayer.exe
 
     steps:
       - name: Checkout code
@@ -32,28 +18,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.20'
-
-      - name: Set up environment variables
-        run: |
-          echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
-          echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
-          echo "EXECUTABLE=${EXECUTABLE_NAME}${{ matrix.executable_ext }}" >> $GITHUB_ENV
-
       - name: Install dependencies (Windows)
-        if: matrix.goos == 'windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: >-
+          nstall: >-
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-mpv
 
       - name: Set up MSYS2 environment for Go build
-        if: matrix.goos == 'windows'
         shell: msys2 {0}
         run: |
           mkdir -p D:/libmpv/include/mpv
@@ -61,18 +34,59 @@ jobs:
           echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
-
-      - name: Install dependencies
-        run: ${{ matrix.install_deps }}
-
-      - name: Install Fyne CLI
-        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
 
       - name: Tidy go.mod
         run: go mod tidy
 
       - name: Bundle assets
         run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
+          fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
+
+      - name: Build application
+        run: go build -o ./$EXECUTABLE -ldflags -H=windowsgui app/main.go
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: ./$EXECUTABLE
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      GOOS: linux
+      GOARCH: amd64
+      EXECUTABLE: AynaLivePlayer
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Tidy go.mod
+        run: go mod tidy
+
+      - name: Bundle assets
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
           fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
           fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
@@ -83,5 +97,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-build
-          path: ./${{ env.EXECUTABLE }}
+          name: ubuntu-build
+          path: ./$EXECUTABLE
