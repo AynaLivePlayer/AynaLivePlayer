@@ -56,7 +56,9 @@ jobs:
         if: matrix.goos == 'windows'
         shell: msys2 {0}
         run: |
-          echo "CGO_CFLAGS=-ID:/a/_temp/msys64/mingw64/include" >> $GITHUB_ENV
+          mkdir -p D:/libmpv/include/mpv
+          cp -r /mingw64/include/mpv/* D:/libmpv/include/mpv/
+          echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
 
