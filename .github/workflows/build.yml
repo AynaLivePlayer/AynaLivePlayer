@@ -17,7 +17,9 @@ jobs:
             goos: windows
             goarch: amd64
             executable_ext: ".exe"
-            install_deps: ""
+            install_deps: |
+              echo "CGO_CFLAGS=-ID:/a/_temp/msys64/mingw64/include" >> $GITHUB_ENV
+              echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
 
     runs-on: ${{ matrix.os }}
@@ -51,13 +53,6 @@ jobs:
           install: >-
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-mpv
-
-      - name: Set up MSYS2 environment for Go build
-        if: matrix.goos == 'windows'
-        shell: msys2 {0}
-        run: |
-          echo "CGO_CFLAGS=D:/a/_temp/msys64/mingw64/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=D:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: ${{ matrix.install_deps }}
