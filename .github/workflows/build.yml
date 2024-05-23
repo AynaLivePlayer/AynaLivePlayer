@@ -50,14 +50,21 @@ jobs:
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
           echo "EXECUTABLE=${EXECUTABLE_NAME}${{ matrix.executable_ext }}" >> $GITHUB_ENV
 
-#      - name: Install dependencies (Windows)
-#        if: matrix.goos == 'windows'
-#        uses: msys2/setup-msys2@v2
-#        with:
-#          msystem: MINGW64
-#          install: >-
-#            mingw-w64-x86_64-toolchain
-#            mingw-w64-x86_64-mpv
+      - name: Install dependencies (Windows)
+        if: matrix.goos == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-mpv
+
+      - name: Set up MSYS2 environment for Go build
+        if: matrix.goos == 'windows'
+        run: |
+          echo "CGO_CFLAGS=$(pkgconf --cflags mpv)" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=$(pkgconf --libs mpv)" >> $GITHUB_ENV
+          echo "PATH=/mingw64/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: ${{ matrix.install_deps }}
