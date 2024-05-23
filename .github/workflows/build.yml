@@ -18,6 +18,7 @@ jobs:
             goarch: amd64
             executable_ext: ".exe"
             install_deps: |
+              ls "C:/msys64/mingw64/include"
               echo "CGO_CFLAGS=-IC:/msys64/mingw64/include" >> $GITHUB_ENV
               echo "CGO_LDFLAGS=-LC:/msys64/mingw64/lib" >> $GITHUB_ENV
               echo "PATH=/mingw64/bin:$PATH" >> $GITHUB_ENV
