@@ -61,6 +61,7 @@ jobs:
 
       - name: Set up MSYS2 environment for Go build
         if: matrix.goos == 'windows'
+        shell: msys2 {0}
         run: |
           echo "CGO_CFLAGS=$(pkgconf --cflags mpv)" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=$(pkgconf --libs mpv)" >> $GITHUB_ENV
