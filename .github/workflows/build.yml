@@ -18,14 +18,10 @@ jobs:
             goarch: amd64
             executable_ext: ".exe"
             install_deps: |
-              echo "CGO_CFLAGS=-Imsys64/mingw64/include" >> $GITHUB_ENV
-              echo "CGO_LDFLAGS=-Lmsys64/mingw64/lib" >> $GITHUB_ENV
-              echo "PATH=/mingw64/bin:$PATH" >> $GITHUB_ENV
-#          - os: macos-latest
-#            goos: darwin
-#            goarch: amd64
-#            executable_ext: ""
-#            install_deps: brew install mpv
+              curl -LO https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar.zst
+              7z x mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar.zst -so | 7z x -si -ttar -oC:/msys64/mingw64
+              echo "CGO_CFLAGS=-IC:/msys64/mingw64/include" >> $GITHUB_ENV
+              echo "CGO_LDFLAGS=-LC:/msys64/mingw64/lib" >> $GITHUB_ENV
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -50,14 +46,14 @@ jobs:
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
           echo "EXECUTABLE=${EXECUTABLE_NAME}${{ matrix.executable_ext }}" >> $GITHUB_ENV
 
-      - name: Install dependencies (Windows)
-        if: matrix.goos == 'windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-mpv
+#      - name: Install dependencies (Windows)
+#        if: matrix.goos == 'windows'
+#        uses: msys2/setup-msys2@v2
+#        with:
+#          msystem: MINGW64
+#          install: >-
+#            mingw-w64-x86_64-toolchain
+#            mingw-w64-x86_64-mpv
 
       - name: Install dependencies
         run: ${{ matrix.install_deps }}
