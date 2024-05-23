@@ -18,7 +18,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install dependencies (Windows)
+      - name: Install dependencies
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -30,7 +30,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir -p D:/libmpv/include/mpv
-          cp -r /mingw64/include/mpv/* D:/libmpv/include/mpv/
+          cp -r D:/a/_temp/mingw64/include/mpv/* D:/libmpv/include/mpv/
           echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
