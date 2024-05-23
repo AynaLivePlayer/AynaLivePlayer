@@ -50,7 +50,7 @@ jobs:
           fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
 
       - name: Build application
-        run: go build -o ./$EXECUTABLE -ldflags -H=windowsgui app/main.go
+        run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -92,7 +92,7 @@ jobs:
           fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
 
       - name: Build application
-        run: go build -o ./$EXECUTABLE app/main.go
+        run: go build -o ./${{ env.EXECUTABLE }} app/main.go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
