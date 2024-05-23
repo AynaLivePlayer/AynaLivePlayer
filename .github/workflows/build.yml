@@ -61,7 +61,8 @@ jobs:
 
       - name: check
         if: matrix.goos == 'windows'
-        run: ls D:/a/_temp/msys64/mingw64/include
+        run: |
+          ls /mingw64/include
 
 
       - name: Install dependencies
