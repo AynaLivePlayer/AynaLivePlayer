@@ -21,10 +21,10 @@ jobs:
               curl -LO https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar.zst
               curl -LO https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-v1.5.2-win64.zip
               7z x zstd-v1.5.2-win64.zip -ozstd
-              .\zstd\zstd.exe -d mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar.zst -o mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar
+              ./zstd/zstd.exe -d mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar.zst -o mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar
               7z x mingw-w64-x86_64-mpv-0.38.0-1-any.pkg.tar -oC:/msys64/mingw64
               echo "CGO_CFLAGS=-IC:/msys64/mingw64/include" >> $GITHUB_ENV
-              echo "CGO_LDFLAGS=-LC:/msys64/mingw64/lib -lmpv" >> $GITHUB_ENV
+              echo "CGO_LDFLAGS=-LC:/msys64/mingw64/lib" >> $GITHUB_ENV
 
 
     runs-on: ${{ matrix.os }}
