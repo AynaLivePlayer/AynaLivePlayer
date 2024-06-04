@@ -51,6 +51,7 @@ func CheckUpdate() (model.VersionInfo, bool) {
 		return model.VersionInfo{}, false
 	}
 	result := gjson.ParseBytes(resp.Body())
+	log.Infof("check update result: %s", result.String())
 	if !result.Get("data.has_update").Bool() {
 		log.Infof("no update available")
 		return model.VersionInfo{}, false
