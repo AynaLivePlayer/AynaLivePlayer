@@ -61,7 +61,7 @@ func withMusicProperties(f func(updater *media.SystemMediaTransportControlsDispl
 func InitSystemMediaControl() {
 	_ = ole.RoInitialize(1)
 
-	sptr, _ := syscall.UTF16PtrFromString(config.ProgramName)
+	sptr, _ := syscall.UTF16PtrFromString("Aynakeya." + config.ProgramName)
 	syscall.SyscallN(SetCurrentProcessExplicitAppUserModelID, uintptr(unsafe.Pointer(sptr)))
 	_player = must(playback.NewMediaPlayer())
 	smtc = must(_player.GetSystemMediaTransportControls())
