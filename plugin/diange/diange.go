@@ -85,6 +85,11 @@ func NewDiange() *Diange {
 				Command:  "点l歌",
 				Priority: 4,
 			},
+			"kugou": {
+				Enable:   true,
+				Command:  "点kg歌",
+				Priority: 5,
+			},
 		},
 		cooldowns: make(map[string]int),
 		log:       global.Logger.WithPrefix("Plugin.Diange"),
