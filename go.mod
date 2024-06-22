@@ -5,6 +5,8 @@ go 1.19
 replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
 	github.com/AynaLivePlayer/miaosic v0.1.5 => ./pkg/miaosic // submodule
+
+	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
 )
 
 require (
@@ -16,18 +18,20 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/aynakeya/go-mpv v0.0.6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240306074159-ea2d69986ecb
+	github.com/go-ole/go-ole v1.3.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/mattn/go-colorable v0.1.12
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/saltosystems/winrt-go v0.0.0-20240320184339-289d313a74b7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4
-	github.com/tidwall/gjson v1.16.0
+	github.com/tidwall/gjson v1.17.1
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
-	golang.org/x/sys v0.13.0
+	golang.org/x/sys v0.19.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -69,7 +73,7 @@ require (
 	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
