@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/AynaLivePlayer/miaosic"
+	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
 	"time"
@@ -151,7 +152,8 @@ func (d *Diange) getSources() []string {
 }
 
 func (d *Diange) getSource(cmd string) []string {
-	if cmd == d.CustomCMD {
+	customCmds := strings.Split(d.CustomCMD, "|")
+	if slices.Contains(customCmds, cmd) {
 		return d.getSources()
 	}
 	sources := []string{}

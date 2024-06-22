@@ -30,9 +30,11 @@ func Initialize() {
 		wshub.NewWsHub(),
 	)
 	updater.Initialize()
+	//sysmediacontrol.InitSystemMediaControl()
 }
 
 func Stop() {
+	//sysmediacontrol.Destroy()
 	liveroom.StopAndSave()
 	playlist.Close()
 	player.StopMpvPlayer()
