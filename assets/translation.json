@@ -384,6 +384,10 @@
       "en": "User",
       "zh-CN": "普通用户"
     },
+    "plugin.diange.user_max": {
+      "en": "User Maximum queue",
+      "zh-CN": "单个用户最大点歌数"
+    },
     "plugin.maxduration.description": {
       "en": "Set the maximum duration of a song",
       "zh-CN": "设置歌曲最长能播多久"
