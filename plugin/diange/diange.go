@@ -18,6 +18,7 @@ import (
 	"golang.org/x/exp/slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -35,6 +36,7 @@ type Diange struct {
 	MedalName           string
 	MedalPermission     int
 	QueueMax            int
+	UserMax             int
 	UserCoolDown        int
 	CustomCMD           string
 	SourceConfigPath    string
@@ -46,6 +48,7 @@ type Diange struct {
 	sourceConfigs      map[string]*sourceConfig
 	blacklist          []blacklistItem
 	cooldowns          map[string]int
+	userCount          sync.Map
 	panel              fyne.CanvasObject
 	log                logger.ILogger
 }
@@ -59,6 +62,7 @@ func NewDiange() *Diange {
 		AdminPermission:     true,
 		QueueMax:            128,
 		UserCoolDown:        -1,
+		UserMax:             128,
 		CustomCMD:           "点歌",
 		SourceConfigPath:    "./config/diange.json",
 		BlackListItemPath:   "./config/diange_blacklist.json",
@@ -85,8 +89,14 @@ func NewDiange() *Diange {
 				Command:  "点l歌",
 				Priority: 4,
 			},
+			"kugou": {
+				Enable:   true,
+				Command:  "点kg歌",
+				Priority: 5,
+			},
 		},
 		cooldowns: make(map[string]int),
+		userCount: sync.Map{},
 		log:       global.Logger.WithPrefix("Plugin.Diange"),
 	}
 	return diange
@@ -119,6 +129,18 @@ func (d *Diange) Enable() error {
 		"plugin.diange.queue.update",
 		func(event *event.Event) {
 			d.currentQueueLength = len(event.Data.(events.PlaylistDetailUpdateEvent).Medias)
+			medias := event.Data.(events.PlaylistDetailUpdateEvent).Medias
+			tmpUserCount := make(map[string]int)
+			for _, media := range medias {
+				_, ok := tmpUserCount[media.ToUser().Name]
+				if !ok {
+					tmpUserCount[media.ToUser().Name] = 0
+				}
+				tmpUserCount[media.ToUser().Name]++
+			}
+			for user, count := range tmpUserCount {
+				d.userCount.Store(user, count)
+			}
 		})
 	global.EventManager.RegisterA(
 		events.PlayerPlayingUpdate,
@@ -179,6 +201,18 @@ func (d *Diange) handleMessage(event *event.Event) {
 	if d.currentQueueLength >= d.QueueMax {
 		d.log.Info("Queue is full, ignore diange")
 		return
+	}
+
+	//check user max
+	if d.UserMax > 0 {
+		userCount, ok := d.userCount.Load(message.User.Username)
+		if !ok {
+			userCount = 0
+		}
+		if userCount.(int) >= d.UserMax {
+			d.log.Infof("User %s(%s) exceed max diange count, ignore", message.User.Username, message.User.Uid)
+			return
+		}
 	}
 
 	// if in user cool down, return
@@ -321,6 +355,10 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.diange.queue_max")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.QueueMax))),
 	)
+	dgUserMax := container.NewBorder(nil, nil,
+		widget.NewLabel(i18n.T("plugin.diange.user_max")), nil,
+		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserMax))),
+	)
 	dgCoolDown := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.cooldown")), nil,
 		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserCoolDown))),
@@ -350,6 +388,6 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 	dgSourceCMD := container.NewBorder(
 		nil, nil, widget.NewLabel(i18n.T("plugin.diange.source_cmd")), nil,
 		container.NewVBox(sourceCfgs...))
-	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgCoolDown, dgShortCut, skipPlaylist, dgSourceCMD)
+	d.panel = container.NewVBox(dgPerm, dgMdPerm, dgQueue, dgUserMax, dgCoolDown, dgShortCut, skipPlaylist, dgSourceCMD)
 	return d.panel
 }
