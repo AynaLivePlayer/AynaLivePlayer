@@ -49,8 +49,6 @@ jobs:
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
-          fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
-          fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
 
       - name: Build application
         run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
@@ -93,8 +91,6 @@ jobs:
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
-          fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
-          fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
 
       - name: Build application
         run: go build -o ./${{ env.EXECUTABLE }} app/main.go

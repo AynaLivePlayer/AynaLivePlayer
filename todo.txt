@@ -11,7 +11,8 @@
 - web弹幕协议的断线handler (web 重连)
 - 歌词event发送全部歌词，前端处理不同版本
 - 网页输出重写，使用网页版本，不绑定在点歌机内（点歌机不需要启动网页服务)
-
+- mpv cover display in config
+- optimize local music
 ----
 
 Finished

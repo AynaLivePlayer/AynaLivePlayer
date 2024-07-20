@@ -43,8 +43,7 @@ git submodule update
 ```
 6. now you can build (please check makefile for more details)
 ```powershell
-$env:CGO_LDFLAGS="-LC:\Users\vboxuser\Desktop\AynaLivePlayer\libmpv\lib"
-$env:CGO_CFLAGS="-IC:\Users\vboxuser\Desktop\AynaLivePlayer\libmpv\include"
+$env:CGO_LDFLAGS="-LC:\Users\Admin\Desktop\AynaLivePlayer\libmpv\lib";$env:CGO_CFLAGS="-IC:\Users\Admin\Desktop\AynaLivePlayer\libmpv\include"
 # ... more setup, see makefile
-go build -o AynaLivePlayer -ldflags -H=windowsgui app/main.go
+go build -o AynaLivePlayer.exe -ldflags -H=windowsgui app/main.go
 ```
