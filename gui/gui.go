@@ -35,7 +35,7 @@ func Initialize() {
 	logger.Info("Initializing GUI")
 	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	App = app.NewWithID(config.ProgramName)
-	App.Settings().SetTheme(&myTheme{})
+	//App.Settings().SetTheme(&myTheme{})
 	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
 
 	tabs := container.NewAppTabs(

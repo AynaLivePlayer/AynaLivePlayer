@@ -13,5 +13,3 @@ var ImageEmptyQrCode = &fyne.StaticResource{
 }
 
 var ImageIcon = resImageIcon
-var FontMSYaHei = resFontMSYaHei
-var FontMSYaHeiBold = resFontMSYaHeiBold
