@@ -7,8 +7,9 @@ import (
 )
 
 type playerConfig struct {
-	Volume      float64
-	AudioDevice string
+	Volume            float64
+	AudioDevice       string
+	DisplayMusicCover bool
 }
 
 func (p *playerConfig) Name() string {
@@ -24,7 +25,8 @@ func (p *playerConfig) OnSave() {
 }
 
 var cfg = &playerConfig{
-	Volume: 100,
+	Volume:            100,
+	DisplayMusicCover: true,
 }
 
 func restoreConfig() {
