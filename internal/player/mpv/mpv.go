@@ -212,7 +212,7 @@ func registerCmdHandler() {
 		})
 		log.Debugf("mpv command loadfile %s %s", mediaInfo.Title, mediaUrl.Url)
 		cmd := []string{"loadfile", mediaUrl.Url}
-		if media.Info.Cover.Url != "" {
+		if cfg.DisplayMusicCover && media.Info.Cover.Url != "" {
 			// add media cover to video channel.
 			// https://mpv.io/manual/master/#command-interface-[<options>]]]
 			// api changes after client version 2.3 (0.38.0
