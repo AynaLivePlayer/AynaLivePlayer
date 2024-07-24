@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/storage"
 	"github.com/AynaLivePlayer/miaosic"
+	"github.com/go-resty/resty/v2"
 	"github.com/nfnt/resize"
 	"image"
 	"image/png"
@@ -35,20 +35,15 @@ func NewImageFromPlayerPicture(picture miaosic.Picture) (*canvas.Image, error) {
 		if img == nil {
 			return nil, errors.New("fail to read image")
 		}
-
 	} else {
-		uri, err := storage.ParseURI(picture.Url)
+		get, err := resty.New().R().Get(picture.Url)
 		if err != nil {
 			return nil, err
 		}
-		if uri == nil {
-			return nil, errors.New("fail to fail url")
-		}
+		img = canvas.NewImageFromReader(bytes.NewReader(get.Body()), "cover")
 		// NewImageFromURI will return an image with empty resource and file
-		img = canvas.NewImageFromURI(uri)
-		if img == nil || (img.File == "" && img.Resource == nil) {
-			// bug fix, return a new error to indicate fail to read an image
-			return nil, errors.New("fail to read image")
+		if img == nil {
+			return nil, errors.New("fail to download image")
 		}
 	}
 	if img.Resource == nil {
