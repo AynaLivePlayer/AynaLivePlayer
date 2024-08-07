@@ -74,7 +74,7 @@ func (d *Qiege) handleMessage(event *event.Event) {
 	if len(msgs) < 1 || msgs[0] != d.CustomCMD {
 		return
 	}
-	d.log.Infof("recieve diange command")
+	d.log.Infof("recieve qiege command")
 	if d.UserPermission {
 		if d.currentUid == message.User.Uid {
 			global.EventManager.CallA(

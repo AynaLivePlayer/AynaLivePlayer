@@ -176,7 +176,7 @@ func registerCmdHandler() {
 		log.Infof("[MPV Player] Play media %s", mediaInfo.Title)
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
-			log.Warn("[MPV PlayControl] get media url failed", err)
+			log.Warn("[MPV PlayControl] get media url failed ", mediaInfo.Meta.ID(), err)
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
