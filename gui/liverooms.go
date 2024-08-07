@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
@@ -57,8 +58,8 @@ func createRoomSelector() fyne.CanvasObject {
 				descriptionLabel.SetText("")
 			}
 		})
-		idEntry := widget.NewEntry()
-		nameEntry := widget.NewEntry()
+		idEntry := xfyne.EntryDisableUndoRedo(widget.NewEntry())
+		nameEntry := xfyne.EntryDisableUndoRedo(widget.NewEntry())
 		dia := dialog.NewCustomConfirm(
 			i18n.T("gui.room.add.title"),
 			i18n.T("gui.room.add.confirm"),

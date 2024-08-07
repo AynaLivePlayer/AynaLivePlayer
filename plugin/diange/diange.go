@@ -6,6 +6,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -345,27 +346,27 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		container.NewGridWithColumns(2,
 			container.NewBorder(nil, nil,
 				widget.NewLabel(i18n.T("plugin.diange.medal.name")), nil,
-				widget.NewEntryWithData(binding.BindString(&d.MedalName))),
+				xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&d.MedalName)))),
 			container.NewBorder(nil, nil,
 				widget.NewLabel(i18n.T("plugin.diange.medal.level")), nil,
-				widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MedalPermission)))),
+				xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MedalPermission))))),
 		),
 	)
 	dgQueue := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.queue_max")), nil,
-		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.QueueMax))),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.QueueMax)))),
 	)
 	dgUserMax := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.user_max")), nil,
-		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserMax))),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserMax)))),
 	)
 	dgCoolDown := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.cooldown")), nil,
-		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserCoolDown))),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.UserCoolDown)))),
 	)
 	dgShortCut := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.diange.custom_cmd")), nil,
-		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&d.CustomCMD))),
 	)
 	skipPlaylistCheck := widget.NewCheckWithData(i18n.T("plugin.diange.skip_playlist.prompt"), binding.BindBool(&d.SkipSystemPlaylist))
 	skipPlaylist := container.NewHBox(
@@ -379,9 +380,9 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 				widget.NewLabel(source),
 				widget.NewCheckWithData(i18n.T("plugin.diange.source.enable"), binding.BindBool(&cfg.Enable)),
 				widget.NewLabel(i18n.T("plugin.diange.source.priority")),
-				widget.NewEntryWithData(binding.IntToString(binding.BindInt(&cfg.Priority))),
+				xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&cfg.Priority)))),
 				widget.NewLabel(i18n.T("plugin.diange.source.command")),
-				widget.NewEntryWithData(binding.BindString(&cfg.Command)),
+				xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&cfg.Command))),
 			),
 		)
 	}

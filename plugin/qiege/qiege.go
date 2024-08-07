@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -120,7 +121,7 @@ func (d *Qiege) CreatePanel() fyne.CanvasObject {
 	)
 	qgShortCut := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.qiege.custom_cmd")), nil,
-		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&d.CustomCMD))),
 	)
 	d.panel = container.NewVBox(dgPerm, qgShortCut)
 	return d.panel

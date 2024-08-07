@@ -1,6 +1,7 @@
 package diange
 
 import (
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -30,7 +31,7 @@ func (b *blacklist) CreatePanel() fyne.CanvasObject {
 		return b.panel
 	}
 	// UI组件
-	input := widget.NewEntry()
+	input := xfyne.EntryDisableUndoRedo(widget.NewEntry())
 	input.SetPlaceHolder(i18n.T("plugin.diange.blacklist.input.placeholder"))
 
 	exactText := i18n.T("plugin.diange.blacklist.option.exact")

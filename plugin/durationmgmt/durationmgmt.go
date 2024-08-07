@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -90,7 +91,7 @@ func (d *MaxDuration) CreatePanel() fyne.CanvasObject {
 	if d.panel != nil {
 		return d.panel
 	}
-	maxDurationInput := widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MaxDuration)))
+	maxDurationInput := xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MaxDuration))))
 	skipOnPlayCheckbox := widget.NewCheckWithData(i18n.T("plugin.maxduration.enable"), binding.BindBool(&d.SkipOnPlay))
 	skipOnReachCheckbox := widget.NewCheckWithData(i18n.T("plugin.maxduration.enable"), binding.BindBool(&d.SkipOnReach))
 	d.panel = container.New(
