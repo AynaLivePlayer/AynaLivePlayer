@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
 	"fyne.io/fyne/v2"
@@ -17,6 +18,7 @@ func setupSysTray() {
 		desk.SetSystemTrayIcon(resource.ImageIcon)
 	}
 	MainWindow.SetCloseIntercept(func() {
+		_ = config.SaveToConfigFile(config.ConfigPath)
 		MainWindow.Hide()
 	})
 }

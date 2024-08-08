@@ -7,6 +7,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -183,7 +184,7 @@ func (w *WebInfo) CreatePanel() fyne.CanvasObject {
 	statusText.SetText(w.getServerStatusText())
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.webinfo.port")), nil,
-		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port))),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port)))),
 	)
 	serverUrl := widget.NewHyperlink(w.getServerUrl(), util.UrlMustParse(w.getServerUrl()))
 	serverPreview := container.NewHBox(

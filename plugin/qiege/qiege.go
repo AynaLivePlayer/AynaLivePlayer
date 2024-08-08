@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -74,7 +75,7 @@ func (d *Qiege) handleMessage(event *event.Event) {
 	if len(msgs) < 1 || msgs[0] != d.CustomCMD {
 		return
 	}
-	d.log.Infof("recieve diange command")
+	d.log.Infof("recieve qiege command")
 	if d.UserPermission {
 		if d.currentUid == message.User.Uid {
 			global.EventManager.CallA(
@@ -120,7 +121,7 @@ func (d *Qiege) CreatePanel() fyne.CanvasObject {
 	)
 	qgShortCut := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.qiege.custom_cmd")), nil,
-		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&d.CustomCMD))),
 	)
 	d.panel = container.NewVBox(dgPerm, qgShortCut)
 	return d.panel

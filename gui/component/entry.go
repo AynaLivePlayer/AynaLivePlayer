@@ -1,6 +1,7 @@
 package component
 
 import (
+	"AynaLivePlayer/gui/xfyne"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
@@ -14,6 +15,7 @@ type Entry struct {
 func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
+	xfyne.EntryDisableUndoRedo(&e.Entry)
 	return e
 }
 

@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
@@ -44,7 +45,7 @@ func createPlaylists() fyne.CanvasObject {
 		})
 	PlaylistManager.AddBtn = widget.NewButton(i18n.T("gui.playlist.button.add"), func() {
 		providerEntry := widget.NewSelect(PlaylistManager.providers, nil)
-		idEntry := widget.NewEntry()
+		idEntry := xfyne.EntryDisableUndoRedo(widget.NewEntry())
 		dia := dialog.NewCustomConfirm(
 			i18n.T("gui.playlist.add.title"),
 			i18n.T("gui.playlist.add.confirm"),

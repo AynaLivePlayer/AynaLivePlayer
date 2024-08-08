@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -97,9 +98,9 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 	freshStatusText()
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.wshub.port")), nil,
-		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port))),
+		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port)))),
 	)
-	serverUrl := widget.NewEntry()
+	serverUrl := xfyne.EntryDisableUndoRedo(widget.NewEntry())
 	serverUrl.SetText(w.server.getWsUrl())
 	serverUrl.Disable()
 	serverPreview := container.NewBorder(nil, nil,

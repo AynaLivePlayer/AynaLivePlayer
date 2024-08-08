@@ -82,5 +82,12 @@ func Initialize() {
 	MainWindow.SetFixedSize(true)
 	if config.General.ShowSystemTray {
 		setupSysTray()
+	} else {
+		MainWindow.SetCloseIntercept(
+			func() {
+				// save twice i don;t care
+				_ = config.SaveToConfigFile(config.ConfigPath)
+				MainWindow.Close()
+			})
 	}
 }
