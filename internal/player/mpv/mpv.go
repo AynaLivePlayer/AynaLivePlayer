@@ -13,6 +13,7 @@ import (
 	"github.com/aynakeya/go-mpv"
 	"github.com/tidwall/gjson"
 	"math"
+	"time"
 )
 
 var running bool = false
@@ -60,7 +61,8 @@ func SetupPlayer() {
 			}
 			if e.EventId == mpv.EVENT_SHUTDOWN {
 				log.Info("[MPV Player] libmpv shutdown")
-				StopPlayer()
+				// should not call, otherwise StopPlayer gonna be call twice and cause panic
+				// StopPlayer()
 			}
 		}
 	}()
@@ -68,11 +70,31 @@ func SetupPlayer() {
 
 func StopPlayer() {
 	cfg.AudioDevice = libmpv.GetPropertyString("audio-device")
+	log.Debugf("successfully get audio-device and set config %s", cfg.AudioDevice)
 	log.Info("stopping mpv player")
 	running = false
-	// stop player async, should be closed in the end anyway
-	go libmpv.TerminateDestroy()
-	log.Info("mpv player stopped")
+	done := make(chan struct{})
+
+	// Stop player async but wait for at most 1 second
+	go func() {
+		//err := libmpv.SetOptionString("vo", "no")
+		//if err != nil {
+		//	log.Error("fail to reseting window handle to 0")
+		//}
+		// todo: when call TerminateDestroy after wid has been set, a c code panic will arise.
+		// maybe because the window mpv attach to has been closed. so handle was closed twice
+		// for now. just don't destroy it. because it also might fix configuration
+		// not properly saved issue
+		libmpv.TerminateDestroy()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.Info("mpv player stopped")
+	case <-time.After(1 * time.Second):
+		log.Error("mpv player stop timed out")
+	}
 }
 
 var prevPercentPos float64 = 0

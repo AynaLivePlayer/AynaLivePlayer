@@ -13,9 +13,6 @@ func setupPlayerWindow() {
 	playerWindow.SetCloseIntercept(func() {
 		playerWindow.Hide()
 	})
-	MainWindow.SetOnClosed(func() {
-		playerWindow.Close()
-	})
 	playerWindow.Hide()
 }
 
