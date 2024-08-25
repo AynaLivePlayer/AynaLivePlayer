@@ -58,7 +58,9 @@ func main() {
 		global.EventManager.Start()
 	}()
 	gui.MainWindow.ShowAndRun()
+	global.Logger.Info("closing internal server")
 	internal.Stop()
+	global.Logger.Infof("closing event manager")
 	global.EventManager.Stop()
 	if *dev {
 		i18n.SaveTranslation()

@@ -79,15 +79,20 @@ func Initialize() {
 		})
 
 	checkUpdate()
-	MainWindow.SetFixedSize(true)
+	MainWindow.SetFixedSize(config.General.FixedSize)
 	if config.General.ShowSystemTray {
 		setupSysTray()
 	} else {
 		MainWindow.SetCloseIntercept(
 			func() {
-				// save twice i don;t care
+				// todo: save twice i don;t care
 				_ = config.SaveToConfigFile(config.ConfigPath)
 				MainWindow.Close()
 			})
 	}
+	MainWindow.SetOnClosed(func() {
+		if playerWindow != nil {
+			playerWindow.Close()
+		}
+	})
 }
