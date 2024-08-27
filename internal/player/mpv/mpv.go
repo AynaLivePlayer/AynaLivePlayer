@@ -77,10 +77,6 @@ func StopPlayer() {
 
 	// Stop player async but wait for at most 1 second
 	go func() {
-		//err := libmpv.SetOptionString("vo", "no")
-		//if err != nil {
-		//	log.Error("fail to reseting window handle to 0")
-		//}
 		// todo: when call TerminateDestroy after wid has been set, a c code panic will arise.
 		// maybe because the window mpv attach to has been closed. so handle was closed twice
 		// for now. just don't destroy it. because it also might fix configuration
@@ -92,8 +88,8 @@ func StopPlayer() {
 	select {
 	case <-done:
 		log.Info("mpv player stopped")
-	case <-time.After(1 * time.Second):
-		log.Error("mpv player stop timed out")
+	case <-time.After(2 * time.Second):
+		log.Error("mpv player stop timed out (2s) ")
 	}
 }
 
