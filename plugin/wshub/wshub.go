@@ -20,25 +20,31 @@ import (
 
 type WsHub struct {
 	config.BaseConfig
-	Enabled       bool
-	Port          int
-	LocalHostOnly bool
-	panel         fyne.CanvasObject
-	server        *wsServer
-	log           logger.ILogger
+	Enabled            bool
+	Port               int
+	LocalHostOnly      bool
+	EnableWsHubControl bool
+	panel              fyne.CanvasObject
+	server             *wsServer
+	log                logger.ILogger
 }
 
 func NewWsHub() *WsHub {
 	return &WsHub{
-		Enabled:       false,
-		Port:          29629,
-		LocalHostOnly: true,
-		log:           global.Logger.WithPrefix("plugin.wshub"),
+		Enabled:            false,
+		Port:               29629,
+		LocalHostOnly:      true,
+		EnableWsHubControl: false,
+		log:                global.Logger.WithPrefix("plugin.wshub"),
 	}
 }
 
+var globalEnableWsHubControl = false
+
 func (w *WsHub) Enable() error {
 	config.LoadConfig(w)
+	// todo: should pass EnableWsHubControl to client instead of using global variable
+	globalEnableWsHubControl = w.EnableWsHubControl
 	w.server = newWsServer(&w.Port, &w.LocalHostOnly)
 	gui.AddConfigLayout(w)
 	w.registerEvents()

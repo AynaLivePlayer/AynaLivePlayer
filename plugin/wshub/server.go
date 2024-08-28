@@ -48,7 +48,9 @@ func (c *wsClient) start() {
 			global.Logger.Warn("unmarshal event data failed", err)
 			return
 		}
-		global.EventManager.CallA(data.EventID, actualEventData)
+		if globalEnableWsHubControl {
+			global.EventManager.CallA(data.EventID, actualEventData)
+		}
 	}
 }
 
