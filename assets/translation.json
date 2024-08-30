@@ -551,6 +551,10 @@
     "plugin.wshub.title": {
       "en": "Websocket Hub",
       "zh-CN": "Websocket服务器"
+    },
+    "plugin.wshub.webinfo_text": {
+      "en": "Obs browser output",
+      "zh-CN": "OBS网页输出: "
     }
   }
 }

@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"net/url"
 )
 
 type WsHub struct {
@@ -164,7 +165,9 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.wshub.server_control")),
 		startBtn, stopBtn, restartBtn,
 	)
-	w.panel = container.NewVBox(serverStatus, autoStart, localHostOnly, serverPreview, serverPort, ctrlBtns)
+	uri, _ := url.Parse("http://obsinfo.biliaudiobot.com/")
+	infos := container.NewHBox(widget.NewLabel(i18n.T("plugin.wshub.webinfo_text")), widget.NewHyperlink("http://obsinfo.biliaudiobot.com", uri))
+	w.panel = container.NewVBox(serverStatus, autoStart, localHostOnly, serverPreview, serverPort, ctrlBtns, infos)
 	return nil
 }
 

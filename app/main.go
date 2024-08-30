@@ -63,6 +63,7 @@ func main() {
 	global.Logger.Infof("closing event manager")
 	global.EventManager.Stop()
 	if *dev {
+		global.Logger.Infof("saving translation")
 		i18n.SaveTranslation()
 	}
 	_ = config.SaveToConfigFile(config.ConfigPath)
