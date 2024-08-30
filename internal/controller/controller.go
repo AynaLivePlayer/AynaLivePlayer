@@ -65,13 +65,17 @@ func handlePlayNext() {
 					events.PlaylistNextCmdEvent{
 						Remove: true,
 					})
-			} else {
-				log.Infof("Try to play next media in system playlist")
-				global.EventManager.CallA(events.PlaylistNextCmd(model.PlaylistIDSystem),
-					events.PlaylistNextCmdEvent{
-						Remove: false,
-					})
+				return
 			}
+			if !config.General.UseSystemPlaylist {
+				// do not play system playlist
+				return
+			}
+			log.Infof("Try to play next media in system playlist")
+			global.EventManager.CallA(events.PlaylistNextCmd(model.PlaylistIDSystem),
+				events.PlaylistNextCmdEvent{
+					Remove: false,
+				})
 		})
 
 	global.EventManager.RegisterA(

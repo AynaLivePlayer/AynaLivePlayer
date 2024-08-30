@@ -37,6 +37,6 @@ func Stop() {
 	//sysmediacontrol.Destroy()
 	liveroom.StopAndSave()
 	playlist.Close()
-	player.StopMpvPlayer()
 	plugins.ClosePlugins()
+	player.StopMpvPlayer()
 }

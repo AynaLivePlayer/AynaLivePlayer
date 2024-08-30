@@ -16,29 +16,36 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"net/url"
 )
 
 type WsHub struct {
 	config.BaseConfig
-	Enabled       bool
-	Port          int
-	LocalHostOnly bool
-	panel         fyne.CanvasObject
-	server        *wsServer
-	log           logger.ILogger
+	Enabled            bool
+	Port               int
+	LocalHostOnly      bool
+	EnableWsHubControl bool
+	panel              fyne.CanvasObject
+	server             *wsServer
+	log                logger.ILogger
 }
 
 func NewWsHub() *WsHub {
 	return &WsHub{
-		Enabled:       false,
-		Port:          29629,
-		LocalHostOnly: true,
-		log:           global.Logger.WithPrefix("plugin.wshub"),
+		Enabled:            false,
+		Port:               29629,
+		LocalHostOnly:      true,
+		EnableWsHubControl: false,
+		log:                global.Logger.WithPrefix("plugin.wshub"),
 	}
 }
 
+var globalEnableWsHubControl = false
+
 func (w *WsHub) Enable() error {
 	config.LoadConfig(w)
+	// todo: should pass EnableWsHubControl to client instead of using global variable
+	globalEnableWsHubControl = w.EnableWsHubControl
 	w.server = newWsServer(&w.Port, &w.LocalHostOnly)
 	gui.AddConfigLayout(w)
 	w.registerEvents()
@@ -158,7 +165,9 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 		widget.NewLabel(i18n.T("plugin.wshub.server_control")),
 		startBtn, stopBtn, restartBtn,
 	)
-	w.panel = container.NewVBox(serverStatus, autoStart, localHostOnly, serverPreview, serverPort, ctrlBtns)
+	uri, _ := url.Parse("http://obsinfo.biliaudiobot.com/")
+	infos := container.NewHBox(widget.NewLabel(i18n.T("plugin.wshub.webinfo_text")), widget.NewHyperlink("http://obsinfo.biliaudiobot.com", uri))
+	w.panel = container.NewVBox(serverStatus, autoStart, localHostOnly, serverPreview, serverPort, ctrlBtns, infos)
 	return nil
 }
 

@@ -58,9 +58,12 @@ func main() {
 		global.EventManager.Start()
 	}()
 	gui.MainWindow.ShowAndRun()
+	global.Logger.Info("closing internal server")
 	internal.Stop()
+	global.Logger.Infof("closing event manager")
 	global.EventManager.Stop()
 	if *dev {
+		global.Logger.Infof("saving translation")
 		i18n.SaveTranslation()
 	}
 	_ = config.SaveToConfigFile(config.ConfigPath)

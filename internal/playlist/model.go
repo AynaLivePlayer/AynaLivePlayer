@@ -151,7 +151,7 @@ func (p *playlist) Next(delete bool) {
 	p.Lock.Lock()
 	if p.Size() == 0 {
 		// no media in the playlist
-		// do not issue any event
+		// do not dispatch any event
 		p.Lock.Unlock()
 		return
 	}

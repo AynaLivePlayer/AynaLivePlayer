@@ -52,6 +52,14 @@
       "en": "Basic",
       "zh-CN": "基础设置"
     },
+    "gui.config.basic.use_system_playlist": {
+      "en": "Play system playlist when no music",
+      "zh-CN": "是否播放闲置歌单(实验性)"
+    },
+    "gui.config.basic.use_system_playlist.prompt": {
+      "en": "Yes",
+      "zh-CN": "是"
+    },
     "gui.history.artist": {
       "en": "Artist",
       "zh-CN": "歌手"
@@ -543,6 +551,10 @@
     "plugin.wshub.title": {
       "en": "Websocket Hub",
       "zh-CN": "Websocket服务器"
+    },
+    "plugin.wshub.webinfo_text": {
+      "en": "Obs browser output",
+      "zh-CN": "OBS网页输出: "
     }
   }
 }

@@ -124,6 +124,13 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
 		global.EventManager.CallA(events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
 	})
-	b.panel = container.NewVBox(randomPlaylist, skipWhenErr, outputDevice, checkUpdateBox, checkUpdateBtn)
+	useSysPlaylistBtn := container.NewHBox(
+		widget.NewLabel(i18n.T("gui.config.basic.use_system_playlist")),
+		component.NewCheckOneWayBinding(
+			i18n.T("gui.config.basic.use_system_playlist.prompt"),
+			&config.General.UseSystemPlaylist,
+			config.General.UseSystemPlaylist),
+	)
+	b.panel = container.NewVBox(randomPlaylist, useSysPlaylistBtn, skipWhenErr, outputDevice, checkUpdateBox, checkUpdateBtn)
 	return b.panel
 }
