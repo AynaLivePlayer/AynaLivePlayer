@@ -13,7 +13,6 @@
 - 网页输出重写，使用网页版本，不绑定在点歌机内（点歌机不需要启动网页服务)
 - optimize local music
 - 从搜索里添加的歌不能被切
-- remove tmp fix for entry undo
 
 ----
 
