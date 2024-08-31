@@ -48,7 +48,7 @@ jobs:
       - name: Bundle assets
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
+          fyne bundle --name resImageIcon --package resource ./assets/icon2.png > ./resource/bundle.go
 
       - name: Build application
         run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
