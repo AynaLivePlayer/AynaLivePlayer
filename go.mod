@@ -36,7 +36,7 @@ require (
 
 require (
 	fyne.io/systray v1.11.0 // indirect
-	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240427041017-949a66917a81 // indirect
+	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240922031304-c497ed5617c4 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect

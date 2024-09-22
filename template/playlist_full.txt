@@ -1,5 +1,5 @@
 {{range .Playlist}}
-Index: # {{ .Index}}
+Index: #{{ .Index}}
 Title: {{ .Title }}
 Artist: {{ .Artist }}
 Album: {{ .Album}}
