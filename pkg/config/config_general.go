@@ -11,6 +11,7 @@ type _GeneralConfig struct {
 	PlayNextOnFail    bool
 	UseSystemPlaylist bool
 	FixedSize         bool
+	EnableSMC         bool // enable system media control
 }
 
 func (c *_GeneralConfig) Name() string {
@@ -27,4 +28,5 @@ var General = &_GeneralConfig{
 	PlayNextOnFail:    false,
 	UseSystemPlaylist: true,
 	FixedSize:         true,
+	EnableSMC:         true,
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/saltosystems/winrt-go/windows/foundation"
 	"github.com/saltosystems/winrt-go/windows/media"
 	"github.com/saltosystems/winrt-go/windows/media/playback"
+	"github.com/saltosystems/winrt-go/windows/storage/streams"
 	"syscall"
 	"unsafe"
 )
@@ -74,6 +75,7 @@ func InitSystemMediaControl() {
 	_ = smtc.SetIsNextEnabled(true)
 	_ = smtc.SetIsPreviousEnabled(true)
 	_ = smtc.SetPlaybackStatus(media.MediaPlaybackStatusPlaying)
+
 	withDisplayUpdater(func(updater *media.SystemMediaTransportControlsDisplayUpdater) {
 		_ = updater.SetType(media.MediaPlaybackTypeMusic)
 	})
@@ -83,10 +85,60 @@ func InitSystemMediaControl() {
 		withMusicProperties(func(updater *media.SystemMediaTransportControlsDisplayUpdater, properties *media.MusicDisplayProperties) {
 			properties.SetArtist(data.Media.Info.Artist)
 			properties.SetTitle(data.Media.Info.Title)
+			properties.SetAlbumTitle(data.Media.Info.Album)
+			if data.Media.Info.Cover.Url != "" {
+				imgUri, _ := foundation.UriCreateUri(data.Media.Info.Cover.Url)
+				defer imgUri.Release()
+				stream, _ := streams.RandomAccessStreamReferenceCreateFromUri(imgUri)
+				defer stream.Release()
+				_ = updater.SetThumbnail(stream)
+			} else {
+				// todo: using cover data
+			}
 			_ = updater.Update()
 		})
+		if data.Removed {
+			smtc.SetPlaybackStatus(media.MediaPlaybackStatusChanging)
+		}
 	})
 
+	global.EventManager.RegisterA(events.PlayerPropertyPauseUpdate, "sysmediacontrol.update_paused", func(event *event.Event) {
+		if event.Data.(events.PlayerPropertyPauseUpdateEvent).Paused {
+			smtc.SetPlaybackStatus(media.MediaPlaybackStatusPaused)
+		} else {
+			smtc.SetPlaybackStatus(media.MediaPlaybackStatusPlaying)
+		}
+	})
+
+	pressedHandler := foundation.NewTypedEventHandler(
+		ole.NewGUID(buttonPressedEventGUID),
+		func(_ *foundation.TypedEventHandler, _ unsafe.Pointer, args unsafe.Pointer) {
+			eventArgs := (*media.SystemMediaTransportControlsButtonPressedEventArgs)(args)
+			defer eventArgs.Release()
+			switch val, _ := eventArgs.GetButton(); val {
+			case media.SystemMediaTransportControlsButtonPlay:
+				global.EventManager.CallA(
+					events.PlayerSetPauseCmd, events.PlayerSetPauseCmdEvent{Pause: false})
+			case media.SystemMediaTransportControlsButtonPause:
+				global.EventManager.CallA(
+					events.PlayerSetPauseCmd, events.PlayerSetPauseCmdEvent{Pause: true})
+			case media.SystemMediaTransportControlsButtonNext:
+				global.EventManager.CallA(
+					events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
+			case media.SystemMediaTransportControlsButtonPrevious:
+				global.EventManager.CallA(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+					Position: 0,
+					Absolute: true,
+				})
+			}
+		},
+	)
+	_, _ = smtc.AddButtonPressed(pressedHandler)
+	pressedHandler.Release()
+
+	// todo: finish timeline properties
+	// cuz win 11 are not display timeline properties now
+	// i just ignore it
 }
 
 func Destroy() {
