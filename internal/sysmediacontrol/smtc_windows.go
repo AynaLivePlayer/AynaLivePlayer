@@ -7,6 +7,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/logger"
 	"github.com/go-ole/go-ole"
 	"github.com/saltosystems/winrt-go"
 	"github.com/saltosystems/winrt-go/windows/foundation"
@@ -36,6 +37,8 @@ var (
 		media.SignatureSystemMediaTransportControls,
 		media.SignatureSystemMediaTransportControlsButtonPressedEventArgs,
 	)
+	timelineProps *media.SystemMediaTransportControlsTimelineProperties
+	log           logger.ILogger
 )
 
 func must[T any](t T, err error) T {
@@ -61,6 +64,7 @@ func withMusicProperties(f func(updater *media.SystemMediaTransportControlsDispl
 
 func InitSystemMediaControl() {
 	_ = ole.RoInitialize(1)
+	log = global.Logger.WithPrefix("SMTC")
 
 	sptr, _ := syscall.UTF16PtrFromString("Aynakeya." + config.ProgramName)
 	syscall.SyscallN(SetCurrentProcessExplicitAppUserModelID, uintptr(unsafe.Pointer(sptr)))
@@ -139,9 +143,33 @@ func InitSystemMediaControl() {
 	// todo: finish timeline properties
 	// cuz win 11 are not display timeline properties now
 	// i just ignore it
+	lastDuration := int64(0)
+	lastTimePos := int64(0)
+	timelineProps, _ = media.NewSystemMediaTransportControlsTimelineProperties()
+	global.EventManager.RegisterA(events.PlayerPropertyDurationUpdate, "sysmediacontrol.properties.duration", func(event *event.Event) {
+		data := event.Data.(events.PlayerPropertyDurationUpdateEvent)
+		lastDuration = int64(data.Duration * 1000)
+		_ = timelineProps.SetStartTime(foundation.TimeSpan{Duration: 0})
+		_ = timelineProps.SetMinSeekTime(foundation.TimeSpan{Duration: 0})
+		_ = timelineProps.SetEndTime(foundation.TimeSpan{Duration: lastDuration * TicksPerMillisecond})
+		_ = timelineProps.SetMaxSeekTime(foundation.TimeSpan{Duration: lastDuration * TicksPerMillisecond})
+		_ = timelineProps.SetPosition(foundation.TimeSpan{Duration: lastTimePos * TicksPerMillisecond})
+		_ = smtc.UpdateTimelineProperties(timelineProps)
+	})
+	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "sysmediacontrol.properties.time_pos", func(event *event.Event) {
+		data := event.Data.(events.PlayerPropertyTimePosUpdateEvent)
+		lastTimePos = int64(data.TimePos * 1000)
+		_ = timelineProps.SetStartTime(foundation.TimeSpan{Duration: 0})
+		_ = timelineProps.SetMinSeekTime(foundation.TimeSpan{Duration: 0})
+		_ = timelineProps.SetEndTime(foundation.TimeSpan{Duration: lastDuration * TicksPerMillisecond})
+		_ = timelineProps.SetMaxSeekTime(foundation.TimeSpan{Duration: lastDuration * TicksPerMillisecond})
+		_ = timelineProps.SetPosition(foundation.TimeSpan{Duration: lastTimePos * TicksPerMillisecond})
+		_ = smtc.UpdateTimelineProperties(timelineProps)
+	})
 }
 
 func Destroy() {
+	timelineProps.Release()
 	smtc.Release()
 	_player.Release()
 }
