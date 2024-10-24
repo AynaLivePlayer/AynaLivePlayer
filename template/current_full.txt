@@ -3,5 +3,5 @@ Artist: {{ .Current.Artist }}
 Album: {{ .Current.Album}}
 Username: {{ .Current.Username }}
 Progress(in seconds):  {{.CurrentTime.TotalSeconds}} / {{.TotalTime.TotalSeconds}}
-Progress(in minutes:seconds):  {{ .CurrentTime.Minutes}}:{{ .CurrentTime.Seconds}} / {{ .TotalTime.Minutes}}:{{ .TotalTime.Seconds}}
+Progress(in minutes:seconds):  {{printf "%02d" .CurrentTime.Minutes}}:{{printf "%02d" .CurrentTime.Seconds}} / {{printf "%02d" .TotalTime.Minutes}}:{{printf "%02d" .TotalTime.Seconds}}
 Lyric: {{ .Lyric}}

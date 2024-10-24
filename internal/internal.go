@@ -7,7 +7,9 @@ import (
 	"AynaLivePlayer/internal/playlist"
 	"AynaLivePlayer/internal/plugins"
 	"AynaLivePlayer/internal/source"
+	"AynaLivePlayer/internal/sysmediacontrol"
 	"AynaLivePlayer/internal/updater"
+	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/plugin/diange"
 	"AynaLivePlayer/plugin/durationmgmt"
 	"AynaLivePlayer/plugin/qiege"
@@ -30,11 +32,15 @@ func Initialize() {
 		wshub.NewWsHub(),
 	)
 	updater.Initialize()
-	//sysmediacontrol.InitSystemMediaControl()
+	if config.General.EnableSMC {
+		sysmediacontrol.InitSystemMediaControl()
+	}
 }
 
 func Stop() {
-	//sysmediacontrol.Destroy()
+	if config.General.EnableSMC {
+		sysmediacontrol.Destroy()
+	}
 	liveroom.StopAndSave()
 	playlist.Close()
 	plugins.ClosePlugins()
