@@ -191,7 +191,17 @@ func (d *Diange) getSource(cmd string) []string {
 func (d *Diange) handleMessage(event *event.Event) {
 	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
 	msgs := strings.Split(message.Message, " ")
-	if len(msgs) < 2 || len(msgs[0]) == 0 || len(msgs[1]) == 0 {
+	if len(msgs) < 2 || len(msgs[0]) == 0 {
+		return
+	}
+	nonEmptyKeywords := []string{}
+	for _, msg := range msgs[1:] {
+		if len(msg) > 0 {
+			nonEmptyKeywords = append(nonEmptyKeywords, msg)
+		}
+	}
+	keywords := strings.Join(nonEmptyKeywords, " ")
+	if len(keywords) == 0 {
 		return
 	}
 	sources := d.getSource(msgs[0])
@@ -235,7 +245,6 @@ func (d *Diange) handleMessage(event *event.Event) {
 	if !perm {
 		return
 	}
-	keywords := strings.Join(msgs[1:], " ")
 	// blacklist check
 	for _, item := range d.blacklist {
 		if item.Exact && item.Value == keywords {
