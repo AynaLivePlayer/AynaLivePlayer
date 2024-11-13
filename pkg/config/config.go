@@ -22,7 +22,7 @@ func GetAssetPath(name string) string {
 	return path.Join(AssetsPath, name)
 }
 
-var DEFAULT_CONFIGS = []Config{General}
+var DEFAULT_CONFIGS = []Config{General, Experimental}
 
 type Config interface {
 	Name() string
