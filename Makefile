@@ -19,10 +19,10 @@ endif
 
 bundle:
 	fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
-#	fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh.ttc >> ./resource/bundle.go
-#	fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd.ttc >> ./resource/bundle.go
 	fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh0.ttf >> ./resource/bundle.go
 	fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd0.ttf >> ./resource/bundle.go
+#	fyne bundle --append --name resFontMSYaHei --package resource ./assets/msyh.ttc >> ./resource/bundle.go
+#	fyne bundle --append --name resFontMSYaHeiBold --package resource ./assets/msyhbd.ttc >> ./resource/bundle.go
 
 prebuild: bundle
 	$(RRM) ./release

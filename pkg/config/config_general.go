@@ -12,6 +12,7 @@ type _GeneralConfig struct {
 	UseSystemPlaylist bool
 	FixedSize         bool
 	EnableSMC         bool // enable system media control
+
 }
 
 func (c *_GeneralConfig) Name() string {
