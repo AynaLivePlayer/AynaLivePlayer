@@ -65,8 +65,8 @@ github.com/antonfisher/nested-logrus-formatter v1.3.1/go.mod h1:6WTfyWFkBc9+zyBa
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/aynakeya/deepcolor v1.0.2 h1:ldmVMweZTX3uLFpRQBtNyapGMXZ+UqkDp2S08ROD0rE=
-github.com/aynakeya/deepcolor v1.0.2/go.mod h1:9wdFsi0G4uAQlu58B2/eHBlGoQ8VkmSyPsK+bDZ+6dQ=
+github.com/aynakeya/deepcolor v1.0.3 h1:FKDVxGIiD4R2XSOhS6HwCWPPsmXgG3KKqja1nNNU7HE=
+github.com/aynakeya/deepcolor v1.0.3/go.mod h1:9wdFsi0G4uAQlu58B2/eHBlGoQ8VkmSyPsK+bDZ+6dQ=
 github.com/aynakeya/go-mpv v0.0.6 h1:WCBwHrzl700C1J3f+aXR+URw/OKYPjwUjDW9diOsXYY=
 github.com/aynakeya/go-mpv v0.0.6/go.mod h1:do6ImaEyt9dlQ7JRS/8ke+P9q4kGW8+Bf6j3faBQOfE=
 github.com/aynakeya/open-bilibili-live v0.0.7 h1:em/IpFeExaUmOO+jSlhzjjppiuDflLuobzdMo96dtOo=

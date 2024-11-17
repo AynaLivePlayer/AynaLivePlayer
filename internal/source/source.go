@@ -7,7 +7,7 @@ import (
 	"github.com/AynaLivePlayer/miaosic"
 	//_ "github.com/AynaLivePlayer/miaosic/providers/bilibili"
 	_ "github.com/AynaLivePlayer/miaosic/providers/bilivideo"
-	_ "github.com/AynaLivePlayer/miaosic/providers/kugou"
+	"github.com/AynaLivePlayer/miaosic/providers/kugou"
 	_ "github.com/AynaLivePlayer/miaosic/providers/kuwo"
 	"github.com/AynaLivePlayer/miaosic/providers/local"
 	_ "github.com/AynaLivePlayer/miaosic/providers/netease"
@@ -34,6 +34,7 @@ var sourceCfg = &_sourceConfig{
 func Initialize() {
 	config.LoadConfig(sourceCfg)
 	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
+	kugou.UseInstrumental()
 
 	global.EventManager.CallA(
 		events.MediaProviderUpdate, events.MediaProviderUpdateEvent{
