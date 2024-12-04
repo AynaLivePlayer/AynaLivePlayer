@@ -42,7 +42,7 @@ require (
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
-	github.com/aynakeya/deepcolor v1.0.2 // indirect
+	github.com/aynakeya/deepcolor v1.0.3 // indirect
 	github.com/aynakeya/open-bilibili-live v0.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25 // indirect

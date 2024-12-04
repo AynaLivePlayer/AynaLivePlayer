@@ -1,0 +1,1 @@
+start AynaLivePlayer.exe --headless

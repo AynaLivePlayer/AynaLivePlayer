@@ -1,0 +1,32 @@
+{
+  "bilibili-video": {
+    "enable": true,
+    "command": "点b歌",
+    "priority": 3
+  },
+  "kugou": {
+    "enable": true,
+    "command": "点kg歌",
+    "priority": 5
+  },
+  "kugou-instr": {
+    "enable": true,
+    "command": "点伴奏",
+    "priority": 6
+  },
+  "kuwo": {
+    "enable": true,
+    "command": "点k歌",
+    "priority": 2
+  },
+  "local": {
+    "enable": true,
+    "command": "点local",
+    "priority": 4
+  },
+  "netease": {
+    "enable": true,
+    "command": "点w歌",
+    "priority": 1
+  }
+}

@@ -326,7 +326,6 @@ func (d *Diange) handleMessage(event *event.Event) {
 			})
 		return
 	}
-
 }
 
 func (d *Diange) Title() string {
