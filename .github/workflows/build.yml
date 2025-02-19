@@ -54,7 +54,7 @@ jobs:
         run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: ./${{ env.EXECUTABLE }}
@@ -96,7 +96,7 @@ jobs:
         run: go build -o ./${{ env.EXECUTABLE }} app/main.go
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-build
           path: ./${{ env.EXECUTABLE }}
