@@ -80,6 +80,11 @@ func NewDiange() *Diange {
 				Command:  "点k歌",
 				Priority: 2,
 			},
+			"kugou-instr": {
+				Enable:   true,
+				Command:  "点伴奏",
+				Priority: 6,
+			},
 			"bilibili-video": {
 				Enable:   true,
 				Command:  "点b歌",
@@ -154,6 +159,20 @@ func (d *Diange) Enable() error {
 			}
 			d.isCurrentSystem = (!data.Media.IsLiveRoomUser()) && (data.Media.ToUser().Name == model.SystemUser.Name)
 		})
+	// check if all available source has a command in sourceConfigs, if not add this source to sourceConfigs
+	// actually, if default config exists, then this code does nothing.
+	prvdrs := miaosic.ListAvailableProviders()
+	for _, pvdr := range prvdrs {
+		// found pvdr in command list
+		if _, ok := d.sourceConfigs[pvdr]; ok {
+			continue
+		}
+		d.sourceConfigs[pvdr] = &sourceConfig{
+			Enable:   true,
+			Command:  "点" + pvdr + "歌",
+			Priority: len(d.sourceConfigs) + 1,
+		}
+	}
 	return nil
 }
 
