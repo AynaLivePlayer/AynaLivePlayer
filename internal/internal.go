@@ -16,6 +16,7 @@ import (
 	"AynaLivePlayer/plugin/sourcelogin"
 	"AynaLivePlayer/plugin/textinfo"
 	"AynaLivePlayer/plugin/wshub"
+	"AynaLivePlayer/plugin/yinliang"
 )
 
 func Initialize() {
@@ -26,7 +27,7 @@ func Initialize() {
 	liveroom.Initialize()
 	plugins.Initialize()
 	plugins.LoadPlugins(
-		diange.NewDiange(), qiege.NewQiege(), sourcelogin.NewSourceLogin(),
+		diange.NewDiange(), qiege.NewQiege(), yinliang.NewYinliang(), sourcelogin.NewSourceLogin(),
 		textinfo.NewTextInfo(),
 		durationmgmt.NewMaxDuration(),
 		wshub.NewWsHub(),
