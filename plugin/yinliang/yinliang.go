@@ -21,6 +21,7 @@ import (
 
 type Yinliang struct {
 	config.BaseConfig
+	Enabled         bool
 	AdminPermission bool
 	VolumeUpCMD     string
 	VolumeDownCMD   string
@@ -32,11 +33,12 @@ type Yinliang struct {
 
 func NewYinliang() *Yinliang {
 	return &Yinliang{
+		Enabled:         false,
 		AdminPermission: true,
 		VolumeUpCMD:     "音量调大",
 		VolumeDownCMD:   "音量调小",
 		VolumeStep:      5.0,
-		MaxVolume:       50.0,
+		MaxVolume:       75.0,
 		currentVolume:   50.0,
 	}
 }
@@ -82,6 +84,9 @@ func (y *Yinliang) Disable() error {
 }
 
 func (y *Yinliang) handleMessage(event *event.Event) {
+	if !y.Enabled {
+		return
+	}
 	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
 	cmd := strings.TrimSpace(message.Message)
 
@@ -125,6 +130,10 @@ func (y *Yinliang) CreatePanel() fyne.CanvasObject {
 	if y.panel != nil {
 		return y.panel
 	}
+
+	enabledCheck := component.NewCheckOneWayBinding(i18n.T("plugin.yinliang.enabled"),
+		&y.AdminPermission,
+		y.AdminPermission)
 
 	permCheck := component.NewCheckOneWayBinding(
 		i18n.T("plugin.yinliang.admin_permission"),
@@ -174,6 +183,7 @@ func (y *Yinliang) CreatePanel() fyne.CanvasObject {
 	)
 
 	y.panel = container.NewVBox(
+		enabledCheck,
 		permCheck,
 		cmdConfig,
 		volumeControlConfig,

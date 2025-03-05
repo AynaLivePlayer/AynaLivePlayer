@@ -568,6 +568,10 @@
       "en": "Admin only",
       "zh-CN": "仅房管可操作"
     },
+    "plugin.yinliang.enabled": {
+      "en": "Enabled volume control",
+      "zh-CN": "启用弹幕音量控制"
+    },
     "plugin.yinliang.volume_up_cmd": {
       "en": "Volume increase command",
       "zh-CN": "音量增加命令"
