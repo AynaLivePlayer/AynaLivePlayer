@@ -9,6 +9,7 @@ import (
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
+	"AynaLivePlayer/pkg/logger"
 	"fmt"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ type Yinliang struct {
 	MaxVolume       float64
 	currentVolume   float64
 	panel           fyne.CanvasObject
+	log             logger.ILogger
 }
 
 func NewYinliang() *Yinliang {
@@ -40,6 +42,7 @@ func NewYinliang() *Yinliang {
 		VolumeStep:      5.0,
 		MaxVolume:       75.0,
 		currentVolume:   50.0,
+		log:             global.Logger.WithPrefix("Plugin.Yiliang"),
 	}
 }
 
@@ -95,6 +98,7 @@ func (y *Yinliang) handleMessage(event *event.Event) {
 	}
 
 	if !y.AdminPermission || !message.User.Admin {
+		y.log.Infof("User <%s> modify volume failed: no permission", message.User.Username)
 		return
 	}
 
@@ -109,6 +113,7 @@ func (y *Yinliang) handleMessage(event *event.Event) {
 	} else if newVolume < 0 {
 		newVolume = 0
 	}
+	y.log.Infof("User <%s> modify volume from %.2f to %.2f", message.User.Username, y.currentVolume, newVolume)
 
 	global.EventManager.CallA(
 		events.PlayerVolumeChangeCmd,
@@ -132,8 +137,8 @@ func (y *Yinliang) CreatePanel() fyne.CanvasObject {
 	}
 
 	enabledCheck := component.NewCheckOneWayBinding(i18n.T("plugin.yinliang.enabled"),
-		&y.AdminPermission,
-		y.AdminPermission)
+		&y.Enabled,
+		y.Enabled)
 
 	permCheck := component.NewCheckOneWayBinding(
 		i18n.T("plugin.yinliang.admin_permission"),
