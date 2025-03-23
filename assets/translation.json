@@ -555,6 +555,38 @@
     "plugin.wshub.webinfo_text": {
       "en": "Obs browser output",
       "zh-CN": "OBS网页输出: "
+    },
+    "plugin.yinliang.title": {
+      "en": "Volume Control",
+      "zh-CN": "音量控制"
+    },
+    "plugin.yinliang.description": {
+      "en": "Control volume via danmaku",
+      "zh-CN": "通过弹幕控制音量"
+    },
+    "plugin.yinliang.admin_permission": {
+      "en": "Admin only",
+      "zh-CN": "仅房管可操作"
+    },
+    "plugin.yinliang.enabled": {
+      "en": "Enabled volume control",
+      "zh-CN": "启用弹幕音量控制"
+    },
+    "plugin.yinliang.volume_up_cmd": {
+      "en": "Volume increase command",
+      "zh-CN": "音量增加命令"
+    },
+    "plugin.yinliang.volume_down_cmd": {
+      "en": "Volume decrease command", 
+      "zh-CN": "音量减少命令"
+    },
+    "plugin.yinliang.volume_step": {
+      "en": "Adjustment step (%)",
+      "zh-CN": "每次音量调整 (%)"
+    },
+    "plugin.yinliang.max_volume": {
+      "en": "Maximum volume (%)",
+      "zh-CN": "最大音量限制 (%)"
     }
   }
 }

@@ -85,6 +85,8 @@ func getLogOut(filename string, maxSize int64) (*os.File, error) {
 	}
 	fileinfo, err := file.Stat()
 	if err != nil {
+		// i don't care, just truncate
+		_ = file.Truncate(0)
 		return nil, errors.New("failed to get log file stat, using default stdout")
 	}
 	if fileinfo.Size() > maxSize {
