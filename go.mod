@@ -19,28 +19,28 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/mattn/go-colorable v0.1.12
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/saltosystems/winrt-go v0.0.0-20240320184339-289d313a74b7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4
-	github.com/tidwall/gjson v1.17.1
+	github.com/tidwall/gjson v1.17.3
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
-	golang.org/x/sys v0.20.0
+	golang.org/x/sys v0.25.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
 require (
 	fyne.io/systray v1.11.0 // indirect
-	github.com/AynaLivePlayer/blivedm-go v0.0.0-20240922031304-c497ed5617c4 // indirect
+	github.com/AynaLivePlayer/blivedm-go v0.0.0-20250527143915-74cc4b2603bc // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/XiaoMengXinX/Music163Api-Go v0.1.30 // indirect
-	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/aynakeya/deepcolor v1.0.3 // indirect
 	github.com/aynakeya/open-bilibili-live v0.0.7 // indirect
@@ -77,7 +77,7 @@ require (
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
