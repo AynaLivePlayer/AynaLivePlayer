@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"os"
 
 	_logger "AynaLivePlayer/pkg/logger"
 )
@@ -33,7 +34,9 @@ func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
 	logger.Info("Initializing GUI")
-	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
+	if !config.General.UseSystemFonts {
+		_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
+	}
 	App = app.NewWithID(config.ProgramName)
 	//App.Settings().SetTheme(&myTheme{})
 	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
