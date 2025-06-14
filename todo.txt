@@ -1,6 +1,5 @@
 - long text wrap in list
 - went idle and insert new item race condition
-- @3 fix handler execution (maybe priority)
 - @4 list refresh
 - @5 delete optimization
 - race condition in RichText. i dont care fu
