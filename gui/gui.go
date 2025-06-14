@@ -35,7 +35,6 @@ func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
 	logger.Info("Initializing GUI")
-	_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyha.ttc"))
 	if !config.General.UseSystemFonts {
 		_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	}
@@ -71,6 +70,7 @@ func Initialize() {
 	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
 
 	// todo: fix, window were created even if not show. this block gui from closing
+	// i can't create sub window before the main window shows.
 	// setupPlayerWindow()
 
 	// register error
@@ -99,6 +99,7 @@ func Initialize() {
 	MainWindow.SetOnClosed(func() {
 		logger.Infof("GUI closing")
 		if playerWindow != nil {
+			logger.Infof("player window closing")
 			playerWindow.Close()
 		}
 	})
