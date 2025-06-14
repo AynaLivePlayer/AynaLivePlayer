@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -135,14 +136,14 @@ func registerRoomHandlers() {
 	global.EventManager.RegisterA(
 		events.LiveRoomProviderUpdate,
 		"gui.liveroom.provider_update",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			RoomTab.providers = event.Data.(events.LiveRoomProviderUpdateEvent).Providers
 			RoomTab.Rooms.Refresh()
-		})
+		}))
 	global.EventManager.RegisterA(
 		events.LiveRoomRoomsUpdate,
 		"gui.liveroom.rooms_update",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			logger.Infof("Update rooms")
 			data := event.Data.(events.LiveRoomRoomsUpdateEvent)
 			RoomTab.lock.Lock()
@@ -150,11 +151,11 @@ func registerRoomHandlers() {
 			RoomTab.Rooms.Select(0)
 			RoomTab.Rooms.Refresh()
 			RoomTab.lock.Unlock()
-		})
+		}))
 	global.EventManager.RegisterA(
 		events.LiveRoomStatusUpdate,
 		"gui.liveroom.room_status_update",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			room := event.Data.(events.LiveRoomStatusUpdateEvent).Room
 			index := -1
 			for i := 0; i < len(RoomTab.rooms); i++ {
@@ -182,7 +183,7 @@ func registerRoomHandlers() {
 				}
 				RoomTab.Status.Refresh()
 			}
-		})
+		}))
 
 }
 
@@ -216,10 +217,10 @@ func createRoomController() fyne.CanvasObject {
 	global.EventManager.RegisterA(
 		events.LiveRoomOperationFinish,
 		"gui.liveroom.operation_finish",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			RoomTab.ConnectBtn.Enable()
 			RoomTab.DisConnectBtn.Enable()
-		})
+		}))
 	RoomTab.Status = widget.NewLabel(i18n.T("gui.room.waiting"))
 	RoomTab.RoomTitle = widget.NewLabel("")
 	RoomTab.RoomID = widget.NewLabel("")

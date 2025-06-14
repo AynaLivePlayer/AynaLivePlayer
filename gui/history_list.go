@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
@@ -76,10 +77,10 @@ func createHistoryList() fyne.CanvasObject {
 func registerHistoryHandler() {
 	global.EventManager.RegisterA(
 		events.PlaylistDetailUpdate(model.PlaylistIDHistory),
-		"gui.history.update", func(event *event.Event) {
+		"gui.history.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			History.mux.Lock()
 			History.Medias = event.Data.(events.PlaylistDetailUpdateEvent).Medias
 			History.List.Refresh()
 			History.mux.Unlock()
-		})
+		}))
 }

@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
@@ -14,7 +15,7 @@ import (
 
 var SearchBar = &struct {
 	Input     *component.Entry
-	Button    *component.AsyncButton
+	Button    *widget.Button
 	UseSource *widget.Select
 }{}
 
@@ -26,7 +27,7 @@ func createSearchBar() fyne.CanvasObject {
 			SearchBar.Button.OnTapped()
 		}
 	}
-	SearchBar.Button = component.NewAsyncButton(i18n.T("gui.search.search"), func() {
+	SearchBar.Button = widget.NewButton(i18n.T("gui.search.search"), func() {
 		keyword := SearchBar.Input.Text
 		pr := SearchBar.UseSource.Selected
 		logger.Debugf("Search keyword: %s, provider: %s", keyword, pr)
@@ -41,7 +42,7 @@ func createSearchBar() fyne.CanvasObject {
 	})
 
 	global.EventManager.RegisterA(events.MediaProviderUpdate,
-		"gui.search.provider.update", func(event *event.Event) {
+		"gui.search.provider.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))
 			copy(s, providers.Providers)
@@ -49,7 +50,7 @@ func createSearchBar() fyne.CanvasObject {
 			if len(s) > 0 {
 				SearchBar.UseSource.SetSelected(s[0])
 			}
-		})
+		}))
 
 	SearchBar.UseSource = widget.NewSelect([]string{}, func(s string) {
 	})

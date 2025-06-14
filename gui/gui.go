@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -34,6 +35,7 @@ func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
 	logger.Info("Initializing GUI")
+	_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyha.ttc"))
 	if !config.General.UseSystemFonts {
 		_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
 	}
@@ -68,18 +70,19 @@ func Initialize() {
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
 
-	setupPlayerWindow()
+	// todo: fix, window were created even if not show. this block gui from closing
+	// setupPlayerWindow()
 
 	// register error
 	global.EventManager.RegisterA(
-		events.ErrorUpdate, "gui.show_error", func(e *event.Event) {
+		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *event.Event) {
 			err := e.Data.(events.ErrorUpdateEvent).Error
 			logger.Warnf("gui received error event: %v, %v", err, err == nil)
 			if err == nil {
 				return
 			}
 			dialog.ShowError(err, MainWindow)
-		})
+		}))
 
 	checkUpdate()
 	MainWindow.SetFixedSize(config.General.FixedSize)
@@ -94,6 +97,7 @@ func Initialize() {
 			})
 	}
 	MainWindow.SetOnClosed(func() {
+		logger.Infof("GUI closing")
 		if playerWindow != nil {
 			playerWindow.Close()
 		}

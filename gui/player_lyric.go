@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
@@ -41,8 +42,9 @@ func createLyricWindow() fyne.Window {
 	w.CenterOnScreen()
 
 	// register handlers
+	// todo: lyric not update correctly, known bug https://github.com/fyne-io/fyne/pull/5783
 	global.EventManager.RegisterA(
-		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", func(event *event.Event) {
+		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *event.Event) {
 			e := event.Data.(events.PlayerLyricPosUpdateEvent)
 			logger.Debug("lyric update", e)
 			if prevIndex >= len(fullLrc.Objects) || e.CurrentIndex >= len(fullLrc.Objects) {
@@ -66,13 +68,13 @@ func createLyricWindow() fyne.Window {
 				},
 			})
 			fullLrc.Refresh()
-		})
+		}))
 
-	global.EventManager.RegisterA(events.PlayerLyricReload, "player.lyric.current_lyric", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerLyricReload, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *event.Event) {
 		e := event.Data.(events.PlayerLyricReloadEvent)
 		fullLrc.Objects = createLyricObj(&e.Lyrics)
 		lrcWindow.Refresh()
-	})
+	}))
 
 	global.EventManager.CallA(events.PlayerLyricRequestCmd, events.PlayerLyricRequestCmdEvent{})
 

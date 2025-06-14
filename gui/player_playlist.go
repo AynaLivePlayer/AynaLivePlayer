@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
@@ -74,12 +75,12 @@ func createPlaylist() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			object.(*fyne.Container).Objects[2].(*playlistOperationButton).Index = id
 		})
-	global.EventManager.RegisterA(events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "gui.player.playlist.update", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "gui.player.playlist.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 		UserPlaylist.mux.Lock()
 		UserPlaylist.Medias = event.Data.(events.PlaylistDetailUpdateEvent).Medias
 		UserPlaylist.List.Refresh()
 		UserPlaylist.mux.Unlock()
-	})
+	}))
 	return container.NewBorder(
 		container.NewBorder(nil, nil,
 			widget.NewLabel("#"), widget.NewLabel(i18n.T("gui.player.playlist.ops")),

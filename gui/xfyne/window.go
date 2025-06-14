@@ -11,6 +11,7 @@ import (
 
 // getGlfwWindow returns the glfw.Window pointer from a fyne.Window.
 // very unsafe and ugly hacks. but it works.
+// todo: replace with LifeCycle https://github.com/fyne-io/fyne/issues/4483
 func getGlfwWindow(window fyne.Window) *glfw.Window {
 	rv := reflect.ValueOf(window)
 	if rv.Type().String() != "*glfw.window" {

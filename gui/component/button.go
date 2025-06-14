@@ -37,7 +37,8 @@ func (b *AsyncButton) SetOnTapped(f func()) {
 		b.Disable()
 		go func() {
 			f()
-			b.Enable()
+			//time.Sleep(3 * time.Second)
+			fyne.Do(b.Enable)
 		}()
 	}
 }
