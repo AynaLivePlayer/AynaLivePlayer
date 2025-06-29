@@ -2,7 +2,8 @@ package config
 
 type _ExperimentalConfig struct {
 	BaseConfig
-	Headless bool
+	Headless   bool
+	PlayerCore string
 }
 
 func (c *_ExperimentalConfig) Name() string {
@@ -10,5 +11,6 @@ func (c *_ExperimentalConfig) Name() string {
 }
 
 var Experimental = &_ExperimentalConfig{
-	Headless: false,
+	Headless:   false,
+	PlayerCore: "mpv",
 }
