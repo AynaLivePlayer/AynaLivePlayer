@@ -29,6 +29,9 @@ var duration float64 = 0
 var currentMedia model.Media
 var currentWindowHandle uintptr
 
+var audioDevices []model.AudioDevice
+var currentAudioDevice string
+
 var videoOptions = map[string][]string{
 	"windows": {"--video-filter=adjust", "--directx-hwnd"},
 	"darwin":  {"--vout=macosx"},
@@ -98,12 +101,17 @@ func SetupPlayer() {
 	// 注册事件
 	registerEvents()
 	registerCmdHandler()
+	updateAudioDeviceList()
 	restoreConfig()
 	log.Info("VLC player initialized")
 }
 
 func StopPlayer() {
 	log.Info("stopping VLC player")
+	if currentAudioDevice != "" {
+		cfg.AudioDevice = currentAudioDevice
+		log.Infof("save audio device config: %s", cfg.AudioDevice)
+	}
 	running = false
 	if player != nil {
 		err := player.Stop()
@@ -337,5 +345,99 @@ func registerCmdHandler() {
 	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *event.Event) {
 		handle := evnt.Data.(events.PlayerVideoPlayerSetWindowHandleCmdEvent).Handle
 		setWindowHandle(handle)
+	})
+
+	global.EventManager.RegisterA(events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *event.Event) {
+		device := evnt.Data.(events.PlayerSetAudioDeviceCmdEvent).Device
+		if err := setAudioDevice(device); err != nil {
+			log.Warn("set audio device failed", err)
+			global.EventManager.CallA(
+				events.ErrorUpdate,
+				events.ErrorUpdateEvent{
+					Error: err,
+				})
+		}
+	})
+}
+
+// setAudioDevice 设置音频输出设备
+func setAudioDevice(deviceID string) error {
+	lock.Lock()
+	defer lock.Unlock()
+
+	log.Infof("set audio device to: %s", deviceID)
+
+	// 验证设备是否在列表中
+	found := false
+	for _, dev := range audioDevices {
+		if dev.Name == deviceID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("audio device not found: %s", deviceID)
+	}
+
+	// 设置音频设备
+	if err := player.SetAudioOutputDevice(deviceID, ""); err != nil {
+		log.Error("set audio device failed: ", err)
+		return err
+	}
+
+	currentAudioDevice = deviceID
+
+	// 更新配置
+	cfg.AudioDevice = deviceID
+
+	// 发送更新事件
+	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+		Current: currentAudioDevice,
+		Devices: audioDevices,
+	})
+
+	return nil
+}
+
+// updateAudioDeviceList 获取并更新音频设备列表
+func updateAudioDeviceList() {
+	lock.Lock()
+	defer lock.Unlock()
+
+	// 获取所有音频设备
+	devices, err := player.AudioOutputDevices()
+	if err != nil {
+		log.Error("get audio device list failed: ", err)
+		return
+	}
+
+	// 获取当前音频设备
+	currentDevice, err := player.AudioOutputDevice()
+	if err != nil {
+		log.Warn("get current audio device failed: ", err)
+		currentDevice = ""
+	}
+	log.Debugf("current audio device list: %s", devices)
+	log.Debugf("current audio device: %s", currentDevice)
+
+	// 转换设备格式
+	audioDevices = make([]model.AudioDevice, 0, len(devices))
+	for _, device := range devices {
+		audioDevices = append(audioDevices, model.AudioDevice{
+			Name:        device.Name,
+			Description: device.Description,
+		})
+	}
+
+	currentAudioDevice = currentDevice
+
+	log.Infof("update audio device list: %d devices, current: %s",
+		len(audioDevices), currentAudioDevice)
+
+	// 发送事件通知
+	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+		Current: currentAudioDevice,
+		Devices: audioDevices,
 	})
 }

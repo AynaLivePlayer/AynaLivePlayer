@@ -35,6 +35,9 @@ func restoreConfig() {
 	})
 	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "player.config.volume", func(evnt *event.Event) {
 		data := evnt.Data.(events.PlayerPropertyVolumeUpdateEvent)
+		if data.Volume < 0 {
+			return
+		}
 		cfg.Volume = data.Volume
 	})
 	global.EventManager.CallA(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
