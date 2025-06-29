@@ -135,6 +135,7 @@ func (d *Diange) Enable() error {
 		"plugin.diange.queue.update",
 		func(event *event.Event) {
 			d.currentQueueLength = len(event.Data.(events.PlaylistDetailUpdateEvent).Medias)
+			d.log.Debugf("current queue length: %d", d.currentQueueLength)
 			medias := event.Data.(events.PlaylistDetailUpdateEvent).Medias
 			tmpUserCount := make(map[string]int)
 			for _, media := range medias {
@@ -144,8 +145,11 @@ func (d *Diange) Enable() error {
 				}
 				tmpUserCount[media.ToUser().Name]++
 			}
+			// clear user count
+			d.userCount.Clear()
 			for user, count := range tmpUserCount {
 				d.userCount.Store(user, count)
+				d.log.Debugf("user media count in player playlist %s: %d", user, count)
 			}
 		})
 	global.EventManager.RegisterA(
