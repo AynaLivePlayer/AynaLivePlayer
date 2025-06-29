@@ -11,8 +11,8 @@ type _GeneralConfig struct {
 	PlayNextOnFail    bool
 	UseSystemPlaylist bool
 	FixedSize         bool
-	EnableSMC         bool // enable system media control
-	UseSystemFonts    bool // using system fonts
+	EnableSMC         bool   // enable system media control
+	CustomFonts       string // use custom fonts, under ./assets file
 
 }
 
@@ -31,5 +31,5 @@ var General = &_GeneralConfig{
 	UseSystemPlaylist: true,
 	FixedSize:         true,
 	EnableSMC:         true,
-	UseSystemFonts:    true,
+	CustomFonts:       "",
 }

@@ -35,8 +35,8 @@ func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
 	logger.Info("Initializing GUI")
-	if !config.General.UseSystemFonts {
-		_ = os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
+	if config.General.CustomFonts != "" {
+		_ = os.Setenv("FYNE_FONT", config.GetAssetPath(config.General.CustomFonts))
 	}
 	App = app.NewWithID(config.ProgramName)
 	//App.Settings().SetTheme(&myTheme{})
