@@ -176,7 +176,7 @@ func registerPlayControllerHandler() {
 						return
 					}
 					PlayController.Cover.Resource = pic.Resource
-					PlayController.Cover.Refresh()
+					fyne.Do(PlayController.Cover.Refresh)
 				}
 
 			}()

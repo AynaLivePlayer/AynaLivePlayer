@@ -15,6 +15,7 @@ require (
 	fyne.io/fyne/v2 v2.6.1
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
 	github.com/AynaLivePlayer/miaosic v0.1.7
+	github.com/adrg/libvlc-go/v3 v3.1.6
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/aynakeya/go-mpv v0.0.7
@@ -47,7 +48,7 @@ require (
 	github.com/aynakeya/deepcolor v1.0.3 // indirect
 	github.com/aynakeya/open-bilibili-live v0.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25 // indirect
+	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8 // indirect
 	github.com/fredbi/uri v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fyne-io/gl-js v0.1.0 // indirect
@@ -68,7 +69,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rymdport/portal v0.4.1 // indirect
-	github.com/sahilm/fuzzy v0.1.0 // indirect
+	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/spf13/cast v1.9.2 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
