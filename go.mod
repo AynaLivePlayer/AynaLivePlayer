@@ -18,7 +18,7 @@ require (
 	github.com/adrg/libvlc-go/v3 v3.1.6
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/aynakeya/go-mpv v0.0.7
+	github.com/aynakeya/go-mpv v0.0.8
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20250301202403-da16c1255728
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-resty/resty/v2 v2.16.5
