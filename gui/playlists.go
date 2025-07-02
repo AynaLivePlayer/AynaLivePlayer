@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -97,14 +98,14 @@ func createPlaylists() fyne.CanvasObject {
 		})
 	}
 	global.EventManager.RegisterA(events.MediaProviderUpdate,
-		"gui.playlists.provider.update", func(event *event.Event) {
+		"gui.playlists.provider.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))
 			copy(s, providers.Providers)
 			PlaylistManager.providers = s
-		})
+		}))
 	global.EventManager.RegisterA(events.PlaylistManagerInfoUpdate,
-		"gui.playlists.info.update", func(event *event.Event) {
+		"gui.playlists.info.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.PlaylistManagerInfoUpdateEvent)
 			prevLen := len(PlaylistManager.currentPlaylists)
 			PlaylistManager.currentPlaylists = data.Playlists
@@ -113,12 +114,12 @@ func createPlaylists() fyne.CanvasObject {
 			if prevLen != len(PlaylistManager.currentPlaylists) {
 				PlaylistManager.Playlists.Select(0)
 			}
-		})
+		}))
 	global.EventManager.RegisterA(events.PlaylistManagerSystemUpdate,
-		"gui.playlists.system.update", func(event *event.Event) {
+		"gui.playlists.system.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.PlaylistManagerSystemUpdateEvent)
 			PlaylistManager.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current") + data.Info.DisplayName())
-		})
+		}))
 	return container.NewHBox(
 		container.NewBorder(
 			nil, container.NewCenter(container.NewHBox(PlaylistManager.AddBtn, PlaylistManager.RemoveBtn)),
@@ -190,12 +191,12 @@ func createPlaylistMedias() fyne.CanvasObject {
 			}
 		})
 	global.EventManager.RegisterA(events.PlaylistManagerCurrentUpdate,
-		"gui.playlists.current.update", func(event *event.Event) {
+		"gui.playlists.current.update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			logger.Infof("receive current playlist update, try to refresh playlist medias")
 			data := event.Data.(events.PlaylistManagerCurrentUpdateEvent)
 			PlaylistManager.currentMedias = data.Medias
 			PlaylistManager.PlaylistMedia.Refresh()
-		})
+		}))
 	return container.NewBorder(
 		container.NewHBox(PlaylistManager.RefreshBtn, PlaylistManager.SetAsSystemBtn, PlaylistManager.CurrentSystemPlaylist), nil,
 		nil, nil,

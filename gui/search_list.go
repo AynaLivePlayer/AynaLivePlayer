@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
@@ -61,13 +62,13 @@ func createSearchList() fyne.CanvasObject {
 				})
 			}
 		})
-	global.EventManager.RegisterA(events.SearchResultUpdate, "gui.search.update_result", func(event *event.Event) {
+	global.EventManager.RegisterA(events.SearchResultUpdate, "gui.search.update_result", gutil.ThreadSafeHandler(func(event *event.Event) {
 		items := event.Data.(events.SearchResultUpdateEvent).Medias
 		SearchResult.Items = items
 		SearchResult.mux.Lock()
 		SearchResult.List.Refresh()
 		SearchResult.mux.Unlock()
-	})
+	}))
 	return container.NewBorder(
 		container.NewBorder(nil, nil,
 			widget.NewLabel("#"), widget.NewLabel(i18n.T("gui.search.operation")),

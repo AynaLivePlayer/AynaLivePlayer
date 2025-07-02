@@ -3,6 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2/dialog"
@@ -11,7 +12,7 @@ import (
 
 func checkUpdate() {
 	global.EventManager.RegisterA(
-		events.CheckUpdateResultUpdate, "gui.updater.check_update", func(event *event.Event) {
+		events.CheckUpdateResultUpdate, "gui.updater.check_update", gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.CheckUpdateResultUpdateEvent)
 			msg := data.Info.Version.String() + "\n\n\n" + data.Info.Info
 			if data.HasUpdate {
@@ -27,5 +28,5 @@ func checkUpdate() {
 					widget.NewRichTextFromMarkdown(""),
 					MainWindow)
 			}
-		})
+		}))
 }

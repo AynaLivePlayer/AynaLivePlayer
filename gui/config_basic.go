@@ -5,6 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -44,10 +45,10 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 		})
 	global.EventManager.RegisterA(events.PlaylistModeChangeUpdate(model.PlaylistIDPlayer),
 		"gui.config.basic.random_playlist.player",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
 			playerRandomCheck.SetChecked(data.Mode == model.PlaylistModeRandom)
-		})
+		}))
 
 	systemRandomCheck := widget.NewCheck(i18n.T("gui.config.basic.random_playlist.system"),
 		func(b bool) {
@@ -63,10 +64,10 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 
 	global.EventManager.RegisterA(events.PlaylistModeChangeUpdate(model.PlaylistIDSystem),
 		"gui.config.basic.random_playlist.system",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
 			systemRandomCheck.SetChecked(data.Mode == model.PlaylistModeRandom)
-		})
+		}))
 
 	randomPlaylist := container.NewHBox(
 		widget.NewLabel(i18n.T("gui.config.basic.random_playlist")),
@@ -86,7 +87,7 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 	global.EventManager.RegisterA(
 		events.PlayerAudioDeviceUpdate,
 		"gui.config.basic.audio_device.update",
-		func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *event.Event) {
 			data := event.Data.(events.PlayerAudioDeviceUpdateEvent)
 			devices := make([]string, len(data.Devices))
 			deviceDesc2Name = make(map[string]string)
@@ -102,7 +103,7 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			deviceSel.Options = devices
 			deviceSel.Selected = currentDevice
 			deviceSel.Refresh()
-		})
+		}))
 
 	outputDevice := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("gui.config.basic.audio_device")), nil,

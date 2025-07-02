@@ -17,6 +17,9 @@ func setupPlayerWindow() {
 }
 
 func showPlayerWindow() {
+	if playerWindow == nil {
+		setupPlayerWindow()
+	}
 	playerWindow.Show()
 	if playerWindowHandle == 0 {
 		playerWindowHandle = xfyne.GetWindowHandle(playerWindow)

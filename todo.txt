@@ -1,21 +1,21 @@
 - long text wrap in list
 - went idle and insert new item race condition
-- @3 fix handler execution (maybe priority)
 - @4 list refresh
 - @5 delete optimization
 - race condition in RichText. i dont care fu
 
 - 适配歌词服务器
 - 媒体源 - 歌单信息获取
-- mpris, SMTC
-- 歌词event发送全部歌词，前端处理不同版本
+- mpris
 - optimize local music
-- 从搜索里添加的歌不能被切
-- 随机歌单
+- 下一首为非版权歌时自动切歌不生效
+- 网易云电台节目
+- 自定义弹幕服务器
 
 ----
 
 Finished
+- 2024.06.30       : 添加vlc核心，修复若干bug，gui框架更新，修复点歌限制为1时可能出现的无法点歌的问题
 - 2024.05.27       : 修复web弹幕获取到0个host的时候闪退的问题
 - 2024.03.27       : 添加b站合集新链接的格式
 - 2024.03.22       : 添加酷狗歌单新链接的格式

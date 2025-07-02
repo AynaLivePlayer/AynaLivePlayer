@@ -4,6 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
@@ -14,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"os"
 
 	_logger "AynaLivePlayer/pkg/logger"
 )
@@ -33,7 +35,9 @@ func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
 	black_magic()
 	logger.Info("Initializing GUI")
-	//os.Setenv("FYNE_FONT", config.GetAssetPath("msyh.ttc"))
+	if config.General.CustomFonts != "" {
+		_ = os.Setenv("FYNE_FONT", config.GetAssetPath(config.General.CustomFonts))
+	}
 	App = app.NewWithID(config.ProgramName)
 	//App.Settings().SetTheme(&myTheme{})
 	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
@@ -65,18 +69,20 @@ func Initialize() {
 	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
 
-	setupPlayerWindow()
+	// todo: fix, window were created even if not show. this block gui from closing
+	// i can't create sub window before the main window shows.
+	// setupPlayerWindow()
 
 	// register error
 	global.EventManager.RegisterA(
-		events.ErrorUpdate, "gui.show_error", func(e *event.Event) {
+		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *event.Event) {
 			err := e.Data.(events.ErrorUpdateEvent).Error
 			logger.Warnf("gui received error event: %v, %v", err, err == nil)
 			if err == nil {
 				return
 			}
 			dialog.ShowError(err, MainWindow)
-		})
+		}))
 
 	checkUpdate()
 	MainWindow.SetFixedSize(config.General.FixedSize)
@@ -91,7 +97,9 @@ func Initialize() {
 			})
 	}
 	MainWindow.SetOnClosed(func() {
+		logger.Infof("GUI closing")
 		if playerWindow != nil {
+			logger.Infof("player window closing")
 			playerWindow.Close()
 		}
 	})

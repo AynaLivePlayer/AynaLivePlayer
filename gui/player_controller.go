@@ -59,7 +59,7 @@ func registerPlayControllerHandler() {
 	PlayController.ButtonLrc.OnTapped = func() {
 		if !PlayController.LrcWindowOpen {
 			PlayController.LrcWindowOpen = true
-			createLyricWindow().Show()
+			createLyricWindow().Close()
 		}
 	}
 
@@ -67,26 +67,25 @@ func registerPlayControllerHandler() {
 		showPlayerWindow()
 	}
 
-	global.EventManager.RegisterA(events.PlayerPropertyPauseUpdate, "gui.player.controller.paused", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyPauseUpdate, "gui.player.controller.paused", gutil.ThreadSafeHandler(func(event *event.Event) {
 		if event.Data.(events.PlayerPropertyPauseUpdateEvent).Paused {
 			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
 		} else {
 			PlayController.ButtonSwitch.Icon = theme.MediaPauseIcon()
 		}
 		PlayController.ButtonSwitch.Refresh()
-	})
+	}))
 
-	global.EventManager.RegisterA(events.PlayerPropertyPercentPosUpdate, "gui.player.controller.percent_pos", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyPercentPosUpdate, "gui.player.controller.percent_pos", gutil.ThreadSafeHandler(func(event *event.Event) {
 		if PlayController.Progress.Dragging {
 			return
 		}
 		PlayController.Progress.Value = event.Data.(events.PlayerPropertyPercentPosUpdateEvent).PercentPos * 10
 		PlayController.Progress.Refresh()
-	})
+	}))
 
-	global.EventManager.RegisterA(events.PlayerPropertyIdleActiveUpdate, "gui.player.controller.idle_active", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyIdleActiveUpdate, "gui.player.controller.idle_active", gutil.ThreadSafeHandler(func(event *event.Event) {
 		isIdle := event.Data.(events.PlayerPropertyIdleActiveUpdateEvent).IsIdle
-		// todo: @3
 		if isIdle {
 			PlayController.Progress.Value = 0
 			PlayController.Progress.Max = 0
@@ -97,7 +96,7 @@ func registerPlayControllerHandler() {
 		} else {
 			PlayController.Progress.Max = 1000
 		}
-	})
+	}))
 
 	PlayController.Progress.Max = 0
 	PlayController.Progress.OnDragEnd = func(f float64) {
@@ -107,18 +106,18 @@ func registerPlayControllerHandler() {
 		})
 	}
 
-	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "gui.player.controller.time_pos", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "gui.player.controller.time_pos", gutil.ThreadSafeHandler(func(event *event.Event) {
 		PlayController.CurrentTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos)))
-	})
+	}))
 
-	global.EventManager.RegisterA(events.PlayerPropertyDurationUpdate, "gui.player.controller.duration", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyDurationUpdate, "gui.player.controller.duration", gutil.ThreadSafeHandler(func(event *event.Event) {
 		PlayController.TotalTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyDurationUpdateEvent).Duration)))
-	})
+	}))
 
-	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "gui.player.controller.volume", func(event *event.Event) {
+	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "gui.player.controller.volume", gutil.ThreadSafeHandler(func(event *event.Event) {
 		PlayController.Volume.Value = event.Data.(events.PlayerPropertyVolumeUpdateEvent).Volume
 		PlayController.Volume.Refresh()
-	})
+	}))
 
 	PlayController.Volume.OnChanged = func(f float64) {
 		global.EventManager.CallA(events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
@@ -126,7 +125,8 @@ func registerPlayControllerHandler() {
 		})
 	}
 
-	global.EventManager.RegisterA(events.PlayerPlayingUpdate, "gui.player.updateinfo", func(event *event.Event) {
+	// todo: double check cover loading for new thread model
+	global.EventManager.RegisterA(events.PlayerPlayingUpdate, "gui.player.updateinfo", gutil.ThreadSafeHandler(func(event *event.Event) {
 		if event.Data.(events.PlayerPlayingUpdateEvent).Removed {
 			PlayController.Progress.Value = 0
 			PlayController.Progress.Max = 0
@@ -176,12 +176,12 @@ func registerPlayControllerHandler() {
 						return
 					}
 					PlayController.Cover.Resource = pic.Resource
-					PlayController.Cover.Refresh()
+					fyne.Do(PlayController.Cover.Refresh)
 				}
 
 			}()
 		}
-	})
+	}))
 }
 
 func createPlayControllerV2() fyne.CanvasObject {
