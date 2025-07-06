@@ -233,6 +233,7 @@ func registerCmdHandler() {
 
 		// 创建媒体对象
 		var media *vlc.Media
+		log.Debugf("[VLC PlayControl] get player media %s", mediaUrls[0].Url)
 		if strings.HasPrefix(mediaUrls[0].Url, "http") {
 			media, err = vlc.NewMediaFromURL(mediaUrls[0].Url)
 		} else {
