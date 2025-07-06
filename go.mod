@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
-	github.com/AynaLivePlayer/miaosic v0.1.7 => ./pkg/miaosic // submodule
+	github.com/AynaLivePlayer/miaosic v0.2.1 => ./pkg/miaosic // submodule
 
 	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
 )
@@ -14,7 +14,7 @@ replace (
 require (
 	fyne.io/fyne/v2 v2.6.1
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
-	github.com/AynaLivePlayer/miaosic v0.1.7
+	github.com/AynaLivePlayer/miaosic v0.2.1
 	github.com/adrg/libvlc-go/v3 v3.1.6
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
@@ -65,6 +65,7 @@ require (
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
+	github.com/makiuchi-d/gozxing v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -81,6 +82,7 @@ require (
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
