@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - disabled
 
 jobs:
   build-windows:
@@ -47,7 +47,7 @@ jobs:
 
       - name: Bundle assets
         run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
+          go install fyne.io/tools/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon2.png > ./resource/bundle.go
 
       - name: Build application
