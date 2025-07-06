@@ -59,7 +59,7 @@ func registerPlayControllerHandler() {
 	PlayController.ButtonLrc.OnTapped = func() {
 		if !PlayController.LrcWindowOpen {
 			PlayController.LrcWindowOpen = true
-			createLyricWindow().Close()
+			createLyricWindow().Show()
 		}
 	}
 
