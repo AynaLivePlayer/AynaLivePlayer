@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
-	github.com/AynaLivePlayer/miaosic v0.2.1 => ./pkg/miaosic // submodule
+	github.com/AynaLivePlayer/miaosic v0.2.3 => ./pkg/miaosic // submodule
 
 	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
 )
@@ -14,7 +14,7 @@ replace (
 require (
 	fyne.io/fyne/v2 v2.6.1
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
-	github.com/AynaLivePlayer/miaosic v0.2.1
+	github.com/AynaLivePlayer/miaosic v0.2.3
 	github.com/adrg/libvlc-go/v3 v3.1.6
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
