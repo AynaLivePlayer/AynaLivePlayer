@@ -54,6 +54,17 @@ func (w *SourceLogin) Enable() error {
 }
 
 func (w *SourceLogin) Disable() error {
+	w.log.Info("save session for all provider")
+	providers := miaosic.ListAvailableProviders()
+	for _, pname := range providers {
+		if p, ok := miaosic.GetProvider(pname); ok {
+			pl, ok2 := p.(miaosic.Loginable)
+			if ok2 {
+				w.log.Info("save session for %s", pname)
+				w.sessions[pname] = pl.SaveSession()
+			}
+		}
+	}
 	return nil
 }
 
