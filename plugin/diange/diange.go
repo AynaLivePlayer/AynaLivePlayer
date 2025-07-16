@@ -83,7 +83,7 @@ func NewDiange() *Diange {
 			"kugou-instr": {
 				Enable:   true,
 				Command:  "点伴奏",
-				Priority: 6,
+				Priority: 7,
 			},
 			"bilibili-video": {
 				Enable:   true,
@@ -93,12 +93,17 @@ func NewDiange() *Diange {
 			"local": {
 				Enable:   true,
 				Command:  "点l歌",
-				Priority: 4,
+				Priority: 6,
 			},
 			"kugou": {
 				Enable:   true,
 				Command:  "点kg歌",
 				Priority: 5,
+			},
+			"qq": {
+				Enable:   true,
+				Command:  "点q歌",
+				Priority: 4,
 			},
 		},
 		cooldowns: make(map[string]int),
