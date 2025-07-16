@@ -176,7 +176,7 @@ func registerPlayControllerHandler() {
 						return
 					}
 					PlayController.Cover.Resource = pic.Resource
-					fyne.Do(PlayController.Cover.Refresh)
+					gutil.RunInFyneThread(PlayController.Cover.Refresh)
 				}
 
 			}()
