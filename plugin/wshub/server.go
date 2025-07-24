@@ -120,7 +120,7 @@ func (s *wsServer) handleWsInfo(w http.ResponseWriter, r *http.Request) {
 		if data.EventID == "" {
 			continue
 		}
-		eventCacheData, _ := json.Marshal(data)
+		eventCacheData, _ := toCapitalizedJSON(data)
 		err := client.conn.WriteMessage(websocket.TextMessage, eventCacheData)
 		if err != nil {
 			s.log.Warn("write message failed", err)
