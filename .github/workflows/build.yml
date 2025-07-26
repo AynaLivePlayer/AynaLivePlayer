@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - disabled
+      - dev
 
 jobs:
   build-windows:
@@ -14,6 +14,8 @@ jobs:
       GOOS: windows
       GOARCH: amd64
       EXECUTABLE: AynaLivePlayer.exe
+      CGO_CFLAGS: "-I/mingw64/include"
+      CGO_LDFLAGS: "-L/mingw64/lib"
 
     steps:
       - name: Checkout code
@@ -21,26 +23,20 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install dependencies
+      - name: Set up MSYS2 and install dependencies
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
+          update: true
           install: >-
             mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-vlc
             mingw-w64-x86_64-mpv
-
-      - name: Set up MSYS2 environment for Go build
-        shell: msys2 {0}
-        run: |
-          mkdir -p D:/libmpv/include/mpv
-          cp -r /mingw64/include/mpv/* D:/libmpv/include/mpv/
-          echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
 
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.22'
 
       - name: Tidy go.mod
         run: go mod tidy
@@ -77,12 +73,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
+          sudo apt-get install -y libvlc-dev vlc libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
 
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.22'
 
       - name: Tidy go.mod
         run: go mod tidy
