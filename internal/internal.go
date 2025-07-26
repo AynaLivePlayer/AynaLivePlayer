@@ -20,7 +20,7 @@ import (
 )
 
 func Initialize() {
-	player.SetupMpvPlayer()
+	player.SetupPlayer()
 	source.Initialize()
 	playlist.Initialize()
 	controller.Initialize()
@@ -45,5 +45,5 @@ func Stop() {
 	liveroom.StopAndSave()
 	playlist.Close()
 	plugins.ClosePlugins()
-	player.StopMpvPlayer()
+	player.StopPlayer()
 }
