@@ -1,3 +1,5 @@
+//go:build !mpvOnly && !vlcOnly
+
 package player
 
 import (
@@ -6,18 +8,17 @@ import (
 	"AynaLivePlayer/pkg/config"
 )
 
-func SetupMpvPlayer() {
+func SetupPlayer() {
 	if config.Experimental.PlayerCore == "vlc" {
 		vlc.SetupPlayer()
 	} else {
 		mpv.SetupPlayer()
 	}
-
 }
 
-func StopMpvPlayer() {
+func StopPlayer() {
 	if config.Experimental.PlayerCore == "vlc" {
-		vlc.StopPlayer()
+		//vlc.StopPlayer()
 	} else {
 		mpv.StopPlayer()
 	}

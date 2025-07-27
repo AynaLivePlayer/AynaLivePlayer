@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - disabled
+      - master
 
 jobs:
   build-windows:
@@ -14,6 +14,8 @@ jobs:
       GOOS: windows
       GOARCH: amd64
       EXECUTABLE: AynaLivePlayer.exe
+      CGO_CFLAGS: "-I${{ github.workspace }}/libmpv/include -I${{ github.workspace }}/libvlc/VideoLAN.LibVLC.Windows.3.0.21/build/x64/include"
+      CGO_LDFLAGS: "-L${{ github.workspace }}/libmpv -L${{ github.workspace }}/libvlc/VideoLAN.LibVLC.Windows.3.0.21/build/x64"
 
     steps:
       - name: Checkout code
@@ -21,43 +23,58 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install dependencies
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-mpv
+      - name: Install 7-Zip
+        run: choco install 7zip
 
-      - name: Set up MSYS2 environment for Go build
-        shell: msys2 {0}
+      - name: Download libmpv
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: "shinchiro/mpv-winbuild-cmake"
+          latest: true
+          fileName: "mpv-dev-x86_64-[0-9]*.7z"
+          extract: false
+          out-file-path: "libmpv"
+
+      - name: Extract libmpv
         run: |
-          mkdir -p D:/libmpv/include/mpv
-          cp -r /mingw64/include/mpv/* D:/libmpv/include/mpv/
-          echo "CGO_CFLAGS=-ID:/libmpv/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-LD:/a/_temp/msys64/mingw64/lib" >> $GITHUB_ENV
+          7z x "libmpv/mpv-dev-x86_64-*.7z" -o"libmpv"
+
+      - name: Setup NuGet.exe
+        uses: nuget/setup-nuget@v2
+        with:
+          nuget-version: 'latest'
+
+      - name: Install VLC dependency
+        run: nuget install VideoLAN.LibVLC.Windows -OutputDirectory ${{ github.workspace }}/libvlc -Version 3.0.21
 
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.22'
 
-      - name: Tidy go.mod
-        run: go mod tidy
+      - name: Install Go Dependencies
+        run: |
+          go mod tidy
+          go install fyne.io/tools/cmd/fyne@latest
 
       - name: Bundle assets
         run: |
-          go install fyne.io/tools/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon2.png > ./resource/bundle.go
 
       - name: Build application
-        run: go build -o ./${{ env.EXECUTABLE }} -ldflags -H=windowsgui app/main.go
+        run: |
+          go build -tags=mpvOnly -v -o ./AynaLivePlayerMpv.exe -ldflags -H=windowsgui app/main.go
+          go build -tags=vlcOnly -v -o ./AynaLivePlayerVlc.exe -ldflags -H=windowsgui app/main.go
+          go build -v -o ./AynaLivePlayerAllPlayer.exe -ldflags -H=windowsgui app/main.go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: ./${{ env.EXECUTABLE }}
+          path: |
+            ./AynaLivePlayerMpv.exe
+            ./AynaLivePlayerVlc.exe
+            ./AynaLivePlayerAllPlayer.exe
 
   build-ubuntu:
     runs-on: ubuntu-latest
@@ -77,19 +94,20 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
+          sudo apt-get install -y libvlc-dev vlc libmpv-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev xorg-dev
 
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.22'
 
-      - name: Tidy go.mod
-        run: go mod tidy
+      - name: Install Go Dependencies
+        run: |
+          go mod tidy
+          go install fyne.io/tools/cmd/fyne@latest
 
       - name: Bundle assets
         run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
           fyne bundle --name resImageIcon --package resource ./assets/icon.png > ./resource/bundle.go
 
       - name: Build application

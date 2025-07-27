@@ -8,6 +8,5 @@ CMakeCache.txt
 /config/
 /release/
 log.txt
-go.sum
 config.ini
 config.ini.bak

@@ -10,7 +10,6 @@ import (
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
-	"encoding/json"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -183,7 +182,7 @@ func (w *WsHub) registerEvents() {
 					EventID: e.Id,
 					Data:    e.Data,
 				}
-				val, err := json.Marshal(ed)
+				val, err := toCapitalizedJSON(ed)
 				if err != nil {
 					w.log.Errorf("failed to marshal event data %v", err)
 					return
