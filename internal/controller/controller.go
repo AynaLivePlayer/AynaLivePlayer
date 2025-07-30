@@ -39,7 +39,7 @@ func handlePlayNext() {
 		events.PlaylistInsertUpdate(model.PlaylistIDPlayer),
 		"internal.controller.playcontrol.playnext_when_insert.player",
 		func(event *event.Event) {
-			if isIdle {
+			if isIdle && config.General.PlayNextOnFail {
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
 					events.PlayerPlayNextCmdEvent{})
 			}
@@ -49,7 +49,7 @@ func handlePlayNext() {
 		events.PlaylistInsertUpdate(model.PlaylistIDSystem),
 		"internal.controller.playcontrol.playnext_when_insert.system",
 		func(event *event.Event) {
-			if isIdle {
+			if isIdle && config.General.PlayNextOnFail {
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
 					events.PlayerPlayNextCmdEvent{})
 			}

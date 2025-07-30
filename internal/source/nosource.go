@@ -1,4 +1,4 @@
-//go:build !nosource
+//go:build nosource
 
 package source
 
@@ -7,12 +7,6 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
 	"github.com/AynaLivePlayer/miaosic"
-	_ "github.com/AynaLivePlayer/miaosic/providers/bilivideo"
-	"github.com/AynaLivePlayer/miaosic/providers/kugou"
-	_ "github.com/AynaLivePlayer/miaosic/providers/kuwo"
-	"github.com/AynaLivePlayer/miaosic/providers/local"
-	_ "github.com/AynaLivePlayer/miaosic/providers/netease"
-	_ "github.com/AynaLivePlayer/miaosic/providers/qq"
 )
 
 type _sourceConfig struct {
@@ -35,9 +29,7 @@ var sourceCfg = &_sourceConfig{
 
 func Initialize() {
 	config.LoadConfig(sourceCfg)
-	kugou.UseInstrumental()
-	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
-
+	miaosic.RegisterProvider(&dummySource{})
 	global.EventManager.CallA(
 		events.MediaProviderUpdate, events.MediaProviderUpdateEvent{
 			Providers: miaosic.ListAvailableProviders(),

@@ -410,7 +410,11 @@ func (d *Diange) CreatePanel() fyne.CanvasObject {
 		skipPlaylistCheck,
 	)
 	sourceCfgs := []fyne.CanvasObject{}
+	prvdrs := miaosic.ListAvailableProviders()
 	for source, cfg := range d.sourceConfigs {
+		if !slices.Contains(prvdrs, source) {
+			continue
+		}
 		sourceCfgs = append(
 			sourceCfgs, container.NewGridWithColumns(2,
 				widget.NewLabel(source),
