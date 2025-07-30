@@ -40,7 +40,7 @@ func Initialize() {
 	}
 	App = app.NewWithID(config.ProgramName)
 	//App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s-%s", config.ProgramName, model.Version(config.Version), config.General.DistributionChannel))
+	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),

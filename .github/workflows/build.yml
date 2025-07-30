@@ -63,9 +63,21 @@ jobs:
 
       - name: Build application
         run: |
+          go build -tags=mpvOnly,nosource -v -o ./AynaLivePlayerMpvNoSource.exe -ldflags -H=windowsgui app/main.go
+          go build -tags=vlcOnly,nosource -v -o ./AynaLivePlayerVlcNoSource.exe -ldflags -H=windowsgui app/main.go
+          go build -tags=nosource -v -o ./AynaLivePlayerAllPlayerNoSource.exe -ldflags -H=windowsgui app/main.go
           go build -tags=mpvOnly -v -o ./AynaLivePlayerMpv.exe -ldflags -H=windowsgui app/main.go
           go build -tags=vlcOnly -v -o ./AynaLivePlayerVlc.exe -ldflags -H=windowsgui app/main.go
           go build -v -o ./AynaLivePlayerAllPlayer.exe -ldflags -H=windowsgui app/main.go
+
+      - name: Upload artifact (NoSource)
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-nosource
+          path: |
+            ./AynaLivePlayerMpvNoSource.exe
+            ./AynaLivePlayerVlcNoSource.exe
+            ./AynaLivePlayerAllPlayerNoSource.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
