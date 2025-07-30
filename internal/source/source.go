@@ -5,7 +5,6 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
 	"github.com/AynaLivePlayer/miaosic"
-	//_ "github.com/AynaLivePlayer/miaosic/providers/bilibili"
 	_ "github.com/AynaLivePlayer/miaosic/providers/bilivideo"
 	"github.com/AynaLivePlayer/miaosic/providers/kugou"
 	_ "github.com/AynaLivePlayer/miaosic/providers/kuwo"
@@ -34,8 +33,11 @@ var sourceCfg = &_sourceConfig{
 
 func Initialize() {
 	config.LoadConfig(sourceCfg)
-	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
 	kugou.UseInstrumental()
+	if config.General.DistributionChannel != "github" {
+		miaosic.UnregisterAllProvider()
+	}
+	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
 
 	global.EventManager.CallA(
 		events.MediaProviderUpdate, events.MediaProviderUpdateEvent{

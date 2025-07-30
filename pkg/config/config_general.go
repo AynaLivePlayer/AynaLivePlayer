@@ -2,18 +2,18 @@ package config
 
 type _GeneralConfig struct {
 	BaseConfig
-	Width             float32
-	Height            float32
-	Language          string
-	InfoApiServer     string
-	AutoCheckUpdate   bool
-	ShowSystemTray    bool
-	PlayNextOnFail    bool
-	UseSystemPlaylist bool
-	FixedSize         bool
-	EnableSMC         bool   // enable system media control
-	CustomFonts       string // use custom fonts, under ./assets file
-
+	Width               float32
+	Height              float32
+	Language            string
+	InfoApiServer       string
+	AutoCheckUpdate     bool
+	ShowSystemTray      bool
+	PlayNextOnFail      bool
+	UseSystemPlaylist   bool
+	FixedSize           bool
+	EnableSMC           bool   // enable system media control
+	CustomFonts         string // use custom fonts, under ./assets file
+	DistributionChannel string // app distribution channel, default fanfan
 }
 
 func (c *_GeneralConfig) Name() string {
@@ -21,15 +21,16 @@ func (c *_GeneralConfig) Name() string {
 }
 
 var General = &_GeneralConfig{
-	Language:          "zh-CN",
-	ShowSystemTray:    false,
-	InfoApiServer:     "http://localhost:9090",
-	AutoCheckUpdate:   true,
-	Width:             960,
-	Height:            480,
-	PlayNextOnFail:    false,
-	UseSystemPlaylist: true,
-	FixedSize:         true,
-	EnableSMC:         true,
-	CustomFonts:       "",
+	Language:            "zh-CN",
+	ShowSystemTray:      false,
+	InfoApiServer:       "http://localhost:9090",
+	AutoCheckUpdate:     true,
+	Width:               960,
+	Height:              480,
+	PlayNextOnFail:      false,
+	UseSystemPlaylist:   true,
+	FixedSize:           true,
+	EnableSMC:           true,
+	CustomFonts:         "",
+	DistributionChannel: "fanfan",
 }
