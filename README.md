@@ -8,16 +8,24 @@ QQ group: 621035845
 
 ## build
 
+
+> outdated, please refer to workflow file
+
 ```
 go build -o AynaLivePlayer.exe -ldflags -H=windowsgui app/gui/main.go
 ```
 
 ## packaging
+
+> outdated, please refer to workflow file
+
 ```
 fyne package --src path_to_gui --exe AynaLivePlayer.exe --appVersion 0.8.4 --icon path_to_icon
 ```
 
 ## Windows build guide
+
+> outdated, please refer to workflow file
 
 1. install golang [link](https://go.dev/doc/install)
 2. install chocolatey [link](https://chocolatey.org/install)
