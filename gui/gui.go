@@ -2,14 +2,12 @@ package gui
 
 import (
 	"AynaLivePlayer/core/events"
-	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/event"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -40,7 +38,7 @@ func Initialize() {
 	}
 	App = app.NewWithID(config.ProgramName)
 	//App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(fmt.Sprintf("%s Ver %s", config.ProgramName, model.Version(config.Version)))
+	MainWindow = App.NewWindow(getAppTitle())
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem(i18n.T("gui.tab.player"),
