@@ -9,5 +9,5 @@ import (
 )
 
 func getAppTitle() string {
-	return fmt.Sprintf("%s Ver %s - 正式版", config.ProgramName, model.Version(config.Version))
+	return fmt.Sprintf("%s Ver %s - 测试版 仅供开发人员测试使用 请勿用于其他用途", config.ProgramName, model.Version(config.Version))
 }
