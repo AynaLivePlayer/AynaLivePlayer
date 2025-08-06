@@ -2,6 +2,7 @@ package gui
 
 import (
 	"AynaLivePlayer/core/events"
+	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
@@ -84,9 +85,9 @@ func registerPlayControllerHandler() {
 		PlayController.Progress.Refresh()
 	}))
 
-	global.EventManager.RegisterA(events.PlayerPropertyIdleActiveUpdate, "gui.player.controller.idle_active", gutil.ThreadSafeHandler(func(event *event.Event) {
-		isIdle := event.Data.(events.PlayerPropertyIdleActiveUpdateEvent).IsIdle
-		if isIdle {
+	global.EventManager.RegisterA(events.PlayerPropertyStateUpdate, "gui.player.controller.idle_active", gutil.ThreadSafeHandler(func(event *event.Event) {
+		state := event.Data.(events.PlayerPropertyStateUpdateEvent).State
+		if state == model.PlayerStateIdle || state == model.PlayerStateLoading {
 			PlayController.Progress.Value = 0
 			PlayController.Progress.Max = 0
 			//PlayController.Title.SetText("Title")
@@ -178,7 +179,6 @@ func registerPlayControllerHandler() {
 					PlayController.Cover.Resource = pic.Resource
 					gutil.RunInFyneThread(PlayController.Cover.Refresh)
 				}
-
 			}()
 		}
 	}))
