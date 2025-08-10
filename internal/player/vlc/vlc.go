@@ -223,10 +223,6 @@ func registerCmdHandler() {
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
 			log.Warn("[VLC PlayControl] get media url failed ", mediaInfo.Meta.ID(), err)
-			global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
-				Media:   evnt.Data.(events.PlayerPlayCmdEvent).Media,
-				Removed: false,
-			})
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
