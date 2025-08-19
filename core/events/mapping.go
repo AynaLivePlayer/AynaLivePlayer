@@ -29,7 +29,7 @@ var EventsMapping = map[event.EventId]any{
 	PlayerPlayingUpdate:                 PlayerPlayingUpdateEvent{},
 	PlayerPropertyPauseUpdate:           PlayerPropertyPauseUpdateEvent{},
 	PlayerPropertyPercentPosUpdate:      PlayerPropertyPercentPosUpdateEvent{},
-	PlayerPropertyIdleActiveUpdate:      PlayerPropertyIdleActiveUpdateEvent{},
+	PlayerPropertyStateUpdate:           PlayerPropertyStateUpdateEvent{},
 	PlayerPropertyTimePosUpdate:         PlayerPropertyTimePosUpdateEvent{},
 	PlayerPropertyDurationUpdate:        PlayerPropertyDurationUpdateEvent{},
 	PlayerPropertyVolumeUpdate:          PlayerPropertyVolumeUpdateEvent{},

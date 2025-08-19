@@ -21,14 +21,15 @@ func Stop() {
 
 func handlePlayNext() {
 	log := global.Logger.WithPrefix("Controller")
-	isIdle := false
+	playerState := model.PlayerStatePlaying
 	global.EventManager.RegisterA(
-		events.PlayerPropertyIdleActiveUpdate,
+		events.PlayerPropertyStateUpdate,
 		"internal.controller.playcontrol.idleplaynext",
 		func(event *event.Event) {
-			data := event.Data.(events.PlayerPropertyIdleActiveUpdateEvent)
-			isIdle = data.IsIdle
-			if data.IsIdle {
+			data := event.Data.(events.PlayerPropertyStateUpdateEvent)
+			log.Debug("[MPV PlayControl] update player to state", playerState, "->", data.State)
+			playerState = data.State
+			if playerState == model.PlayerStateIdle {
 				log.Info("mpv went idle, try play next")
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
 					events.PlayerPlayNextCmdEvent{})
@@ -36,10 +37,23 @@ func handlePlayNext() {
 		})
 
 	global.EventManager.RegisterA(
+		events.PlayerPropertyStateUpdate,
+		"internal.controller.playcontrol.clear_when_idle", func(event *event.Event) {
+			data := event.Data.(events.PlayerPropertyStateUpdateEvent)
+			// if is idle, remove playing media
+			if data.State == model.PlayerStateIdle {
+				global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
+					Media:   model.Media{},
+					Removed: true,
+				})
+			}
+		})
+
+	global.EventManager.RegisterA(
 		events.PlaylistInsertUpdate(model.PlaylistIDPlayer),
 		"internal.controller.playcontrol.playnext_when_insert.player",
 		func(event *event.Event) {
-			if isIdle && config.General.PlayNextOnFail {
+			if playerState == model.PlayerStateIdle {
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
 					events.PlayerPlayNextCmdEvent{})
 			}
@@ -49,7 +63,7 @@ func handlePlayNext() {
 		events.PlaylistInsertUpdate(model.PlaylistIDSystem),
 		"internal.controller.playcontrol.playnext_when_insert.system",
 		func(event *event.Event) {
-			if isIdle && config.General.PlayNextOnFail {
+			if playerState == model.PlayerStateIdle {
 				global.EventManager.CallA(events.PlayerPlayNextCmd,
 					events.PlayerPlayNextCmdEvent{})
 			}
@@ -82,8 +96,9 @@ func handlePlayNext() {
 		events.PlayerPlayErrorUpdate,
 		"internal.controller.playcontrol.playnext_on_error",
 		func(event *event.Event) {
-			if isIdle && config.General.PlayNextOnFail {
+			if config.General.PlayNextOnFail {
 				global.EventManager.CallA(events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
+				return
 			}
 		})
 

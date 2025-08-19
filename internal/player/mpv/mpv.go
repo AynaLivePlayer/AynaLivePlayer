@@ -95,6 +95,7 @@ func StopPlayer() {
 
 var prevPercentPos float64 = 0
 var prevTimePos float64 = 0
+var currentState = model.PlayerStateIdle
 
 var mpvPropertyHandler = map[string]func(value any){
 	"pause": func(value any) {
@@ -123,20 +124,20 @@ var mpvPropertyHandler = map[string]func(value any){
 
 	},
 	"idle-active": func(value any) {
-		var data events.PlayerPropertyIdleActiveUpdateEvent
+		var data events.PlayerPropertyStateUpdateEvent
 		if value == nil {
-			data.IsIdle = true
+			data.State = model.PlayerStateIdle
 		} else {
-			data.IsIdle = value.(bool)
+			if value.(bool) {
+				data.State = model.PlayerStateIdle
+			} else {
+				data.State = model.PlayerStatePlaying
+			}
 		}
-		// if is idle, remove playing media
-		if data.IsIdle {
-			global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
-				Media:   model.Media{},
-				Removed: true,
-			})
-		}
-		global.EventManager.CallA(events.PlayerPropertyIdleActiveUpdate, data)
+		log.Debugf("mpv state update %v + %v = %v", currentState, data.State, currentState.NextState(data.State))
+		currentState = currentState.NextState(data.State)
+		data.State = currentState
+		global.EventManager.CallA(events.PlayerPropertyStateUpdate, data)
 
 	},
 	"time-pos": func(value any) {
@@ -190,15 +191,28 @@ func registerHandler() {
 
 func registerCmdHandler() {
 	global.EventManager.RegisterA(events.PlayerPlayCmd, "player.play", func(evnt *event.Event) {
+		currentState = currentState.NextState(model.PlayerStateLoading)
+		global.EventManager.CallA(
+			events.PlayerPropertyStateUpdate,
+			events.PlayerPropertyStateUpdateEvent{
+				State: currentState,
+			})
 		mediaInfo := evnt.Data.(events.PlayerPlayCmdEvent).Media.Info
+		media := evnt.Data.(events.PlayerPlayCmdEvent).Media
+		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
+			media.Info = m
+		}
+		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
+			Media:   media,
+			Removed: false,
+		})
 		log.Infof("[MPV Player] Play media %s", mediaInfo.Title)
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
 			log.Warn("[MPV PlayControl] get media url failed ", mediaInfo.Meta.ID(), err)
-			global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
-				Media:   evnt.Data.(events.PlayerPlayCmdEvent).Media,
-				Removed: false,
-			})
+			if err := libmpv.Command([]string{"stop"}); err != nil {
+				log.Error("[MPV PlayControl] failed to stop", err)
+			}
 			global.EventManager.CallA(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
@@ -224,14 +238,6 @@ func registerCmdHandler() {
 				return
 			}
 		}
-		media := evnt.Data.(events.PlayerPlayCmdEvent).Media
-		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
-			media.Info = m
-		}
-		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
-			Media:   media,
-			Removed: false,
-		})
 		log.Debugf("mpv command loadfile %s %s", mediaInfo.Title, mediaUrl.Url)
 		cmd := []string{"loadfile", mediaUrl.Url}
 		if cfg.DisplayMusicCover && media.Info.Cover.Url != "" {
@@ -254,6 +260,12 @@ func registerCmdHandler() {
 				})
 			return
 		}
+		currentState = currentState.NextState(model.PlayerStatePlaying)
+		global.EventManager.CallA(
+			events.PlayerPropertyStateUpdate,
+			events.PlayerPropertyStateUpdateEvent{
+				State: currentState,
+			})
 		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
 			TimePos: 0,
 		})

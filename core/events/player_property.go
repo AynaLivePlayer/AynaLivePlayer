@@ -21,10 +21,10 @@ type PlayerPropertyPercentPosUpdateEvent struct {
 	PercentPos float64
 }
 
-const PlayerPropertyIdleActiveUpdate = "update.player.property.idle_active"
+const PlayerPropertyStateUpdate = "update.player.property.state"
 
-type PlayerPropertyIdleActiveUpdateEvent struct {
-	IsIdle bool
+type PlayerPropertyStateUpdateEvent struct {
+	State model.PlayerState
 }
 
 const PlayerPropertyTimePosUpdate = "update.player.property.time_pos"
