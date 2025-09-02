@@ -10,7 +10,7 @@ type LiveRoom struct {
 	LiveRoom liveroom.LiveRoom `json:"live_room"`
 	Config   LiveRoomConfig    `json:"config"`
 	Title    string            `json:"title"`
-	Status   bool              `json:"-"`
+	Status   bool              `json:"status"`
 }
 
 func (r *LiveRoom) DisplayName() string {
