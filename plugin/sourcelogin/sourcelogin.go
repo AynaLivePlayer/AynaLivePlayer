@@ -124,7 +124,7 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 		func() {
 			err := loginables[providerChoice.Selected].(miaosic.Loginable).Logout()
 			if err != nil {
-				global.EventManager.CallA(events.ErrorUpdate,
+				_ = global.EventBus.Publish(events.ErrorUpdate,
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}
@@ -152,14 +152,14 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 			provider := pvdr.(miaosic.Loginable)
 			currentLoginSession, err = provider.QrLogin()
 			if err != nil {
-				global.EventManager.CallA(events.ErrorUpdate,
+				_ = global.EventBus.Publish(events.ErrorUpdate,
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}
 			w.log.Debugf("trying encode url %s to qrcode", currentLoginSession.Url)
 			data, err := qrcode.Encode(currentLoginSession.Url, qrcode.Medium, 256)
 			if err != nil {
-				global.EventManager.CallA(events.ErrorUpdate,
+				_ = global.EventBus.Publish(events.ErrorUpdate,
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}
@@ -184,7 +184,7 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 			w.log.Info("checking qr status")
 			result, err := provider.QrLoginVerify(currentLoginSession)
 			if err != nil {
-				global.EventManager.CallA(events.ErrorUpdate,
+				_ = global.EventBus.Publish(events.ErrorUpdate,
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}

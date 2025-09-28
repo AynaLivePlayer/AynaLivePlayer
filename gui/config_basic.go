@@ -7,7 +7,7 @@ import (
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -38,14 +38,14 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 				mode = model.PlaylistModeRandom
 			}
 			logger.Infof("Set player playlist mode to %d", mode)
-			global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer),
+			_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer),
 				events.PlaylistModeChangeCmdEvent{
 					Mode: mode,
 				})
 		})
-	global.EventManager.RegisterA(events.PlaylistModeChangeUpdate(model.PlaylistIDPlayer),
+	global.EventBus.Subscribe("", events.PlaylistModeChangeUpdate(model.PlaylistIDPlayer),
 		"gui.config.basic.random_playlist.player",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
 			playerRandomCheck.SetChecked(data.Mode == model.PlaylistModeRandom)
 		}))
@@ -56,15 +56,15 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			if b {
 				mode = model.PlaylistModeRandom
 			}
-			global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDSystem),
+			_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDSystem),
 				events.PlaylistModeChangeCmdEvent{
 					Mode: mode,
 				})
 		})
 
-	global.EventManager.RegisterA(events.PlaylistModeChangeUpdate(model.PlaylistIDSystem),
+	global.EventBus.Subscribe("", events.PlaylistModeChangeUpdate(model.PlaylistIDSystem),
 		"gui.config.basic.random_playlist.system",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
 			systemRandomCheck.SetChecked(data.Mode == model.PlaylistModeRandom)
 		}))
@@ -80,14 +80,14 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 		if !ok {
 			return
 		}
-		global.EventManager.CallA(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
+		_ = global.EventBus.Publish(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
 			Device: name,
 		})
 	})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerAudioDeviceUpdate,
 		"gui.config.basic.audio_device.update",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerAudioDeviceUpdateEvent)
 			devices := make([]string, len(data.Devices))
 			deviceDesc2Name = make(map[string]string)
@@ -123,7 +123,7 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			config.General.AutoCheckUpdate),
 	)
 	checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
-		global.EventManager.CallA(events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
+		_ = global.EventBus.Publish(events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
 	})
 	useSysPlaylistBtn := container.NewHBox(
 		widget.NewLabel(i18n.T("gui.config.basic.use_system_playlist")),

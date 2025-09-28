@@ -7,7 +7,7 @@ import (
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
@@ -175,9 +175,9 @@ func (w *WsHub) registerEvents() {
 	for eid, _ := range events.EventsMapping {
 		eventCache = append(eventCache, &EventData{})
 		currentIdx := i
-		global.EventManager.RegisterA(eid,
+		global.EventBus.Subscribe("", eid,
 			"plugin.wshub.event."+string(eid),
-			func(e *event.Event) {
+			func(e *eventbus.Event) {
 				ed := EventData{
 					EventID: e.Id,
 					Data:    e.Data,

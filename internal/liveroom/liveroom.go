@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"errors"
 	liveroomsdk "github.com/AynaLivePlayer/liveroom-sdk"
@@ -53,7 +53,7 @@ func addLiveRoom(roomModel model.LiveRoom) {
 	// handle failed to create liveroom
 	if err != nil {
 		log.Errorf("Create live room failed: %s", err)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.ErrorUpdate, events.ErrorUpdateEvent{
 				Error: err,
 			})
@@ -61,7 +61,7 @@ func addLiveRoom(roomModel model.LiveRoom) {
 	}
 	if _, ok := liveRooms[room.Config().Identifier()]; ok {
 		log.Errorf("fail to add, room %s already exists", room.Config().Identifier())
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.ErrorUpdate, events.ErrorUpdateEvent{
 				Error: errors.New("room already exists"),
 			})
@@ -69,7 +69,7 @@ func addLiveRoom(roomModel model.LiveRoom) {
 	}
 	if err != nil {
 		log.Errorf("Create live room failed: %s", err)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.ErrorUpdate, events.ErrorUpdateEvent{
 				Error: err,
 			})
@@ -88,7 +88,7 @@ func addLiveRoom(roomModel model.LiveRoom) {
 	})
 	room.OnMessage(func(message *liveroomsdk.Message) {
 		log.Debugf("room %s receive message: %s", room.Config().Identifier(), message.Message)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.LiveRoomMessageReceive,
 			events.LiveRoomMessageReceiveEvent{
 				Message: message,
@@ -100,8 +100,8 @@ func addLiveRoom(roomModel model.LiveRoom) {
 }
 
 func registerHandlers() {
-	global.EventManager.RegisterA(
-		events.LiveRoomAddCmd, "internal.liveroom.add", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.LiveRoomAddCmd, "internal.liveroom.add", func(event *eventbus.Event) {
 			data := event.Data.(events.LiveRoomAddCmdEvent)
 			addLiveRoom(model.LiveRoom{
 				LiveRoom: liveroomsdk.LiveRoom{
@@ -116,8 +116,8 @@ func registerHandlers() {
 			})
 		})
 
-	global.EventManager.RegisterA(
-		events.LiveRoomRemoveCmd, "internal.liveroom.remove", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.LiveRoomRemoveCmd, "internal.liveroom.remove", func(event *eventbus.Event) {
 			data := event.Data.(events.LiveRoomRemoveCmdEvent)
 			room, ok := liveRooms[data.Identifier]
 			if !ok {
@@ -133,8 +133,8 @@ func registerHandlers() {
 			sendRoomsUpdateEvent()
 		})
 
-	global.EventManager.RegisterA(
-		events.LiveRoomConfigChangeCmd, "internal.liveroom.config.change", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.LiveRoomConfigChangeCmd, "internal.liveroom.config.change", func(event *eventbus.Event) {
 			data := event.Data.(events.LiveRoomConfigChangeCmdEvent)
 			if room, ok := liveRooms[data.Identifier]; ok {
 				room.model.Config = data.Config
@@ -142,8 +142,8 @@ func registerHandlers() {
 			}
 		})
 
-	global.EventManager.RegisterA(
-		events.LiveRoomOperationCmd, "internal.liveroom.operation", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.LiveRoomOperationCmd, "internal.liveroom.operation", func(event *eventbus.Event) {
 			data := event.Data.(events.LiveRoomOperationCmdEvent)
 			log.Infof("Live room operation SetConnect %v", data.SetConnect)
 			room, ok := liveRooms[data.Identifier]
@@ -159,12 +159,12 @@ func registerHandlers() {
 			}
 			if err != nil {
 				log.Errorf("Room %s operation failed: %s", data.Identifier, err)
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate, events.ErrorUpdateEvent{
 						Error: err,
 					})
 			}
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.LiveRoomOperationFinish, events.LiveRoomOperationFinishEvent{})
 			sendRoomStatusUpdateEvent(data.Identifier)
 		})
@@ -177,7 +177,7 @@ func sendRoomStatusUpdateEvent(roomId string) {
 		return
 	}
 	log.Infof("send room status update event, room %s", roomId)
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.LiveRoomStatusUpdate,
 		events.LiveRoomStatusUpdateEvent{
 			Room: room.model,
@@ -189,7 +189,7 @@ func sendRoomsUpdateEvent() {
 	for _, r := range liveRooms {
 		rooms = append(rooms, r.model)
 	}
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.LiveRoomRoomsUpdate,
 		events.LiveRoomRoomsUpdateEvent{
 			Rooms: rooms,
@@ -209,7 +209,7 @@ func callEvents() {
 	for _, roomCfg := range cfg.liveRooms {
 		addLiveRoom(roomCfg)
 	}
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.LiveRoomProviderUpdate,
 		events.LiveRoomProviderUpdateEvent{
 			Providers: providerInfo,
@@ -217,7 +217,7 @@ func callEvents() {
 	sendRoomsUpdateEvent()
 	for _, r := range liveRooms {
 		if r.model.Config.AutoConnect {
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.LiveRoomOperationCmd,
 				events.LiveRoomOperationCmdEvent{
 					Identifier: r.room.Config().Identifier(),

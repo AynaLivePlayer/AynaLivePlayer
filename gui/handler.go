@@ -3,11 +3,11 @@ package gui
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 )
 
 func registerHandlers() {
-	global.EventManager.RegisterA(events.GUISetPlayerWindowOpenCmd, "gui.player.videoplayer.handleopen", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.GUISetPlayerWindowOpenCmd, "gui.player.videoplayer.handleopen", func(event *eventbus.Event) {
 		data := event.Data.(events.GUISetPlayerWindowOpenCmdEvent)
 		if data.SetOpen {
 			playerWindow.Close()

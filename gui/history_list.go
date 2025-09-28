@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -50,12 +50,12 @@ func createHistoryList() fyne.CanvasObject {
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			m.User = model.SystemUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				global.EventManager.CallA(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
+				_ = global.EventBus.Publish(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
 					Media: m,
 				})
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				global.EventManager.CallA(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
+				_ = global.EventBus.Publish(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
 					Media:    m,
 					Position: -1,
 				})
@@ -75,9 +75,9 @@ func createHistoryList() fyne.CanvasObject {
 }
 
 func registerHistoryHandler() {
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistDetailUpdate(model.PlaylistIDHistory),
-		"gui.history.update", gutil.ThreadSafeHandler(func(event *event.Event) {
+		"gui.history.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			History.mux.Lock()
 			History.Medias = event.Data.(events.PlaylistDetailUpdateEvent).Medias
 			History.List.Refresh()

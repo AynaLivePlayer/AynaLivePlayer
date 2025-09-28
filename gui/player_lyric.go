@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -42,9 +42,8 @@ func createLyricWindow() fyne.Window {
 	w.CenterOnScreen()
 
 	// register handlers
-	// todo: lyric not update correctly, known bug https://github.com/fyne-io/fyne/pull/5783
-	global.EventManager.RegisterA(
-		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			e := event.Data.(events.PlayerLyricPosUpdateEvent)
 			logger.Debug("lyric update", e)
 			if prevIndex >= len(fullLrc.Objects) || e.CurrentIndex >= len(fullLrc.Objects) {
@@ -70,17 +69,16 @@ func createLyricWindow() fyne.Window {
 			fullLrc.Refresh()
 		}))
 
-	global.EventManager.RegisterA(events.PlayerLyricReload, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerLyricReload, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		e := event.Data.(events.PlayerLyricReloadEvent)
 		fullLrc.Objects = createLyricObj(&e.Lyrics)
 		lrcWindow.Refresh()
 	}))
 
-	global.EventManager.CallA(events.PlayerLyricRequestCmd, events.PlayerLyricRequestCmdEvent{})
+	_ = global.EventBus.Publish(events.PlayerLyricRequestCmd, events.PlayerLyricRequestCmdEvent{})
 
 	w.SetOnClosed(func() {
-		global.EventManager.Unregister("player.lyric.current_lyric")
-		global.EventManager.Unregister("player.lyric.new_media")
+		global.EventBus.Unsubscribe(events.PlayerLyricReload, "player.lyric.current_lyric")
 		PlayController.LrcWindowOpen = false
 	})
 	return w

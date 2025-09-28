@@ -2,13 +2,12 @@ package events
 
 import (
 	"AynaLivePlayer/core/model"
-	"AynaLivePlayer/pkg/event"
 	"encoding/json"
 	"errors"
 	"reflect"
 )
 
-var EventsMapping = map[event.EventId]any{
+var EventsMapping = map[string]any{
 	LiveRoomAddCmd:                      LiveRoomAddCmdEvent{},
 	LiveRoomProviderUpdate:              LiveRoomProviderUpdateEvent{},
 	LiveRoomRemoveCmd:                   LiveRoomRemoveCmdEvent{},
@@ -65,7 +64,7 @@ func init() {
 	}
 }
 
-func UnmarshalEventData(eventId event.EventId, data []byte) (any, error) {
+func UnmarshalEventData(eventId string, data []byte) (any, error) {
 	val, ok := EventsMapping[eventId]
 	if !ok {
 		return nil, errors.New("event id not found")

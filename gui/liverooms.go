@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/gui/xfyne"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -80,7 +80,7 @@ func createRoomSelector() fyne.CanvasObject {
 			func(b bool) {
 				if b && len(clientNameEntry.Selected) > 0 && len(idEntry.Text) > 0 {
 					logger.Infof("Add room %s %s", clientNameEntry.Selected, idEntry.Text)
-					global.EventManager.CallA(
+					_ = global.EventBus.Publish(
 						events.LiveRoomAddCmd,
 						events.LiveRoomAddCmdEvent{
 							Title:    nameEntry.Text,
@@ -98,7 +98,7 @@ func createRoomSelector() fyne.CanvasObject {
 		if len(RoomTab.rooms) == 0 {
 			return
 		}
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.LiveRoomRemoveCmd,
 			events.LiveRoomRemoveCmdEvent{
 				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
@@ -133,17 +133,17 @@ func createRoomSelector() fyne.CanvasObject {
 }
 
 func registerRoomHandlers() {
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomProviderUpdate,
 		"gui.liveroom.provider_update",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			RoomTab.providers = event.Data.(events.LiveRoomProviderUpdateEvent).Providers
 			RoomTab.Rooms.Refresh()
 		}))
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomRoomsUpdate,
 		"gui.liveroom.rooms_update",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			logger.Infof("Update rooms")
 			data := event.Data.(events.LiveRoomRoomsUpdateEvent)
 			RoomTab.lock.Lock()
@@ -152,10 +152,10 @@ func registerRoomHandlers() {
 			RoomTab.Rooms.Refresh()
 			RoomTab.lock.Unlock()
 		}))
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomStatusUpdate,
 		"gui.liveroom.room_status_update",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			room := event.Data.(events.LiveRoomStatusUpdateEvent).Room
 			index := -1
 			for i := 0; i < len(RoomTab.rooms); i++ {
@@ -194,7 +194,7 @@ func createRoomController() fyne.CanvasObject {
 		}
 		RoomTab.ConnectBtn.Disable()
 		logger.Infof("Connect to room %s", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier())
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.LiveRoomOperationCmd,
 			events.LiveRoomOperationCmdEvent{
 				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
@@ -207,17 +207,17 @@ func createRoomController() fyne.CanvasObject {
 		}
 		RoomTab.DisConnectBtn.Disable()
 		logger.Infof("Disconnect from room %s", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier())
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.LiveRoomOperationCmd,
 			events.LiveRoomOperationCmdEvent{
 				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),
 				SetConnect: false,
 			})
 	})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomOperationFinish,
 		"gui.liveroom.operation_finish",
-		gutil.ThreadSafeHandler(func(event *event.Event) {
+		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			RoomTab.ConnectBtn.Enable()
 			RoomTab.DisConnectBtn.Enable()
 		}))
@@ -229,7 +229,7 @@ func createRoomController() fyne.CanvasObject {
 			return
 		}
 		logger.Infof("Change room %s autoconnect to %v", RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(), b)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.LiveRoomConfigChangeCmd,
 			events.LiveRoomConfigChangeCmdEvent{
 				Identifier: RoomTab.rooms[RoomTab.Index].LiveRoom.Identifier(),

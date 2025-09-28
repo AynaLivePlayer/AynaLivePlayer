@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -35,14 +35,14 @@ func createSearchBar() fyne.CanvasObject {
 		SearchResult.Items = make([]model.Media, 0)
 		SearchResult.List.Refresh()
 		SearchResult.mux.Unlock()
-		global.EventManager.CallA(events.SearchCmd, events.SearchCmdEvent{
+		_ = global.EventBus.Publish(events.SearchCmd, events.SearchCmdEvent{
 			Keyword:  keyword,
 			Provider: pr,
 		})
 	})
 
-	global.EventManager.RegisterA(events.MediaProviderUpdate,
-		"gui.search.provider.update", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("", events.MediaProviderUpdate,
+		"gui.search.provider.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))
 			copy(s, providers.Providers)

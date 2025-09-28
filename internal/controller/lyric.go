@@ -3,7 +3,7 @@ package controller
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"github.com/AynaLivePlayer/miaosic"
 )
 
@@ -17,7 +17,7 @@ var lyricManager = &lyricLoader{}
 
 func createLyricLoader() {
 	log := global.Logger.WithPrefix("LyricLoader")
-	global.EventManager.RegisterA(events.PlayerPlayingUpdate, "internal.lyric.update", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPlayingUpdate, "internal.lyric.update", func(event *eventbus.Event) {
 		data := event.Data.(events.PlayerPlayingUpdateEvent)
 		if data.Removed {
 			log.Debugf("current media removed, clear lyric")
@@ -32,18 +32,18 @@ func createLyricLoader() {
 			lyricManager.Lyric = miaosic.ParseLyrics("", "")
 			log.Errorf("failed to get lyric for %s (%s): %s", data.Media.Info.Title, data.Media.Info.Meta.ID(), err)
 		}
-		global.EventManager.CallA(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
+		_ = global.EventBus.Publish(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
 			Lyrics: lyricManager.Lyric,
 		})
 	})
-	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "internal.lyric.update_current", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPropertyTimePosUpdate, "internal.lyric.update_current", func(event *eventbus.Event) {
 		time := event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos
 		idx := lyricManager.Lyric.FindIndex(time)
 		if idx == lyricManager.prevIndex {
 			return
 		}
 		lyricManager.prevIndex = idx
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlayerLyricPosUpdate,
 			events.PlayerLyricPosUpdateEvent{
 				CurrentIndex: idx,
@@ -53,8 +53,8 @@ func createLyricLoader() {
 			})
 		return
 	})
-	global.EventManager.RegisterA(events.PlayerLyricRequestCmd, "internal.lyric.request", func(event *event.Event) {
-		global.EventManager.CallA(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
+	global.EventBus.Subscribe("", events.PlayerLyricRequestCmd, "internal.lyric.request", func(event *eventbus.Event) {
+		_ = global.EventBus.Publish(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
 			Lyrics: lyricManager.Lyric,
 		})
 	})

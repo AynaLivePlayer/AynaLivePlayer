@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"github.com/go-ole/go-ole"
 	"github.com/saltosystems/winrt-go"
@@ -84,7 +84,7 @@ func InitSystemMediaControl() {
 		_ = updater.SetType(media.MediaPlaybackTypeMusic)
 	})
 
-	global.EventManager.RegisterA(events.PlayerPlayingUpdate, "sysmediacontrol.update_playing", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPlayingUpdate, "sysmediacontrol.update_playing", func(event *eventbus.Event) {
 		data := event.Data.(events.PlayerPlayingUpdateEvent)
 		withMusicProperties(func(updater *media.SystemMediaTransportControlsDisplayUpdater, properties *media.MusicDisplayProperties) {
 			properties.SetArtist(data.Media.Info.Artist)
@@ -106,7 +106,7 @@ func InitSystemMediaControl() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerPropertyPauseUpdate, "sysmediacontrol.update_paused", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPropertyPauseUpdate, "sysmediacontrol.update_paused", func(event *eventbus.Event) {
 		if event.Data.(events.PlayerPropertyPauseUpdateEvent).Paused {
 			smtc.SetPlaybackStatus(media.MediaPlaybackStatusPaused)
 		} else {
@@ -121,16 +121,16 @@ func InitSystemMediaControl() {
 			defer eventArgs.Release()
 			switch val, _ := eventArgs.GetButton(); val {
 			case media.SystemMediaTransportControlsButtonPlay:
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.PlayerSetPauseCmd, events.PlayerSetPauseCmdEvent{Pause: false})
 			case media.SystemMediaTransportControlsButtonPause:
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.PlayerSetPauseCmd, events.PlayerSetPauseCmdEvent{Pause: true})
 			case media.SystemMediaTransportControlsButtonNext:
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
 			case media.SystemMediaTransportControlsButtonPrevious:
-				global.EventManager.CallA(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+				_ = global.EventBus.Publish(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
 					Position: 0,
 					Absolute: true,
 				})
@@ -146,7 +146,7 @@ func InitSystemMediaControl() {
 	lastDuration := int64(0)
 	lastTimePos := int64(0)
 	timelineProps, _ = media.NewSystemMediaTransportControlsTimelineProperties()
-	global.EventManager.RegisterA(events.PlayerPropertyDurationUpdate, "sysmediacontrol.properties.duration", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPropertyDurationUpdate, "sysmediacontrol.properties.duration", func(event *eventbus.Event) {
 		data := event.Data.(events.PlayerPropertyDurationUpdateEvent)
 		lastDuration = int64(data.Duration * 1000)
 		_ = timelineProps.SetStartTime(foundation.TimeSpan{Duration: 0})
@@ -156,7 +156,7 @@ func InitSystemMediaControl() {
 		_ = timelineProps.SetPosition(foundation.TimeSpan{Duration: lastTimePos * TicksPerMillisecond})
 		_ = smtc.UpdateTimelineProperties(timelineProps)
 	})
-	global.EventManager.RegisterA(events.PlayerPropertyTimePosUpdate, "sysmediacontrol.properties.time_pos", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPropertyTimePosUpdate, "sysmediacontrol.properties.time_pos", func(event *eventbus.Event) {
 		data := event.Data.(events.PlayerPropertyTimePosUpdateEvent)
 		lastTimePos = int64(data.TimePos * 1000)
 		_ = timelineProps.SetStartTime(foundation.TimeSpan{Duration: 0})

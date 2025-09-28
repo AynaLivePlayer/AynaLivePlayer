@@ -2,19 +2,18 @@ package events
 
 import (
 	"AynaLivePlayer/core/model"
-	"AynaLivePlayer/pkg/event"
 )
 
-func PlaylistDetailUpdate(id model.PlaylistID) event.EventId {
-	return event.EventId("update.playlist.detail." + id)
+func PlaylistDetailUpdate(id model.PlaylistID) string {
+	return string("update.playlist.detail." + id)
 }
 
 type PlaylistDetailUpdateEvent struct {
 	Medias []model.Media
 }
 
-func PlaylistMoveCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.move." + id)
+func PlaylistMoveCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.move." + id)
 }
 
 type PlaylistMoveCmdEvent struct {
@@ -22,24 +21,24 @@ type PlaylistMoveCmdEvent struct {
 	To   int
 }
 
-func PlaylistSetIndexCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.setindex." + id)
+func PlaylistSetIndexCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.setindex." + id)
 }
 
 type PlaylistSetIndexCmdEvent struct {
 	Index int
 }
 
-func PlaylistDeleteCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.delete." + id)
+func PlaylistDeleteCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.delete." + id)
 }
 
 type PlaylistDeleteCmdEvent struct {
 	Index int
 }
 
-func PlaylistInsertCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.insert." + id)
+func PlaylistInsertCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.insert." + id)
 }
 
 type PlaylistInsertCmdEvent struct {
@@ -47,8 +46,8 @@ type PlaylistInsertCmdEvent struct {
 	Media    model.Media
 }
 
-func PlaylistInsertUpdate(id model.PlaylistID) event.EventId {
-	return event.EventId("update.playlist.insert." + id)
+func PlaylistInsertUpdate(id model.PlaylistID) string {
+	return string("update.playlist.insert." + id)
 }
 
 type PlaylistInsertUpdateEvent struct {
@@ -56,32 +55,32 @@ type PlaylistInsertUpdateEvent struct {
 	Media    model.Media
 }
 
-func PlaylistNextCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.next." + id)
+func PlaylistNextCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.next." + id)
 }
 
 type PlaylistNextCmdEvent struct {
 	Remove bool // remove the media after next
 }
 
-func PlaylistNextUpdate(id model.PlaylistID) event.EventId {
-	return event.EventId("update.playlist.next." + id)
+func PlaylistNextUpdate(id model.PlaylistID) string {
+	return string("update.playlist.next." + id)
 }
 
 type PlaylistNextUpdateEvent struct {
 	Media model.Media
 }
 
-func PlaylistModeChangeCmd(id model.PlaylistID) event.EventId {
-	return event.EventId("cmd.playlist.mode." + id)
+func PlaylistModeChangeCmd(id model.PlaylistID) string {
+	return string("cmd.playlist.mode." + id)
 }
 
 type PlaylistModeChangeCmdEvent struct {
 	Mode model.PlaylistMode
 }
 
-func PlaylistModeChangeUpdate(id model.PlaylistID) event.EventId {
-	return event.EventId("update.playlist.mode." + id)
+func PlaylistModeChangeUpdate(id model.PlaylistID) string {
+	return string("update.playlist.mode." + id)
 }
 
 type PlaylistModeChangeUpdateEvent struct {

@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
@@ -22,7 +22,7 @@ func Initialize() {
 			if !hasUpdate {
 				return
 			}
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.CheckUpdateResultUpdate,
 				events.CheckUpdateResultUpdateEvent{
 					HasUpdate: hasUpdate,
@@ -30,11 +30,11 @@ func Initialize() {
 				})
 		}()
 	}
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.CheckUpdateCmd, "internal.updater.handle",
-		func(evt *event.Event) {
+		func(evt *eventbus.Event) {
 			info, hasUpdate := CheckUpdate()
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.CheckUpdateResultUpdate,
 				events.CheckUpdateResultUpdateEvent{
 					HasUpdate: hasUpdate,

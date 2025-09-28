@@ -38,7 +38,7 @@ func Initialize() {
 	kugou.UseInstrumental()
 	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
 
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.MediaProviderUpdate, events.MediaProviderUpdateEvent{
 			Providers: miaosic.ListAvailableProviders(),
 		})

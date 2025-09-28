@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/internal"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	loggerRepo "AynaLivePlayer/pkg/logger/repository"
@@ -39,7 +39,8 @@ var Log = &_LogConfig{
 }
 
 func setupGlobal() {
-	global.EventManager = event.NewManger(128, 16)
+	//global.EventManager = event.NewManger(128, 16)
+	global.EventBus = eventbus.New()
 	global.Logger = loggerRepo.NewZapColoredLogger(Log.Path, !*dev)
 	global.Logger.SetLogLevel(Log.Level)
 }
@@ -57,7 +58,8 @@ func main() {
 		// temporary fix for gui not render correctly.
 		// wait until gui rendered then start event dispatching
 		time.Sleep(1 * time.Second)
-		global.EventManager.Start()
+		//global.EventManager.Start()
+		_ = global.EventBus.Start()
 	}()
 	if *headless || config.Experimental.Headless {
 		quit := make(chan os.Signal)
@@ -70,7 +72,8 @@ func main() {
 	global.Logger.Info("closing internal server")
 	internal.Stop()
 	global.Logger.Infof("closing event manager")
-	global.EventManager.Stop()
+	//global.EventManager.Stop()
+	_ = global.EventBus.Stop()
 	if *dev {
 		global.Logger.Infof("saving translation")
 		i18n.SaveTranslation()
