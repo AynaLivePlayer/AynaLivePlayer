@@ -1,6 +1,7 @@
 package eventbus
 
 type Event struct {
+	// Id is the event id
 	Id string
 	// Channel if channel is empty, then event is broadcast
 	Channel string
@@ -33,7 +34,7 @@ type Subscriber interface {
 type Publisher interface {
 	// Publish basically a wrapper to PublishEvent
 	Publish(eventId string, data interface{}) error
-	// PublishEvent publish a event
+	// PublishEvent publish an event
 	PublishEvent(event *Event) error
 }
 

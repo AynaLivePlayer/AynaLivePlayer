@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -28,12 +28,12 @@ func (b *playlistOperationButton) Tapped(e *fyne.PointEvent) {
 func newPlaylistOperationButton() *playlistOperationButton {
 	b := &playlistOperationButton{Index: 0}
 	deleteItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.delete"), func() {
-		global.EventManager.CallA(events.PlaylistDeleteCmd(model.PlaylistIDPlayer), events.PlaylistDeleteCmdEvent{
+		_ = global.EventBus.Publish(events.PlaylistDeleteCmd(model.PlaylistIDPlayer), events.PlaylistDeleteCmdEvent{
 			Index: b.Index,
 		})
 	})
 	topItem := fyne.NewMenuItem(i18n.T("gui.player.playlist.op.top"), func() {
-		global.EventManager.CallA(events.PlaylistMoveCmd(model.PlaylistIDPlayer), events.PlaylistMoveCmdEvent{
+		_ = global.EventBus.Publish(events.PlaylistMoveCmd(model.PlaylistIDPlayer), events.PlaylistMoveCmdEvent{
 			From: b.Index,
 			To:   0,
 		})
@@ -75,7 +75,7 @@ func createPlaylist() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			object.(*fyne.Container).Objects[2].(*playlistOperationButton).Index = id
 		})
-	global.EventManager.RegisterA(events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "gui.player.playlist.update", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "gui.player.playlist.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		UserPlaylist.mux.Lock()
 		UserPlaylist.Medias = event.Data.(events.PlaylistDetailUpdateEvent).Medias
 		UserPlaylist.List.Refresh()

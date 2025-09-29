@@ -4,15 +4,15 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
 func checkUpdate() {
-	global.EventManager.RegisterA(
-		events.CheckUpdateResultUpdate, "gui.updater.check_update", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.CheckUpdateResultUpdate, "gui.updater.check_update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.CheckUpdateResultUpdateEvent)
 			msg := data.Info.Version.String() + "\n\n\n" + data.Info.Info
 			if data.HasUpdate {

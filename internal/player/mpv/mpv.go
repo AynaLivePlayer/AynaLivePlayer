@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"AynaLivePlayer/pkg/util"
 	"fmt"
@@ -102,7 +102,7 @@ var mpvPropertyHandler = map[string]func(value any){
 		var data events.PlayerPropertyPauseUpdateEvent
 		log.Debugf("pause property update %v %T", value, value)
 		data.Paused = value.(bool)
-		global.EventManager.CallA(events.PlayerPropertyPauseUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyPauseUpdate, data)
 	},
 	"percent-pos": func(value any) {
 		var data events.PlayerPropertyPercentPosUpdateEvent
@@ -120,7 +120,7 @@ var mpvPropertyHandler = map[string]func(value any){
 			return
 		}
 		prevPercentPos = data.PercentPos
-		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyPercentPosUpdate, data)
 
 	},
 	"idle-active": func(value any) {
@@ -137,7 +137,7 @@ var mpvPropertyHandler = map[string]func(value any){
 		log.Debugf("mpv state update %v + %v = %v", currentState, data.State, currentState.NextState(data.State))
 		currentState = currentState.NextState(data.State)
 		data.State = currentState
-		global.EventManager.CallA(events.PlayerPropertyStateUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyStateUpdate, data)
 
 	},
 	"time-pos": func(value any) {
@@ -156,7 +156,7 @@ var mpvPropertyHandler = map[string]func(value any){
 			return
 		}
 		prevTimePos = data.TimePos
-		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyTimePosUpdate, data)
 	},
 	"duration": func(value any) {
 		var data events.PlayerPropertyDurationUpdateEvent
@@ -165,7 +165,7 @@ var mpvPropertyHandler = map[string]func(value any){
 		} else {
 			data.Duration = value.(float64)
 		}
-		global.EventManager.CallA(events.PlayerPropertyDurationUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyDurationUpdate, data)
 	},
 	"volume": func(value any) {
 		var data events.PlayerPropertyVolumeUpdateEvent
@@ -174,7 +174,7 @@ var mpvPropertyHandler = map[string]func(value any){
 		} else {
 			data.Volume = value.(float64)
 		}
-		global.EventManager.CallA(events.PlayerPropertyVolumeUpdate, data)
+		_ = global.EventBus.Publish(events.PlayerPropertyVolumeUpdate, data)
 	},
 }
 
@@ -190,9 +190,9 @@ func registerHandler() {
 }
 
 func registerCmdHandler() {
-	global.EventManager.RegisterA(events.PlayerPlayCmd, "player.play", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPlayCmd, "player.play", func(evnt *eventbus.Event) {
 		currentState = currentState.NextState(model.PlayerStateLoading)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlayerPropertyStateUpdate,
 			events.PlayerPropertyStateUpdateEvent{
 				State: currentState,
@@ -202,7 +202,7 @@ func registerCmdHandler() {
 		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
 			media.Info = m
 		}
-		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
 			Media:   media,
 			Removed: false,
 		})
@@ -213,7 +213,7 @@ func registerCmdHandler() {
 			if err := libmpv.Command([]string{"stop"}); err != nil {
 				log.Error("[MPV PlayControl] failed to stop", err)
 			}
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
 					Error: err,
@@ -253,7 +253,7 @@ func registerCmdHandler() {
 		log.Debug("[MPV PlayControl] mpv command", cmd)
 		if err := libmpv.Command(cmd); err != nil {
 			log.Error("[MPV PlayControl] mpv load media failed", cmd, mediaInfo, err)
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
 					Error: err,
@@ -261,19 +261,19 @@ func registerCmdHandler() {
 			return
 		}
 		currentState = currentState.NextState(model.PlayerStatePlaying)
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlayerPropertyStateUpdate,
 			events.PlayerPropertyStateUpdateEvent{
 				State: currentState,
 			})
-		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
 			TimePos: 0,
 		})
-		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
 			PercentPos: 0,
 		})
 	})
-	global.EventManager.RegisterA(events.PlayerToggleCmd, "player.toggle", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerToggleCmd, "player.toggle", func(evnt *eventbus.Event) {
 		property, err := libmpv.GetProperty("pause", mpv.FORMAT_FLAG)
 		if err != nil {
 			log.Warn("[MPV PlayControl] get property pause failed", err)
@@ -284,14 +284,14 @@ func registerCmdHandler() {
 			log.Warn("[MPV PlayControl] toggle pause failed", err)
 		}
 	})
-	global.EventManager.RegisterA(events.PlayerSetPauseCmd, "player.set_paused", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSetPauseCmd, "player.set_paused", func(evnt *eventbus.Event) {
 		data := evnt.Data.(events.PlayerSetPauseCmdEvent)
 		err := libmpv.SetProperty("pause", mpv.FORMAT_FLAG, data.Pause)
 		if err != nil {
 			log.Warn("[MPV PlayControl] set pause failed", err)
 		}
 	})
-	global.EventManager.RegisterA(events.PlayerSeekCmd, "player.seek", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSeekCmd, "player.seek", func(evnt *eventbus.Event) {
 		data := evnt.Data.(events.PlayerSeekCmdEvent)
 		log.Debugf("seek to %f (absolute=%t)", data.Position, data.Absolute)
 		var err error
@@ -304,7 +304,7 @@ func registerCmdHandler() {
 			log.Warn("seek failed", err)
 		}
 	})
-	global.EventManager.RegisterA(events.PlayerVolumeChangeCmd, "player.volume", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerVolumeChangeCmd, "player.volume", func(evnt *eventbus.Event) {
 		data := evnt.Data.(events.PlayerVolumeChangeCmdEvent)
 		err := libmpv.SetProperty("volume", mpv.FORMAT_DOUBLE, data.Volume)
 		if err != nil {
@@ -312,7 +312,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *eventbus.Event) {
 		handle := evnt.Data.(events.PlayerVideoPlayerSetWindowHandleCmdEvent).Handle
 		err := SetWindowHandle(handle)
 		if err != nil {
@@ -320,11 +320,11 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *eventbus.Event) {
 		device := evnt.Data.(events.PlayerSetAudioDeviceCmdEvent).Device
 		err := libmpv.SetPropertyString("audio-device", device)
 		if err != nil {
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.ErrorUpdate,
 				events.ErrorUpdateEvent{
 					Error: err,
@@ -359,7 +359,7 @@ func updateAudioDeviceList() {
 		return true
 	})
 	log.Infof("update audio device list %v, current %s", dl, ad)
-	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+	_ = global.EventBus.Publish(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
 		Current: ad,
 		Devices: dl,
 	})

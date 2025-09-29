@@ -30,7 +30,7 @@ var sourceCfg = &_sourceConfig{
 func Initialize() {
 	config.LoadConfig(sourceCfg)
 	miaosic.RegisterProvider(&dummySource{})
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.MediaProviderUpdate, events.MediaProviderUpdateEvent{
 			Providers: miaosic.ListAvailableProviders(),
 		})

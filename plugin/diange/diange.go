@@ -8,7 +8,7 @@ import (
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
@@ -131,14 +131,14 @@ func (d *Diange) Enable() error {
 	config.LoadConfig(d)
 	gui.AddConfigLayout(d)
 	gui.AddConfigLayout(&blacklist{})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.diange.message",
 		d.handleMessage)
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistDetailUpdate(model.PlaylistIDPlayer),
 		"plugin.diange.queue.update",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			d.currentQueueLength = len(event.Data.(events.PlaylistDetailUpdateEvent).Medias)
 			d.log.Debugf("current queue length: %d", d.currentQueueLength)
 			medias := event.Data.(events.PlaylistDetailUpdateEvent).Medias
@@ -157,10 +157,10 @@ func (d *Diange) Enable() error {
 				d.log.Debugf("user media count in player playlist %s: %d", user, count)
 			}
 		})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPlayingUpdate,
 		"plugin.diange.check_playing",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPlayingUpdateEvent)
 			if data.Removed {
 				d.isCurrentSystem = true
@@ -216,7 +216,7 @@ func (d *Diange) getSource(cmd string) []string {
 	return sources
 }
 
-func (d *Diange) handleMessage(event *event.Event) {
+func (d *Diange) handleMessage(event *eventbus.Event) {
 	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
 	msgs := strings.Split(message.Message, " ")
 	if len(msgs) < 2 || len(msgs[0]) == 0 {
@@ -333,7 +333,7 @@ func (d *Diange) handleMessage(event *event.Event) {
 			}
 		}
 		if d.SkipSystemPlaylist && d.isCurrentSystem {
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlayerPlayCmd,
 				events.PlayerPlayCmdEvent{
 					Media: model.Media{
@@ -343,7 +343,7 @@ func (d *Diange) handleMessage(event *event.Event) {
 				})
 			return
 		}
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlaylistInsertCmd(model.PlaylistIDPlayer),
 			events.PlaylistInsertCmdEvent{
 				Position: -1,

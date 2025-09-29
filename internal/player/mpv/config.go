@@ -3,7 +3,7 @@ package mpv
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 )
 
 type playerConfig struct {
@@ -30,14 +30,14 @@ var cfg = &playerConfig{
 }
 
 func restoreConfig() {
-	global.EventManager.CallA(events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
+	_ = global.EventBus.Publish(events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
 		Volume: cfg.Volume,
 	})
-	global.EventManager.RegisterA(events.PlayerPropertyVolumeUpdate, "player.config.volume", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPropertyVolumeUpdate, "player.config.volume", func(evnt *eventbus.Event) {
 		data := evnt.Data.(events.PlayerPropertyVolumeUpdateEvent)
 		cfg.Volume = data.Volume
 	})
-	global.EventManager.CallA(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
+	_ = global.EventBus.Publish(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
 		Device: cfg.AudioDevice,
 	})
 }

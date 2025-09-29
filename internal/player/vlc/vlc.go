@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"fmt"
 	"github.com/AynaLivePlayer/miaosic"
@@ -133,10 +133,10 @@ func StopPlayer() {
 func registerEvents() {
 	// 播放结束事件
 	_, err := eventManager.Attach(vlc.MediaPlayerEndReached, func(e vlc.Event, userData interface{}) {
-		global.EventManager.CallA(events.PlayerPropertyStateUpdate, events.PlayerPropertyStateUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyStateUpdate, events.PlayerPropertyStateUpdateEvent{
 			State: model.PlayerStateIdle,
 		})
-		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
 			Media:   model.Media{},
 			Removed: true,
 		})
@@ -158,10 +158,10 @@ func registerEvents() {
 			}
 			prevTimePos = timePos
 			prevPercentPos = percentPos
-			global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
+			_ = global.EventBus.Publish(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
 				TimePos: timePos,
 			})
-			global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
+			_ = global.EventBus.Publish(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
 				PercentPos: percentPos,
 			})
 		}
@@ -174,7 +174,7 @@ func registerEvents() {
 	_, err = eventManager.Attach(vlc.MediaPlayerTimeChanged, func(e vlc.Event, userData interface{}) {
 		dur, _ := player.MediaLength()
 		duration = float64(dur) / 1000.0 // 转换为秒
-		global.EventManager.CallA(events.PlayerPropertyDurationUpdate, events.PlayerPropertyDurationUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyDurationUpdate, events.PlayerPropertyDurationUpdateEvent{
 			Duration: duration,
 		})
 	}, nil)
@@ -185,7 +185,7 @@ func registerEvents() {
 	// 暂停状态改变
 	_, err = eventManager.Attach(vlc.MediaPlayerPaused, func(e vlc.Event, userData interface{}) {
 		log.Debug("VLC player paused")
-		global.EventManager.CallA(events.PlayerPropertyPauseUpdate, events.PlayerPropertyPauseUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyPauseUpdate, events.PlayerPropertyPauseUpdateEvent{
 			Paused: true,
 		})
 	}, nil)
@@ -195,7 +195,7 @@ func registerEvents() {
 
 	_, err = eventManager.Attach(vlc.MediaPlayerPlaying, func(e vlc.Event, userData interface{}) {
 		log.Debug("VLC player playing")
-		global.EventManager.CallA(events.PlayerPropertyPauseUpdate, events.PlayerPropertyPauseUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyPauseUpdate, events.PlayerPropertyPauseUpdateEvent{
 			Paused: false,
 		})
 	}, nil)
@@ -206,14 +206,14 @@ func registerEvents() {
 	_, err = eventManager.Attach(vlc.MediaPlayerAudioVolume, func(e vlc.Event, userData interface{}) {
 		volume, _ := player.Volume()
 		log.Debug("VLC player audio volume: ", volume)
-		global.EventManager.CallA(events.PlayerPropertyVolumeUpdate, events.PlayerPropertyVolumeUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyVolumeUpdate, events.PlayerPropertyVolumeUpdateEvent{
 			Volume: float64(volume),
 		})
 	}, nil)
 }
 
 func registerCmdHandler() {
-	global.EventManager.RegisterA(events.PlayerPlayCmd, "player.play", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerPlayCmd, "player.play", func(evnt *eventbus.Event) {
 		lock.Lock()
 		defer lock.Unlock()
 
@@ -223,7 +223,7 @@ func registerCmdHandler() {
 		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
 		if err != nil || len(mediaUrls) == 0 {
 			log.Warn("[VLC PlayControl] get media url failed ", mediaInfo.Meta.ID(), err)
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlayerPlayErrorUpdate,
 				events.PlayerPlayErrorUpdateEvent{
 					Error: err,
@@ -265,7 +265,7 @@ func registerCmdHandler() {
 		}
 		currentMedia = mediaData
 
-		global.EventManager.CallA(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
 			Media:   mediaData,
 			Removed: false,
 		})
@@ -290,18 +290,18 @@ func registerCmdHandler() {
 		// 重置位置信息
 		prevPercentPos = 0
 		prevTimePos = 0
-		global.EventManager.CallA(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyTimePosUpdate, events.PlayerPropertyTimePosUpdateEvent{
 			TimePos: 0,
 		})
-		global.EventManager.CallA(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyPercentPosUpdate, events.PlayerPropertyPercentPosUpdateEvent{
 			PercentPos: 0,
 		})
-		global.EventManager.CallA(events.PlayerPropertyStateUpdate, events.PlayerPropertyStateUpdateEvent{
+		_ = global.EventBus.Publish(events.PlayerPropertyStateUpdate, events.PlayerPropertyStateUpdateEvent{
 			State: model.PlayerStatePlaying,
 		})
 	})
 
-	global.EventManager.RegisterA(events.PlayerToggleCmd, "player.toggle", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerToggleCmd, "player.toggle", func(evnt *eventbus.Event) {
 		lock.Lock()
 		defer lock.Unlock()
 		err := player.TogglePause()
@@ -311,7 +311,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerSetPauseCmd, "player.set_paused", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSetPauseCmd, "player.set_paused", func(evnt *eventbus.Event) {
 		lock.Lock()
 		defer lock.Unlock()
 		data := evnt.Data.(events.PlayerSetPauseCmdEvent)
@@ -322,7 +322,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerSeekCmd, "player.seek", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSeekCmd, "player.seek", func(evnt *eventbus.Event) {
 		lock.Lock()
 		defer lock.Unlock()
 		data := evnt.Data.(events.PlayerSeekCmdEvent)
@@ -333,7 +333,7 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerVolumeChangeCmd, "player.volume", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerVolumeChangeCmd, "player.volume", func(evnt *eventbus.Event) {
 		lock.Lock()
 		defer lock.Unlock()
 		data := evnt.Data.(events.PlayerVolumeChangeCmdEvent)
@@ -343,16 +343,16 @@ func registerCmdHandler() {
 		}
 	})
 
-	global.EventManager.RegisterA(events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerVideoPlayerSetWindowHandleCmd, "player.set_window_handle", func(evnt *eventbus.Event) {
 		handle := evnt.Data.(events.PlayerVideoPlayerSetWindowHandleCmdEvent).Handle
 		setWindowHandle(handle)
 	})
 
-	global.EventManager.RegisterA(events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *event.Event) {
+	global.EventBus.Subscribe("", events.PlayerSetAudioDeviceCmd, "player.set_audio_device", func(evnt *eventbus.Event) {
 		device := evnt.Data.(events.PlayerSetAudioDeviceCmdEvent).Device
 		if err := setAudioDevice(device); err != nil {
 			log.Warn("set audio device failed", err)
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.ErrorUpdate,
 				events.ErrorUpdateEvent{
 					Error: err,
@@ -393,7 +393,7 @@ func setAudioDevice(deviceID string) error {
 	cfg.AudioDevice = deviceID
 
 	// 发送更新事件
-	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+	_ = global.EventBus.Publish(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
 		Current: currentAudioDevice,
 		Devices: audioDevices,
 	})
@@ -437,7 +437,7 @@ func updateAudioDeviceList() {
 		len(audioDevices), currentAudioDevice)
 
 	// 发送事件通知
-	global.EventManager.CallA(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
+	_ = global.EventBus.Publish(events.PlayerAudioDeviceUpdate, events.PlayerAudioDeviceUpdateEvent{
 		Current: currentAudioDevice,
 		Devices: audioDevices,
 	})

@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"errors"
 	"github.com/AynaLivePlayer/miaosic"
 )
@@ -25,21 +25,21 @@ func createPlaylistManager() {
 		currentSelected = cfg.playlists[0].Meta.ID()
 	}
 
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.PlaylistManagerCurrentUpdate,
 		events.PlaylistManagerCurrentUpdateEvent{
 			Medias: make([]model.Media, 0),
 		})
 
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.PlaylistManagerSetSystemCmd,
 		events.PlaylistManagerSetSystemCmdEvent{
 			PlaylistID: cfg.SystemPlaylistID,
 		})
 
-	global.EventManager.RegisterA(events.PlaylistManagerSetSystemCmd,
+	global.EventBus.Subscribe("", events.PlaylistManagerSetSystemCmd,
 		"internal.playlist.system_playlist.set",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerSetSystemCmdEvent)
 			// default case
 			if data.PlaylistID == "" {
@@ -48,7 +48,7 @@ func createPlaylistManager() {
 			log.Infof("try to set system playlist %s", data.PlaylistID)
 			pl, ok := allPlaylists[data.PlaylistID]
 			if !ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("playlist not found"),
@@ -56,7 +56,7 @@ func createPlaylistManager() {
 				return
 			}
 			cfg.SystemPlaylistID = pl.Meta.ID()
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlaylistManagerSystemUpdate,
 				events.PlaylistManagerSystemUpdateEvent{
 					Info: model.PlaylistInfo{
@@ -75,10 +75,10 @@ func createPlaylistManager() {
 			SystemPlaylist.Replace(medias)
 
 		})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistManagerRefreshCurrentCmd,
 		"internal.playlist.current_playlist.refresh",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerRefreshCurrentCmdEvent)
 			log.Infof("try to refresh playlist %s", data.PlaylistID)
 			currentSelected = data.PlaylistID
@@ -88,7 +88,7 @@ func createPlaylistManager() {
 			}
 			pl, ok := allPlaylists[data.PlaylistID]
 			if !ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("playlist not found"),
@@ -97,7 +97,7 @@ func createPlaylistManager() {
 			}
 			getPlaylist, err := miaosic.GetPlaylist(pl.Meta)
 			if err != nil {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: err,
@@ -109,10 +109,10 @@ func createPlaylistManager() {
 			updatePlaylistManagerInfos()
 		})
 
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistManagerGetCurrentCmd,
 		"internal.playlist.current_playlist.get",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerGetCurrentCmdEvent)
 			log.Infof("try to get playlist %s", data.PlaylistID)
 			currentSelected = data.PlaylistID
@@ -122,7 +122,7 @@ func createPlaylistManager() {
 			}
 			pl, ok := allPlaylists[data.PlaylistID]
 			if !ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("playlist not found"),
@@ -132,15 +132,15 @@ func createPlaylistManager() {
 			updateCurrenMedias(pl)
 		})
 
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistManagerAddPlaylistCmd,
 		"internal.playlist.add_playlist",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerAddPlaylistCmdEvent)
 			log.Info("try to add playlist", data)
 			meta, ok := miaosic.MatchPlaylistByProvider(data.Provider, data.URL)
 			if !ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("not proper url"),
@@ -149,7 +149,7 @@ func createPlaylistManager() {
 			}
 			_, ok = allPlaylists[meta.ID()]
 			if ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("playlist already exists"),
@@ -158,7 +158,7 @@ func createPlaylistManager() {
 			}
 			pl, err := miaosic.GetPlaylist(meta)
 			if err != nil {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: err,
@@ -169,13 +169,13 @@ func createPlaylistManager() {
 			updatePlaylistManagerInfos()
 		})
 
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlaylistManagerRemovePlaylistCmd,
 		"internal.playlist.remove_playlist",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerRemovePlaylistCmdEvent)
 			if data.PlaylistID == cfg.SystemPlaylistID {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("cannot remove system playlist"),
@@ -184,7 +184,7 @@ func createPlaylistManager() {
 			}
 			_, ok := allPlaylists[data.PlaylistID]
 			if !ok {
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.ErrorUpdate,
 					events.ErrorUpdateEvent{
 						Error: errors.New("playlist not found"),
@@ -205,7 +205,7 @@ func updateCurrenMedias(pl *miaosic.Playlist) {
 			User: model.SystemUser,
 		}
 	}
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.PlaylistManagerCurrentUpdate,
 		events.PlaylistManagerCurrentUpdateEvent{
 			Medias: medias,
@@ -225,7 +225,7 @@ func updatePlaylistManagerInfos() {
 		})
 	}
 	log.InfoW("update playlist manager infos")
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.PlaylistManagerInfoUpdate,
 		events.PlaylistManagerInfoUpdateEvent{
 			Playlists: playlists,

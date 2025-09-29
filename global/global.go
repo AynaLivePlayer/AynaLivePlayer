@@ -1,10 +1,10 @@
 package global
 
 import (
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 )
 
 var Logger logger.ILogger = nil
 
-var EventManager *event.Manager = nil
+var EventBus eventbus.Bus = nil

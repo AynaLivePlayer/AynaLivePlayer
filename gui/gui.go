@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/resource"
 	"fyne.io/fyne/v2"
@@ -72,8 +72,8 @@ func Initialize() {
 	// setupPlayerWindow()
 
 	// register error
-	global.EventManager.RegisterA(
-		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *event.Event) {
+	global.EventBus.Subscribe("",
+		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *eventbus.Event) {
 			err := e.Data.(events.ErrorUpdateEvent).Error
 			logger.Warnf("gui received error event: %v, %v", err, err == nil)
 			if err == nil {

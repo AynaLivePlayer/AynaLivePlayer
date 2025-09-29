@@ -4,7 +4,7 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"math/rand"
 	"sync"
 	"time"
@@ -44,34 +44,34 @@ func newPlaylist(id model.PlaylistID) *playlist {
 		Lock:       sync.RWMutex{},
 		Index:      0,
 	}
-	global.EventManager.RegisterA(events.PlaylistMoveCmd(id), "internal.playlist.move", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistMoveCmd(id), "internal.playlist.move", func(event *eventbus.Event) {
 		e := event.Data.(events.PlaylistMoveCmdEvent)
 		pl.Move(e.From, e.To)
 	})
-	global.EventManager.RegisterA(events.PlaylistInsertCmd(id), "internal.playlist.insert", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistInsertCmd(id), "internal.playlist.insert", func(event *eventbus.Event) {
 		e := event.Data.(events.PlaylistInsertCmdEvent)
 		pl.Insert(e.Position, e.Media)
 	})
-	global.EventManager.RegisterA(events.PlaylistDeleteCmd(id), "internal.playlist.delete", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistDeleteCmd(id), "internal.playlist.delete", func(event *eventbus.Event) {
 		e := event.Data.(events.PlaylistDeleteCmdEvent)
 		pl.Delete(e.Index)
 	})
-	global.EventManager.RegisterA(events.PlaylistNextCmd(id), "internal.playlist.next", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistNextCmd(id), "internal.playlist.next", func(event *eventbus.Event) {
 		log.Infof("Playlist %s recieve next", id)
 		pl.Next(event.Data.(events.PlaylistNextCmdEvent).Remove)
 	})
-	global.EventManager.RegisterA(events.PlaylistModeChangeCmd(id), "internal.playlist.mode", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistModeChangeCmd(id), "internal.playlist.mode", func(event *eventbus.Event) {
 		pl.Lock.Lock()
 		pl.mode = event.Data.(events.PlaylistModeChangeCmdEvent).Mode
 		pl.Index = 0
 		pl.resetRandomIndex()
 		pl.Lock.Unlock()
 		log.Infof("Playlist %s mode changed to %d", id, pl.mode)
-		global.EventManager.CallA(events.PlaylistModeChangeUpdate(id), events.PlaylistModeChangeUpdateEvent{
+		_ = global.EventBus.Publish(events.PlaylistModeChangeUpdate(id), events.PlaylistModeChangeUpdateEvent{
 			Mode: pl.mode,
 		})
 	})
-	global.EventManager.RegisterA(events.PlaylistSetIndexCmd(id), "internal.playlist.setindex", func(event *event.Event) {
+	global.EventBus.Subscribe("", events.PlaylistSetIndexCmd(id), "internal.playlist.setindex", func(event *eventbus.Event) {
 		index := event.Data.(events.PlaylistSetIndexCmdEvent).Index
 		if index >= pl.Size() || index < 0 {
 			index = 0
@@ -98,7 +98,7 @@ func (p *playlist) Replace(medias []model.Media) {
 	p.Index = 0
 	p.resetRandomIndex()
 	p.Lock.Unlock()
-	global.EventManager.CallA(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
 		Medias: p.CopyMedia(),
 	})
 }
@@ -118,11 +118,11 @@ func (p *playlist) Insert(index int, media model.Media) {
 	p.Medias[index] = media
 	p.resetRandomIndex()
 	p.Lock.Unlock()
-	global.EventManager.CallA(events.PlaylistInsertUpdate(p.playlistId), events.PlaylistInsertUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistInsertUpdate(p.playlistId), events.PlaylistInsertUpdateEvent{
 		Position: index,
 		Media:    media,
 	})
-	global.EventManager.CallA(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
 		Medias: p.CopyMedia(),
 	})
 }
@@ -140,7 +140,7 @@ func (p *playlist) Delete(index int) {
 	}
 	p.resetRandomIndex()
 	p.Lock.Unlock()
-	global.EventManager.CallA(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
 		Medias: p.CopyMedia(),
 	})
 }
@@ -170,7 +170,7 @@ func (p *playlist) Move(src int, dst int) {
 	}
 	p.Medias[dst] = tmp
 	p.Lock.Unlock()
-	global.EventManager.CallA(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistDetailUpdate(p.playlistId), events.PlaylistDetailUpdateEvent{
 		Medias: p.CopyMedia(),
 	})
 }
@@ -215,7 +215,7 @@ func (p *playlist) Next(delete bool) {
 	//	}
 	//}
 	p.Lock.Unlock()
-	global.EventManager.CallA(events.PlaylistNextUpdate(p.playlistId), events.PlaylistNextUpdateEvent{
+	_ = global.EventBus.Publish(events.PlaylistNextUpdate(p.playlistId), events.PlaylistNextUpdateEvent{
 		Media: m,
 	})
 	if delete {

@@ -7,7 +7,7 @@ import (
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"bytes"
@@ -190,8 +190,8 @@ func (t *TextInfo) OutputCover() {
 }
 
 func (t *TextInfo) registerHandlers() {
-	global.EventManager.RegisterA(
-		events.PlayerPlayingUpdate, "plugin.textinfo.playing", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlayerPlayingUpdate, "plugin.textinfo.playing", func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPlayingUpdateEvent)
 			if data.Removed {
 				t.info.Current = MediaInfo{}
@@ -201,8 +201,8 @@ func (t *TextInfo) registerHandlers() {
 			t.RenderTemplates()
 			t.OutputCover()
 		})
-	global.EventManager.RegisterA(
-		events.PlayerPropertyTimePosUpdate, "plugin.txtinfo.timepos", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlayerPropertyTimePosUpdate, "plugin.txtinfo.timepos", func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos
 			ct := int(data)
 			if ct == t.info.CurrentTime.TotalSeconds {
@@ -211,8 +211,8 @@ func (t *TextInfo) registerHandlers() {
 			t.info.CurrentTime = NewTimeFromSec(ct)
 			t.RenderTemplates()
 		})
-	global.EventManager.RegisterA(
-		events.PlayerPropertyDurationUpdate, "plugin.txtinfo.duration", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlayerPropertyDurationUpdate, "plugin.txtinfo.duration", func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPropertyDurationUpdateEvent).Duration
 			ct := int(data)
 			if ct == t.info.TotalTime.TotalSeconds {
@@ -221,8 +221,8 @@ func (t *TextInfo) registerHandlers() {
 			t.info.TotalTime = NewTimeFromSec(ct)
 			t.RenderTemplates()
 		})
-	global.EventManager.RegisterA(
-		events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "plugin.textinfo.playlist", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlaylistDetailUpdate(model.PlaylistIDPlayer), "plugin.textinfo.playlist", func(event *eventbus.Event) {
 			pl := make([]MediaInfo, 0)
 			data := event.Data.(events.PlaylistDetailUpdateEvent)
 			for index, m := range data.Medias {
@@ -232,8 +232,8 @@ func (t *TextInfo) registerHandlers() {
 			t.info.PlaylistLength = len(pl)
 			t.RenderTemplates()
 		})
-	global.EventManager.RegisterA(
-		events.PlayerLyricPosUpdate, "plugin.textinfo.lyricpos", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.PlayerLyricPosUpdate, "plugin.textinfo.lyricpos", func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerLyricPosUpdateEvent)
 			t.info.Lyric = data.CurrentLine.Lyric
 			t.RenderTemplates()

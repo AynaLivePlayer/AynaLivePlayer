@@ -4,14 +4,14 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"github.com/AynaLivePlayer/miaosic"
 )
 
 func handleSearch() {
 	log := global.Logger.WithPrefix("Search")
-	global.EventManager.RegisterA(
-		events.SearchCmd, "internal.controller.search.handleSearchCmd", func(event *event.Event) {
+	global.EventBus.Subscribe("",
+		events.SearchCmd, "internal.controller.search.handleSearchCmd", func(event *eventbus.Event) {
 			data := event.Data.(events.SearchCmdEvent)
 			log.Infof("Search %s using %s", data.Keyword, data.Provider)
 			searchResult, err := miaosic.SearchByProvider(data.Provider, data.Keyword, 1, 10)
@@ -26,7 +26,7 @@ func handleSearch() {
 					User: model.SystemUser,
 				}
 			}
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.SearchResultUpdate, events.SearchResultUpdateEvent{
 					Medias: medias,
 				})

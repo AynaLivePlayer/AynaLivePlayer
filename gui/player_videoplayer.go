@@ -25,7 +25,7 @@ func showPlayerWindow() {
 		playerWindowHandle = xfyne.GetWindowHandle(playerWindow)
 		logger.Infof("video output window handle: %d", playerWindowHandle)
 		if playerWindowHandle != 0 {
-			global.EventManager.CallA(events.PlayerVideoPlayerSetWindowHandleCmd,
+			_ = global.EventBus.Publish(events.PlayerVideoPlayerSetWindowHandleCmd,
 				events.PlayerVideoPlayerSetWindowHandleCmdEvent{Handle: playerWindowHandle})
 		}
 	}

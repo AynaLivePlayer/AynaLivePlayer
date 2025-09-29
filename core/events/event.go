@@ -1,13 +1,13 @@
 package events
 
 //const (
-//	EventPlay              event.EventId = "player.play"
-//	EventPlayed            event.EventId = "player.played"
-//	EventPlaylistPreInsert event.EventId = "playlist.insert.pre"
-//	EventPlaylistInsert    event.EventId = "playlist.insert.after"
-//	EventPlaylistUpdate    event.EventId = "playlist.update"
-//	EventLyricUpdate       event.EventId = "lyric.update"
-//	EventLyricReload       event.EventId = "lyric.reload"
+//	EventPlay              string = "player.play"
+//	EventPlayed            string = "player.played"
+//	EventPlaylistPreInsert string = "playlist.insert.pre"
+//	EventPlaylistInsert    string = "playlist.insert.after"
+//	EventPlaylistUpdate    string = "playlist.update"
+//	EventLyricUpdate       string = "lyric.update"
+//	EventLyricReload       string = "lyric.reload"
 //)
 
 const ErrorUpdate = "update.error"
@@ -17,8 +17,8 @@ type ErrorUpdateEvent struct {
 }
 
 //
-//func EventPlayerPropertyUpdate(property model.PlayerProperty) event.EventId {
-//	return event.EventId("player.property.update." + string(property))
+//func EventPlayerPropertyUpdate(property model.PlayerProperty) string {
+//	return string("player.property.update." + string(property))
 //}
 //
 //type PlaylistInsertEvent struct {

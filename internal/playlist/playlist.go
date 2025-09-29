@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/logger"
 	"github.com/AynaLivePlayer/miaosic"
 )
@@ -56,22 +56,22 @@ func Initialize() {
 	HistoryPlaylist = newPlaylist(model.PlaylistIDHistory)
 	config.LoadConfig(cfg)
 
-	global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer), events.PlaylistModeChangeCmdEvent{
+	_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer), events.PlaylistModeChangeCmdEvent{
 		Mode: cfg.PlayerPlaylistMode,
 	})
 
-	global.EventManager.CallA(events.PlaylistModeChangeCmd(model.PlaylistIDSystem), events.PlaylistModeChangeCmdEvent{
+	_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDSystem), events.PlaylistModeChangeCmdEvent{
 		Mode: cfg.SystemPlaylistMode,
 	})
 
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPlayingUpdate,
 		"internal.playlist.player_playing_update",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			if event.Data.(events.PlayerPlayingUpdateEvent).Removed {
 				return
 			}
-			global.EventManager.CallA(events.PlaylistInsertCmd(model.PlaylistIDHistory), events.PlaylistInsertCmdEvent{
+			_ = global.EventBus.Publish(events.PlaylistInsertCmd(model.PlaylistIDHistory), events.PlaylistInsertCmdEvent{
 				Media:    event.Data.(events.PlayerPlayingUpdateEvent).Media,
 				Position: -1,
 			})

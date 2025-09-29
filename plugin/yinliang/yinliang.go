@@ -7,7 +7,7 @@ import (
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"fmt"
@@ -67,15 +67,15 @@ func (y *Yinliang) Enable() error {
 
 	gui.AddConfigLayout(y)
 
-	global.EventManager.RegisterA(
+	_ = global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.yinliang.message",
 		y.handleMessage)
 
-	global.EventManager.RegisterA(
+	_ = global.EventBus.Subscribe("",
 		events.PlayerVolumeChangeCmd,
 		"plugin.yinliang.volume_tracker",
-		func(e *event.Event) {
+		func(e *eventbus.Event) {
 			data := e.Data.(events.PlayerVolumeChangeCmdEvent)
 			y.currentVolume = data.Volume
 		})
@@ -86,7 +86,7 @@ func (y *Yinliang) Disable() error {
 	return nil
 }
 
-func (y *Yinliang) handleMessage(event *event.Event) {
+func (y *Yinliang) handleMessage(event *eventbus.Event) {
 	if !y.Enabled {
 		return
 	}
@@ -115,7 +115,7 @@ func (y *Yinliang) handleMessage(event *event.Event) {
 	}
 	y.log.Infof("User <%s> modify volume from %.2f to %.2f", message.User.Username, y.currentVolume, newVolume)
 
-	global.EventManager.CallA(
+	_ = global.EventBus.Publish(
 		events.PlayerVolumeChangeCmd,
 		events.PlayerVolumeChangeCmdEvent{
 			Volume: newVolume,

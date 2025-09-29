@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -51,18 +51,18 @@ func createSearchList() fyne.CanvasObject {
 			object.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%d", id))
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			btns[0].(*widget.Button).OnTapped = func() {
-				global.EventManager.CallA(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
+				_ = global.EventBus.Publish(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
 					Media: SearchResult.Items[id],
 				})
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				global.EventManager.CallA(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
+				_ = global.EventBus.Publish(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
 					Media:    SearchResult.Items[id],
 					Position: -1,
 				})
 			}
 		})
-	global.EventManager.RegisterA(events.SearchResultUpdate, "gui.search.update_result", gutil.ThreadSafeHandler(func(event *event.Event) {
+	global.EventBus.Subscribe("", events.SearchResultUpdate, "gui.search.update_result", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		items := event.Data.(events.SearchResultUpdateEvent).Medias
 		SearchResult.Items = items
 		SearchResult.mux.Lock()

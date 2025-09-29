@@ -6,7 +6,7 @@ import (
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
@@ -43,33 +43,33 @@ func (d *MaxDuration) Name() string {
 func (d *MaxDuration) Enable() error {
 	config.LoadConfig(d)
 	gui.AddConfigLayout(d)
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPropertyDurationUpdate,
 		"plugin.maxduration.duration",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPropertyDurationUpdateEvent)
 			if int(data.Duration) > d.MaxDuration && d.SkipOnPlay {
 				d.log.Infof("Skip on reach max duration %.2f/%d (on play)", data.Duration, d.MaxDuration)
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
 			}
 		})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPropertyTimePosUpdate,
 		"plugin.maxduration.timepos",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPropertyTimePosUpdateEvent)
 			if int(data.TimePos) > d.MaxDuration && d.SkipOnReach && !d.skipped {
 				d.log.Infof("Skip on reach max duration %.2f/%d (on time pos reach)", data.TimePos, d.MaxDuration)
 				d.skipped = true
-				global.EventManager.CallA(
+				_ = global.EventBus.Publish(
 					events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
 			}
 		})
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPlayingUpdate,
 		"plugin.maxduration.play",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			d.skipped = false
 		})
 	return nil

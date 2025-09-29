@@ -6,8 +6,8 @@ import (
 )
 
 //const (
-//	LiveRoomStatusChange   event.EventId = "liveclient.status.change"
-//	LiveRoomMessageReceive event.EventId = "liveclient.message.receive"
+//	LiveRoomStatusChange   string = "liveclient.status.change"
+//	LiveRoomMessageReceive string = "liveclient.message.receive"
 //)
 //
 //type StatusChangeEvent struct {

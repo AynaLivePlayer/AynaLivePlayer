@@ -7,7 +7,7 @@ import (
 	"AynaLivePlayer/gui/component"
 	"AynaLivePlayer/gui/xfyne"
 	"AynaLivePlayer/pkg/config"
-	"AynaLivePlayer/pkg/event"
+	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
 	"fyne.io/fyne/v2"
@@ -45,14 +45,14 @@ func (d *Qiege) Name() string {
 func (d *Qiege) Enable() error {
 	config.LoadConfig(d)
 	gui.AddConfigLayout(d)
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.qiege.message",
 		d.handleMessage)
-	global.EventManager.RegisterA(
+	global.EventBus.Subscribe("",
 		events.PlayerPlayingUpdate,
 		"plugin.qiege.playing",
-		func(event *event.Event) {
+		func(event *eventbus.Event) {
 			data := event.Data.(events.PlayerPlayingUpdateEvent)
 			if data.Removed {
 				d.currentUid = ""
@@ -69,7 +69,7 @@ func (d *Qiege) Disable() error {
 	return nil
 }
 
-func (d *Qiege) handleMessage(event *event.Event) {
+func (d *Qiege) handleMessage(event *eventbus.Event) {
 	message := event.Data.(events.LiveRoomMessageReceiveEvent).Message
 	msgs := strings.Split(message.Message, " ")
 	if len(msgs) < 1 || msgs[0] != d.CustomCMD {
@@ -78,20 +78,20 @@ func (d *Qiege) handleMessage(event *event.Event) {
 	d.log.Infof("recieve qiege command")
 	if d.UserPermission {
 		if d.currentUid == message.User.Uid {
-			global.EventManager.CallA(
+			_ = global.EventBus.Publish(
 				events.PlayerPlayNextCmd,
 				events.PlayerPlayNextCmdEvent{})
 			return
 		}
 	}
 	if d.PrivilegePermission && message.User.Privilege > 0 {
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlayerPlayNextCmd,
 			events.PlayerPlayNextCmdEvent{})
 		return
 	}
 	if d.AdminPermission && message.User.Admin {
-		global.EventManager.CallA(
+		_ = global.EventBus.Publish(
 			events.PlayerPlayNextCmd,
 			events.PlayerPlayNextCmdEvent{})
 		return
