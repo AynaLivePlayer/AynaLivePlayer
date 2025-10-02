@@ -13,6 +13,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 )
 
@@ -45,8 +46,18 @@ func setupGlobal() {
 	global.Logger.SetLogLevel(Log.Level)
 }
 
-func main() {
+func init() {
 	flag.Parse()
+	// if not dev, set working directory to executable directory
+	if !*dev {
+		exePath, _ := os.Executable()
+		exePath, _ = filepath.EvalSymlinks(exePath)
+		exeDir := filepath.Dir(exePath)
+		_ = os.Chdir(exeDir)
+	}
+}
+
+func main() {
 	config.LoadFromFile(config.ConfigPath)
 	config.LoadConfig(Log)
 	i18n.LoadLanguage(config.General.Language)

@@ -3,7 +3,7 @@ package gui
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui/xfyne"
+	"AynaLivePlayer/gui/gutil"
 	"fyne.io/fyne/v2"
 )
 
@@ -22,10 +22,10 @@ func showPlayerWindow() {
 	}
 	playerWindow.Show()
 	if playerWindowHandle == 0 {
-		playerWindowHandle = xfyne.GetWindowHandle(playerWindow)
+		playerWindowHandle = gutil.GetWindowHandle(playerWindow)
 		logger.Infof("video output window handle: %d", playerWindowHandle)
 		if playerWindowHandle != 0 {
-			_ = global.EventBus.Publish(events.PlayerVideoPlayerSetWindowHandleCmd,
+			_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerVideoPlayerSetWindowHandleCmd,
 				events.PlayerVideoPlayerSetWindowHandleCmdEvent{Handle: playerWindowHandle})
 		}
 	}

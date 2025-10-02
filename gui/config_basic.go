@@ -38,12 +38,12 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 				mode = model.PlaylistModeRandom
 			}
 			logger.Infof("Set player playlist mode to %d", mode)
-			_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDPlayer),
+			_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistModeChangeCmd(model.PlaylistIDPlayer),
 				events.PlaylistModeChangeCmdEvent{
 					Mode: mode,
 				})
 		})
-	global.EventBus.Subscribe("", events.PlaylistModeChangeUpdate(model.PlaylistIDPlayer),
+	global.EventBus.Subscribe(eventChannel,  events.PlaylistModeChangeUpdate(model.PlaylistIDPlayer),
 		"gui.config.basic.random_playlist.player",
 		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
@@ -56,13 +56,13 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			if b {
 				mode = model.PlaylistModeRandom
 			}
-			_ = global.EventBus.Publish(events.PlaylistModeChangeCmd(model.PlaylistIDSystem),
+			_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistModeChangeCmd(model.PlaylistIDSystem),
 				events.PlaylistModeChangeCmdEvent{
 					Mode: mode,
 				})
 		})
 
-	global.EventBus.Subscribe("", events.PlaylistModeChangeUpdate(model.PlaylistIDSystem),
+	global.EventBus.Subscribe(eventChannel,  events.PlaylistModeChangeUpdate(model.PlaylistIDSystem),
 		"gui.config.basic.random_playlist.system",
 		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistModeChangeUpdateEvent)
@@ -80,11 +80,11 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 		if !ok {
 			return
 		}
-		_ = global.EventBus.Publish(events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerSetAudioDeviceCmd, events.PlayerSetAudioDeviceCmdEvent{
 			Device: name,
 		})
 	})
-	global.EventBus.Subscribe("",
+	global.EventBus.Subscribe(eventChannel, 
 		events.PlayerAudioDeviceUpdate,
 		"gui.config.basic.audio_device.update",
 		gutil.ThreadSafeHandler(func(event *eventbus.Event) {
@@ -123,7 +123,7 @@ func (b *bascicConfig) CreatePanel() fyne.CanvasObject {
 			config.General.AutoCheckUpdate),
 	)
 	checkUpdateBtn := widget.NewButton(i18n.T("gui.config.basic.check_update"), func() {
-		_ = global.EventBus.Publish(events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
+		_ = global.EventBus.PublishToChannel(eventChannel, events.CheckUpdateCmd, events.CheckUpdateCmdEvent{})
 	})
 	useSysPlaylistBtn := container.NewHBox(
 		widget.NewLabel(i18n.T("gui.config.basic.use_system_playlist")),

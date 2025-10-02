@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
-	"AynaLivePlayer/gui/xfyne"
+
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -147,9 +147,9 @@ func (y *Yinliang) CreatePanel() fyne.CanvasObject {
 
 	cmdConfig := container.NewGridWithColumns(2,
 		widget.NewLabel(i18n.T("plugin.yinliang.volume_up_cmd")),
-		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&y.VolumeUpCMD))),
+		widget.NewEntryWithData(binding.BindString(&y.VolumeUpCMD)),
 		widget.NewLabel(i18n.T("plugin.yinliang.volume_down_cmd")),
-		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&y.VolumeDownCMD))),
+		widget.NewEntryWithData(binding.BindString(&y.VolumeDownCMD)),
 	)
 
 	stepEntry := widget.NewEntryWithData(binding.FloatToStringWithFormat(binding.BindFloat(&y.VolumeStep), "%.1f"))
@@ -182,9 +182,9 @@ func (y *Yinliang) CreatePanel() fyne.CanvasObject {
 
 	volumeControlConfig := container.NewGridWithColumns(2,
 		widget.NewLabel(i18n.T("plugin.yinliang.volume_step")),
-		xfyne.EntryDisableUndoRedo(stepEntry),
+		stepEntry,
 		widget.NewLabel(i18n.T("plugin.yinliang.max_volume")),
-		xfyne.EntryDisableUndoRedo(maxVolEntry),
+		maxVolEntry,
 	)
 
 	y.panel = container.NewVBox(

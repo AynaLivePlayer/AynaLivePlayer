@@ -5,7 +5,7 @@ import (
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui/gutil"
-	"AynaLivePlayer/gui/xfyne"
+
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
 	"fmt"
@@ -46,7 +46,7 @@ func createPlaylists() fyne.CanvasObject {
 		})
 	PlaylistManager.AddBtn = widget.NewButton(i18n.T("gui.playlist.button.add"), func() {
 		providerEntry := widget.NewSelect(PlaylistManager.providers, nil)
-		idEntry := xfyne.EntryDisableUndoRedo(widget.NewEntry())
+		idEntry := widget.NewEntry()
 		dia := dialog.NewCustomConfirm(
 			i18n.T("gui.playlist.add.title"),
 			i18n.T("gui.playlist.add.confirm"),
@@ -64,7 +64,7 @@ func createPlaylists() fyne.CanvasObject {
 			func(b bool) {
 				if b && len(providerEntry.Selected) > 0 && len(idEntry.Text) > 0 {
 					logger.Infof("add playlists %s %s", providerEntry.Selected, idEntry.Text)
-					_ = global.EventBus.Publish(
+					_ = global.EventBus.PublishToChannel(eventChannel,
 						events.PlaylistManagerAddPlaylistCmd,
 						events.PlaylistManagerAddPlaylistCmdEvent{
 							Provider: providerEntry.Selected,
@@ -82,7 +82,7 @@ func createPlaylists() fyne.CanvasObject {
 			return
 		}
 		logger.Infof("remove playlists %s", PlaylistManager.currentPlaylists[PlaylistManager.Index].Meta.ID())
-		_ = global.EventBus.Publish(
+		_ = global.EventBus.PublishToChannel(eventChannel,
 			events.PlaylistManagerRemovePlaylistCmd,
 			events.PlaylistManagerRemovePlaylistCmdEvent{
 				PlaylistID: PlaylistManager.currentPlaylists[PlaylistManager.Index].Meta.ID(),
@@ -93,18 +93,18 @@ func createPlaylists() fyne.CanvasObject {
 			return
 		}
 		PlaylistManager.Index = id
-		_ = global.EventBus.Publish(events.PlaylistManagerGetCurrentCmd, events.PlaylistManagerGetCurrentCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistManagerGetCurrentCmd, events.PlaylistManagerGetCurrentCmdEvent{
 			PlaylistID: PlaylistManager.currentPlaylists[id].Meta.ID(),
 		})
 	}
-	global.EventBus.Subscribe("", events.MediaProviderUpdate,
+	global.EventBus.Subscribe(eventChannel,  events.MediaProviderUpdate,
 		"gui.playlists.provider.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))
 			copy(s, providers.Providers)
 			PlaylistManager.providers = s
 		}))
-	global.EventBus.Subscribe("", events.PlaylistManagerInfoUpdate,
+	global.EventBus.Subscribe(eventChannel,  events.PlaylistManagerInfoUpdate,
 		"gui.playlists.info.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerInfoUpdateEvent)
 			prevLen := len(PlaylistManager.currentPlaylists)
@@ -115,7 +115,7 @@ func createPlaylists() fyne.CanvasObject {
 				PlaylistManager.Playlists.Select(0)
 			}
 		}))
-	global.EventBus.Subscribe("", events.PlaylistManagerSystemUpdate,
+	global.EventBus.Subscribe(eventChannel,  events.PlaylistManagerSystemUpdate,
 		"gui.playlists.system.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.PlaylistManagerSystemUpdateEvent)
 			PlaylistManager.CurrentSystemPlaylist.SetText(i18n.T("gui.playlist.current") + data.Info.DisplayName())
@@ -137,7 +137,7 @@ func createPlaylistMedias() fyne.CanvasObject {
 			if PlaylistManager.Index >= len(PlaylistManager.currentPlaylists) {
 				return
 			}
-			_ = global.EventBus.Publish(events.PlaylistManagerRefreshCurrentCmd, events.PlaylistManagerRefreshCurrentCmdEvent{
+			_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistManagerRefreshCurrentCmd, events.PlaylistManagerRefreshCurrentCmdEvent{
 				PlaylistID: PlaylistManager.currentPlaylists[PlaylistManager.Index].Meta.ID(),
 			})
 		})
@@ -148,7 +148,7 @@ func createPlaylistMedias() fyne.CanvasObject {
 				return
 			}
 			logger.Infof("set playlist %s as system", PlaylistManager.currentPlaylists[PlaylistManager.Index].Meta.ID())
-			_ = global.EventBus.Publish(events.PlaylistManagerSetSystemCmd, events.PlaylistManagerSetSystemCmdEvent{
+			_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistManagerSetSystemCmd, events.PlaylistManagerSetSystemCmdEvent{
 				PlaylistID: PlaylistManager.currentPlaylists[PlaylistManager.Index].Meta.ID(),
 			})
 		})
@@ -179,18 +179,18 @@ func createPlaylistMedias() fyne.CanvasObject {
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			m.User = model.SystemUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				_ = global.EventBus.Publish(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
+				_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
 					Media: m,
 				})
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				_ = global.EventBus.Publish(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
+				_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
 					Media:    m,
 					Position: -1,
 				})
 			}
 		})
-	global.EventBus.Subscribe("", events.PlaylistManagerCurrentUpdate,
+	global.EventBus.Subscribe(eventChannel,  events.PlaylistManagerCurrentUpdate,
 		"gui.playlists.current.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			logger.Infof("receive current playlist update, try to refresh playlist medias")
 			data := event.Data.(events.PlaylistManagerCurrentUpdateEvent)

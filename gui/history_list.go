@@ -50,12 +50,12 @@ func createHistoryList() fyne.CanvasObject {
 			btns := object.(*fyne.Container).Objects[2].(*fyne.Container).Objects
 			m.User = model.SystemUser
 			btns[0].(*widget.Button).OnTapped = func() {
-				_ = global.EventBus.Publish(events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
+				_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerPlayCmd, events.PlayerPlayCmdEvent{
 					Media: m,
 				})
 			}
 			btns[1].(*widget.Button).OnTapped = func() {
-				_ = global.EventBus.Publish(events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
+				_ = global.EventBus.PublishToChannel(eventChannel, events.PlaylistInsertCmd(model.PlaylistIDPlayer), events.PlaylistInsertCmdEvent{
 					Media:    m,
 					Position: -1,
 				})
@@ -75,7 +75,7 @@ func createHistoryList() fyne.CanvasObject {
 }
 
 func registerHistoryHandler() {
-	global.EventBus.Subscribe("",
+	global.EventBus.Subscribe(eventChannel, 
 		events.PlaylistDetailUpdate(model.PlaylistIDHistory),
 		"gui.history.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			History.mux.Lock()

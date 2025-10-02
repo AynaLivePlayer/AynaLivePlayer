@@ -45,16 +45,16 @@ var PlayController = &PlayControllerContainer{}
 
 func registerPlayControllerHandler() {
 	PlayController.ButtonPrev.OnTapped = func() {
-		_ = global.EventBus.Publish(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
 			Position: 0,
 			Absolute: true,
 		})
 	}
 	PlayController.ButtonSwitch.OnTapped = func() {
-		_ = global.EventBus.Publish(events.PlayerToggleCmd, events.PlayerToggleCmdEvent{})
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerToggleCmd, events.PlayerToggleCmdEvent{})
 	}
 	PlayController.ButtonNext.OnTapped = func() {
-		_ = global.EventBus.Publish(events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerPlayNextCmd, events.PlayerPlayNextCmdEvent{})
 	}
 
 	PlayController.ButtonLrc.OnTapped = func() {
@@ -68,7 +68,7 @@ func registerPlayControllerHandler() {
 		showPlayerWindow()
 	}
 
-	global.EventBus.Subscribe("", events.PlayerPropertyPauseUpdate, "gui.player.controller.paused", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyPauseUpdate, "gui.player.controller.paused", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		if event.Data.(events.PlayerPropertyPauseUpdateEvent).Paused {
 			PlayController.ButtonSwitch.Icon = theme.MediaPlayIcon()
 		} else {
@@ -77,7 +77,7 @@ func registerPlayControllerHandler() {
 		PlayController.ButtonSwitch.Refresh()
 	}))
 
-	global.EventBus.Subscribe("", events.PlayerPropertyPercentPosUpdate, "gui.player.controller.percent_pos", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyPercentPosUpdate, "gui.player.controller.percent_pos", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		if PlayController.Progress.Dragging {
 			return
 		}
@@ -85,7 +85,7 @@ func registerPlayControllerHandler() {
 		PlayController.Progress.Refresh()
 	}))
 
-	global.EventBus.Subscribe("", events.PlayerPropertyStateUpdate, "gui.player.controller.idle_active", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyStateUpdate, "gui.player.controller.idle_active", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		state := event.Data.(events.PlayerPropertyStateUpdateEvent).State
 		if state == model.PlayerStateIdle || state == model.PlayerStateLoading {
 			PlayController.Progress.Value = 0
@@ -101,33 +101,33 @@ func registerPlayControllerHandler() {
 
 	PlayController.Progress.Max = 0
 	PlayController.Progress.OnDragEnd = func(f float64) {
-		_ = global.EventBus.Publish(events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerSeekCmd, events.PlayerSeekCmdEvent{
 			Position: f / 10,
 			Absolute: false,
 		})
 	}
 
-	global.EventBus.Subscribe("", events.PlayerPropertyTimePosUpdate, "gui.player.controller.time_pos", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyTimePosUpdate, "gui.player.controller.time_pos", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		PlayController.CurrentTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos)))
 	}))
 
-	global.EventBus.Subscribe("", events.PlayerPropertyDurationUpdate, "gui.player.controller.duration", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyDurationUpdate, "gui.player.controller.duration", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		PlayController.TotalTime.SetText(util.FormatTime(int(event.Data.(events.PlayerPropertyDurationUpdateEvent).Duration)))
 	}))
 
-	global.EventBus.Subscribe("", events.PlayerPropertyVolumeUpdate, "gui.player.controller.volume", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPropertyVolumeUpdate, "gui.player.controller.volume", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		PlayController.Volume.Value = event.Data.(events.PlayerPropertyVolumeUpdateEvent).Volume
 		PlayController.Volume.Refresh()
 	}))
 
 	PlayController.Volume.OnChanged = func(f float64) {
-		_ = global.EventBus.Publish(events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.PlayerVolumeChangeCmd, events.PlayerVolumeChangeCmdEvent{
 			Volume: f,
 		})
 	}
 
 	// todo: double check cover loading for new thread model
-	global.EventBus.Subscribe("", events.PlayerPlayingUpdate, "gui.player.updateinfo", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.PlayerPlayingUpdate, "gui.player.updateinfo", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 		if event.Data.(events.PlayerPlayingUpdateEvent).Removed {
 			PlayController.Progress.Value = 0
 			PlayController.Progress.Max = 0
@@ -227,7 +227,7 @@ func createPlayControllerV2() fyne.CanvasObject {
 		PlayController.Progress)
 
 	PlayController.Title = widget.NewLabel("Title")
-	PlayController.Title.Wrapping = fyne.TextTruncate
+	PlayController.Title.Truncation = fyne.TextTruncateClip
 	PlayController.Artist = widget.NewLabel("Artist")
 	PlayController.Username = widget.NewLabel("Username")
 

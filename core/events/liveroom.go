@@ -5,16 +5,6 @@ import (
 	liveroomsdk "github.com/AynaLivePlayer/liveroom-sdk"
 )
 
-//const (
-//	LiveRoomStatusChange   string = "liveclient.status.change"
-//	LiveRoomMessageReceive string = "liveclient.message.receive"
-//)
-//
-//type StatusChangeEvent struct {
-//	Connected bool
-//	Client    adapter.LiveClient
-//}
-
 const LiveRoomAddCmd = "cmd.liveroom.add"
 
 type LiveRoomAddCmdEvent struct {

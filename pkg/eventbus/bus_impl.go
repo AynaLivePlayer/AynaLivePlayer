@@ -191,7 +191,7 @@ func (b *bus) SubscribeAny(eventId, handlerName string, fn HandlerFunc) error {
 	return nil
 }
 
-func (b *bus) SubscribeOnce(eventId, handlerName string, fn HandlerFunc) error {
+func (b *bus) SubscribeOnce(channel, eventId, handlerName string, fn HandlerFunc) error {
 	if eventId == "" || handlerName == "" || fn == nil {
 		return errors.New("invalid SubscribeOnce args")
 	}
@@ -202,7 +202,7 @@ func (b *bus) SubscribeOnce(eventId, handlerName string, fn HandlerFunc) error {
 		m = make(map[string]handlerRec)
 		b.handlers[eventId] = m
 	}
-	m[handlerName] = handlerRec{name: handlerName, fn: fn, once: true}
+	m[handlerName] = handlerRec{channel: channel, name: handlerName, fn: fn, once: true}
 	return nil
 }
 
@@ -223,6 +223,10 @@ func (b *bus) Unsubscribe(eventId, handlerName string) error {
 
 func (b *bus) Publish(eventId string, data interface{}) error {
 	return b.PublishEvent(&Event{Id: eventId, Data: data})
+}
+
+func (b *bus) PublishToChannel(channel string, eventId string, data interface{}) error {
+	return b.PublishEvent(&Event{Id: eventId, Channel: channel, Data: data})
 }
 
 func (b *bus) PublishEvent(ev *Event) error {
@@ -325,6 +329,15 @@ func (b *bus) Call(eventId string, data interface{}, subEvtId string) (*Event, e
 	case <-b.drainedCh:
 		return nil, errors.New("bus stopped")
 	}
+}
+
+func (b *bus) Reply(req *Event, eventId string, data interface{}) error {
+	return b.PublishEvent(&Event{
+		Id:      eventId,
+		Channel: req.Channel,
+		EchoId:  req.EchoId,
+		Data:    data,
+	})
 }
 
 func (b *bus) nextEchoId() string {

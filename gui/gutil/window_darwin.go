@@ -1,11 +1,9 @@
-//go:build windows
-// +build windows
+//go:build darwin
 
-package xfyne
+package gutil
 
 import (
 	"fyne.io/fyne/v2"
-	"unsafe"
 )
 
 func GetWindowHandle(window fyne.Window) uintptr {
@@ -13,5 +11,5 @@ func GetWindowHandle(window fyne.Window) uintptr {
 	if glfwWindow == nil {
 		return 0
 	}
-	return uintptr(unsafe.Pointer(glfwWindow.GetWin32Window()))
+	return uintptr(glfwWindow.GetCocoaWindow())
 }

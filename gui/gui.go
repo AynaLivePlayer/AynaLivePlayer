@@ -72,7 +72,7 @@ func Initialize() {
 	// setupPlayerWindow()
 
 	// register error
-	global.EventBus.Subscribe("",
+	global.EventBus.Subscribe(eventChannel, 
 		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *eventbus.Event) {
 			err := e.Data.(events.ErrorUpdateEvent).Error
 			logger.Warnf("gui received error event: %v, %v", err, err == nil)

@@ -35,13 +35,13 @@ func createSearchBar() fyne.CanvasObject {
 		SearchResult.Items = make([]model.Media, 0)
 		SearchResult.List.Refresh()
 		SearchResult.mux.Unlock()
-		_ = global.EventBus.Publish(events.SearchCmd, events.SearchCmdEvent{
+		_ = global.EventBus.PublishToChannel(eventChannel, events.SearchCmd, events.SearchCmdEvent{
 			Keyword:  keyword,
 			Provider: pr,
 		})
 	})
 
-	global.EventBus.Subscribe("", events.MediaProviderUpdate,
+	global.EventBus.Subscribe(eventChannel,  events.MediaProviderUpdate,
 		"gui.search.provider.update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			providers := event.Data.(events.MediaProviderUpdateEvent)
 			s := make([]string, len(providers.Providers))

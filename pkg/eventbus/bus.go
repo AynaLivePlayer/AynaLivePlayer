@@ -26,7 +26,7 @@ type Subscriber interface {
 	// SubscribeAny is Subscribe with empty channel. this function will subscribe to event from any channel
 	SubscribeAny(eventId string, handlerName string, fn HandlerFunc) error
 	// SubscribeOnce will run handler once, and delete handler internally
-	SubscribeOnce(eventId string, handlerName string, fn HandlerFunc) error
+	SubscribeOnce(channel string, eventId string, handlerName string, fn HandlerFunc) error
 	// Unsubscribe just remove handler for the bus
 	Unsubscribe(eventId string, handlerName string) error
 }
@@ -34,6 +34,8 @@ type Subscriber interface {
 type Publisher interface {
 	// Publish basically a wrapper to PublishEvent
 	Publish(eventId string, data interface{}) error
+	// PublishToChannel publish event to a specific channel, basically another wrapper to PublishEvent
+	PublishToChannel(channel string, eventId string, data interface{}) error
 	// PublishEvent publish an event
 	PublishEvent(event *Event) error
 }
@@ -41,6 +43,7 @@ type Publisher interface {
 // Caller is special usage of a Publisher
 type Caller interface {
 	Call(pubEvtId string, data interface{}, subEvtId string) (*Event, error)
+	Reply(req *Event, eventId string, data interface{}) error
 }
 
 type Controller interface {

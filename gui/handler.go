@@ -7,7 +7,7 @@ import (
 )
 
 func registerHandlers() {
-	global.EventBus.Subscribe("", events.GUISetPlayerWindowOpenCmd, "gui.player.videoplayer.handleopen", func(event *eventbus.Event) {
+	global.EventBus.Subscribe(eventChannel,  events.GUISetPlayerWindowOpenCmd, "gui.player.videoplayer.handleopen", func(event *eventbus.Event) {
 		data := event.Data.(events.GUISetPlayerWindowOpenCmdEvent)
 		if data.SetOpen {
 			playerWindow.Close()

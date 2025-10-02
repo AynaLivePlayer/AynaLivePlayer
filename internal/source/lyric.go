@@ -1,4 +1,4 @@
-package controller
+package source
 
 import (
 	"AynaLivePlayer/core/events"
@@ -16,8 +16,8 @@ type lyricLoader struct {
 var lyricManager = &lyricLoader{}
 
 func createLyricLoader() {
-	log := global.Logger.WithPrefix("LyricLoader")
-	global.EventBus.Subscribe("", events.PlayerPlayingUpdate, "internal.lyric.update", func(event *eventbus.Event) {
+	var err error
+	err = global.EventBus.Subscribe("", events.PlayerPlayingUpdate, "internal.lyric.update", func(event *eventbus.Event) {
 		data := event.Data.(events.PlayerPlayingUpdateEvent)
 		if data.Removed {
 			log.Debugf("current media removed, clear lyric")
@@ -32,11 +32,14 @@ func createLyricLoader() {
 			lyricManager.Lyric = miaosic.ParseLyrics("", "")
 			log.Errorf("failed to get lyric for %s (%s): %s", data.Media.Info.Title, data.Media.Info.Meta.ID(), err)
 		}
-		_ = global.EventBus.Publish(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
+		_ = global.EventBus.Publish(events.UpdateCurrentLyric, events.UpdateCurrentLyricData{
 			Lyrics: lyricManager.Lyric,
 		})
 	})
-	global.EventBus.Subscribe("", events.PlayerPropertyTimePosUpdate, "internal.lyric.update_current", func(event *eventbus.Event) {
+	if err != nil {
+		log.ErrorW("Subscribe player playing update event failed", "error", err)
+	}
+	err = global.EventBus.Subscribe("", events.PlayerPropertyTimePosUpdate, "internal.lyric.update_current", func(event *eventbus.Event) {
 		time := event.Data.(events.PlayerPropertyTimePosUpdateEvent).TimePos
 		idx := lyricManager.Lyric.FindIndex(time)
 		if idx == lyricManager.prevIndex {
@@ -53,9 +56,15 @@ func createLyricLoader() {
 			})
 		return
 	})
-	global.EventBus.Subscribe("", events.PlayerLyricRequestCmd, "internal.lyric.request", func(event *eventbus.Event) {
-		_ = global.EventBus.Publish(events.PlayerLyricReload, events.PlayerLyricReloadEvent{
+	if err != nil {
+		log.ErrorW("Subscribe player time position update event failed", "error", err)
+	}
+	err = global.EventBus.Subscribe("", events.CmdGetCurrentLyric, "internal.lyric.request", func(event *eventbus.Event) {
+		_ = global.EventBus.Reply(event, events.UpdateCurrentLyric, events.UpdateCurrentLyricData{
 			Lyrics: lyricManager.Lyric,
 		})
 	})
+	if err != nil {
+		log.ErrorW("Subscribe player lyric request command event failed", "error", err)
+	}
 }

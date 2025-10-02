@@ -1,7 +1,6 @@
 //go:build !darwin && !windows && !linux
-// +build !darwin,!windows,!linux
 
-package xfyne
+package gutil
 
 import "fyne.io/fyne/v2"
 

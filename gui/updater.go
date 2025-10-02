@@ -11,7 +11,7 @@ import (
 )
 
 func checkUpdate() {
-	global.EventBus.Subscribe("",
+	global.EventBus.Subscribe(eventChannel, 
 		events.CheckUpdateResultUpdate, "gui.updater.check_update", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			data := event.Data.(events.CheckUpdateResultUpdateEvent)
 			msg := data.Info.Version.String() + "\n\n\n" + data.Info.Info

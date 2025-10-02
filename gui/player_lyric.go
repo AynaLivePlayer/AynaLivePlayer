@@ -42,7 +42,7 @@ func createLyricWindow() fyne.Window {
 	w.CenterOnScreen()
 
 	// register handlers
-	global.EventBus.Subscribe("",
+	global.EventBus.Subscribe(eventChannel,
 		events.PlayerLyricPosUpdate, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
 			e := event.Data.(events.PlayerLyricPosUpdateEvent)
 			logger.Debug("lyric update", e)
@@ -69,16 +69,16 @@ func createLyricWindow() fyne.Window {
 			fullLrc.Refresh()
 		}))
 
-	global.EventBus.Subscribe("", events.PlayerLyricReload, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
-		e := event.Data.(events.PlayerLyricReloadEvent)
+	global.EventBus.Subscribe(eventChannel, events.UpdateCurrentLyric, "player.lyric.current_lyric", gutil.ThreadSafeHandler(func(event *eventbus.Event) {
+		e := event.Data.(events.UpdateCurrentLyricData)
 		fullLrc.Objects = createLyricObj(&e.Lyrics)
 		lrcWindow.Refresh()
 	}))
 
-	_ = global.EventBus.Publish(events.PlayerLyricRequestCmd, events.PlayerLyricRequestCmdEvent{})
+	_ = global.EventBus.PublishToChannel(eventChannel, events.CmdGetCurrentLyric, events.CmdGetCurrentLyricData{})
 
 	w.SetOnClosed(func() {
-		global.EventBus.Unsubscribe(events.PlayerLyricReload, "player.lyric.current_lyric")
+		global.EventBus.Unsubscribe(events.UpdateCurrentLyric, "player.lyric.current_lyric")
 		PlayController.LrcWindowOpen = false
 	})
 	return w

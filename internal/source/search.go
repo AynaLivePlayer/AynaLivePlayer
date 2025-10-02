@@ -1,4 +1,4 @@
-package controller
+package source
 
 import (
 	"AynaLivePlayer/core/events"
@@ -9,9 +9,8 @@ import (
 )
 
 func handleSearch() {
-	log := global.Logger.WithPrefix("Search")
-	global.EventBus.Subscribe("",
-		events.SearchCmd, "internal.controller.search.handleSearchCmd", func(event *eventbus.Event) {
+	err := global.EventBus.Subscribe("",
+		events.SearchCmd, "internal.media_provider.search_handler", func(event *eventbus.Event) {
 			data := event.Data.(events.SearchCmdEvent)
 			log.Infof("Search %s using %s", data.Keyword, data.Provider)
 			searchResult, err := miaosic.SearchByProvider(data.Provider, data.Keyword, 1, 10)
@@ -26,9 +25,13 @@ func handleSearch() {
 					User: model.SystemUser,
 				}
 			}
-			_ = global.EventBus.Publish(
-				events.SearchResultUpdate, events.SearchResultUpdateEvent{
+			_ = global.EventBus.Reply(
+				event, events.SearchResultUpdate,
+				events.SearchResultUpdateEvent{
 					Medias: medias,
 				})
 		})
+	if err != nil {
+		log.ErrorW("Subscribe search event failed", "error", err)
+	}
 }
