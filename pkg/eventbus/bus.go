@@ -42,7 +42,7 @@ type Publisher interface {
 
 // Caller is special usage of a Publisher
 type Caller interface {
-	Call(pubEvtId string, data interface{}, subEvtId string) (*Event, error)
+	Call(pubEvtId string, subEvtId string, data interface{}) (*Event, error)
 	Reply(req *Event, eventId string, data interface{}) error
 }
 

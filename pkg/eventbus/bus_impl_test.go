@@ -13,7 +13,7 @@ import (
 
 // TestBasicLifecycle verifies the fundamental Start, Stop, and Wait operations.
 func TestBasicLifecycle(t *testing.T) {
-	b := New(WithWorkerSize(2), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(2), WithQueueSize(10))
 
 	// Start should only work once.
 	err := b.Start()
@@ -33,7 +33,7 @@ func TestBasicLifecycle(t *testing.T) {
 // TestSubscribeAndPublish verifies the core functionality of publishing an event
 // and having a subscriber receive it.
 func TestSubscribeAndPublish(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(10))
 	err := b.Start()
 	require.NoError(t, err)
 	defer b.Stop()
@@ -59,7 +59,7 @@ func TestSubscribeAndPublish(t *testing.T) {
 
 // TestUnsubscribe ensures that a handler stops receiving events after unsubscribing.
 func TestUnsubscribe(t *testing.T) {
-	b := New(WithWorkerSize(2), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(2), WithQueueSize(10))
 	b.Start()
 	defer b.Stop()
 
@@ -89,7 +89,7 @@ func TestUnsubscribe(t *testing.T) {
 // TestSubscribeOnce verifies that a handler subscribed with SubscribeOnce
 // is only called once and then automatically removed.
 func TestSubscribeOnce(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(10))
 	b.Start()
 	defer b.Stop()
 
@@ -102,7 +102,7 @@ func TestSubscribeOnce(t *testing.T) {
 		wg.Done()
 	}
 
-	err := b.SubscribeOnce("event-once", "handler-once", handler)
+	err := b.SubscribeOnce("", "event-once", "handler-once", handler)
 	require.NoError(t, err)
 
 	// Publish twice
@@ -118,7 +118,7 @@ func TestSubscribeOnce(t *testing.T) {
 
 // TestChannelSubscription validates that handlers correctly receive events based on channel matching.
 func TestChannelSubscription(t *testing.T) {
-	b := New(WithWorkerSize(2), WithQueueSize(20))
+	b := New(WithMaxWorkerSize(2), WithQueueSize(20))
 	b.Start()
 	defer b.Stop()
 
@@ -184,7 +184,7 @@ func TestChannelSubscription(t *testing.T) {
 // TestPublishBeforeStart ensures that events published before the bus starts are queued
 // and processed after Start() is called.
 func TestPublishBeforeStart(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(10))
 
 	var receivedCount int32
 	var wg sync.WaitGroup
@@ -215,7 +215,7 @@ func TestPublishBeforeStart(t *testing.T) {
 
 // TestCall validates the request-response pattern using the Call method.
 func TestCall(t *testing.T) {
-	b := New(WithWorkerSize(2), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(2), WithQueueSize(10))
 	b.Start()
 	defer b.Stop()
 
@@ -234,7 +234,7 @@ func TestCall(t *testing.T) {
 	require.NoError(t, err)
 
 	// Make the call
-	resp, err := b.Call("request-event", "my-data", "response-event")
+	resp, err := b.Call("request-event", "response-event", "my-data")
 
 	// Verify response
 	require.NoError(t, err)
@@ -245,7 +245,7 @@ func TestCall(t *testing.T) {
 
 // TestCall_StopDuringWait checks that Call returns an error if the bus is stopped while waiting.
 func TestCall_StopDuringWait(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(10))
 	b.Start()
 
 	var callErr error
@@ -255,7 +255,7 @@ func TestCall_StopDuringWait(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		// This call will never get a response
-		_, callErr = b.Call("no-reply-event", nil, "no-reply-response")
+		_, callErr = b.Call("no-reply-event", "no-reply-response", nil)
 	}()
 
 	// Give the goroutine time to start waiting
@@ -269,7 +269,7 @@ func TestCall_StopDuringWait(t *testing.T) {
 
 // TestPanicRecovery ensures that a panicking handler does not crash the worker.
 func TestPanicRecovery(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(10))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(10))
 	b.Start()
 	defer b.Stop()
 
@@ -304,7 +304,7 @@ func TestPanicRecovery(t *testing.T) {
 func TestConcurrency(t *testing.T) {
 	workerCount := 4
 	queueSize := 50
-	b := New(WithWorkerSize(workerCount), WithQueueSize(queueSize))
+	b := New(WithMaxWorkerSize(workerCount), WithQueueSize(queueSize))
 	b.Start()
 	defer b.Stop()
 
@@ -368,7 +368,7 @@ func TestConcurrency(t *testing.T) {
 
 // TestInvalidArguments checks that API methods return errors on invalid input.
 func TestInvalidArguments(t *testing.T) {
-	b := New(WithWorkerSize(1), WithQueueSize(1))
+	b := New(WithMaxWorkerSize(1), WithQueueSize(1))
 
 	// Subscribe
 	err := b.Subscribe("", "", "name", func(e *Event) {})
@@ -383,7 +383,7 @@ func TestInvalidArguments(t *testing.T) {
 	require.Error(t, err, "SubscribeAny should error on empty eventId")
 
 	// SubscribeOnce
-	err = b.SubscribeOnce("", "name", func(e *Event) {})
+	err = b.SubscribeOnce("", "", "name", func(e *Event) {})
 	require.Error(t, err, "SubscribeOnce should error on empty eventId")
 
 	// Unsubscribe
@@ -393,6 +393,6 @@ func TestInvalidArguments(t *testing.T) {
 	require.Error(t, err, "Unsubscribe should error on empty handlerName")
 
 	// Call
-	_, err = b.Call("", nil, "subID")
+	_, err = b.Call("", "subID", nil)
 	require.Error(t, err, "Call should error on empty eventId")
 }
