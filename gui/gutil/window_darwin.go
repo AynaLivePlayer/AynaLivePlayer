@@ -7,6 +7,8 @@ import (
 )
 
 func GetWindowHandle(window fyne.Window) uintptr {
+	// macos doesn't support --wid. :(
+	return 0
 	glfwWindow := getGlfwWindow(window)
 	if glfwWindow == nil {
 		return 0

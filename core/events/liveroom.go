@@ -5,12 +5,25 @@ import (
 	liveroomsdk "github.com/AynaLivePlayer/liveroom-sdk"
 )
 
-const LiveRoomAddCmd = "cmd.liveroom.add"
+const CmdLiveRoomAdd = "cmd.liveroom.add"
 
-type LiveRoomAddCmdEvent struct {
+type CmdLiveRoomAddData struct {
 	Title    string
 	Provider string
 	RoomKey  string
+}
+
+const CmdLiveRoomRemove = "cmd.liveroom.remove"
+
+type CmdLiveRoomRemoveData struct {
+	Identifier string
+}
+
+const CmdLiveRoomConfigChange = "cmd.liveroom.config.change"
+
+type CmdLiveRoomConfigChangeData struct {
+	Identifier string
+	Config     model.LiveRoomConfig
 }
 
 const LiveRoomProviderUpdate = "update.liveroom.provider"
@@ -19,41 +32,29 @@ type LiveRoomProviderUpdateEvent struct {
 	Providers []model.LiveRoomProviderInfo
 }
 
-const LiveRoomRemoveCmd = "cmd.liveroom.remove"
+const UpdateLiveRoomRooms = "update.liveroom.rooms"
 
-type LiveRoomRemoveCmdEvent struct {
-	Identifier string
-}
-
-const LiveRoomRoomsUpdate = "update.liveroom.rooms"
-
-type LiveRoomRoomsUpdateEvent struct {
+type UpdateLiveRoomRoomsData struct {
 	Rooms []model.LiveRoom
 }
 
-const LiveRoomStatusUpdate = "update.liveroom.status"
+const UpdateLiveRoomStatus = "update.liveroom.status"
 
-type LiveRoomStatusUpdateEvent struct {
+type UpdateLiveRoomStatusData struct {
 	Room model.LiveRoom
 }
 
-const LiveRoomConfigChangeCmd = "cmd.liveroom.config.change"
+const CmdLiveRoomOperation = "cmd.liveroom.operation"
 
-type LiveRoomConfigChangeCmdEvent struct {
-	Identifier string
-	Config     model.LiveRoomConfig
-}
-
-const LiveRoomOperationCmd = "cmd.liveroom.operation"
-
-type LiveRoomOperationCmdEvent struct {
+type CmdLiveRoomOperationData struct {
 	Identifier string
 	SetConnect bool // connect or disconnect
 }
 
-const LiveRoomOperationFinish = "update.liveroom.operation"
+const ReplyLiveRoomOperation = "reply.liveroom.operation"
 
-type LiveRoomOperationFinishEvent struct {
+type ReplyLiveRoomOperationData struct {
+	Err error
 }
 
 const LiveRoomMessageReceive = "update.liveroom.message"

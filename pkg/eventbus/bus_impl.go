@@ -152,18 +152,13 @@ func (b *bus) Wait() error {
 	select {
 	case <-done:
 		return nil
-	case <-b.drainedCh:
-		// Stopped
-		<-done
-		return nil
 	}
 }
 
 func (b *bus) Stop() error {
 	b.stopOnce.Do(func() {
 		b.stopping.Store(true)
-		close(b.stopCh)    // signal workers to stop immediately
-		close(b.drainedCh) // allow Wait() to proceed
+		close(b.stopCh) // signal workers to stop immediately
 	})
 	return nil
 }
@@ -328,7 +323,7 @@ func (b *bus) Call(eventId string, subEvtId string, data interface{}) (*Event, e
 		return resp, nil
 	case <-timeout:
 		return nil, errors.New("call timeout")
-	case <-b.drainedCh:
+	case <-b.stopCh:
 		return nil, errors.New("bus stopped")
 	}
 }

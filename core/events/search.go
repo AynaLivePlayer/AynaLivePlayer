@@ -4,15 +4,15 @@ import (
 	"AynaLivePlayer/core/model"
 )
 
-const SearchCmd = "cmd.search"
+const CmdMiaosicSearch = "cmd.search"
 
-type SearchCmdEvent struct {
+type CmdMiaosicSearchData struct {
 	Keyword  string
 	Provider string
 }
 
-const SearchResultUpdate = "update.search_result"
+const ReplyMiaosicSearch = "update.search_result"
 
-type SearchResultUpdateEvent struct {
+type ReplyMiaosicSearchData struct {
 	Medias []model.Media
 }

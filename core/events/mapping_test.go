@@ -7,16 +7,16 @@ import (
 )
 
 func TestUnmarshalEventData(t *testing.T) {
-	eventData := LiveRoomAddCmdEvent{
+	eventData := CmdLiveRoomAddData{
 		Title:    "test",
 		Provider: "asdfasd",
 		RoomKey:  "asdfasdf",
 	}
 	data, err := json.Marshal(eventData)
 	require.NoError(t, err)
-	val, err := UnmarshalEventData(LiveRoomAddCmd, data)
+	val, err := UnmarshalEventData(CmdLiveRoomAdd, data)
 	require.NoError(t, err)
-	resultData, ok := val.(LiveRoomAddCmdEvent)
+	resultData, ok := val.(CmdLiveRoomAddData)
 	require.True(t, ok)
 	require.Equal(t, eventData, resultData)
 }

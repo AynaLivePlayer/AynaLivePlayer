@@ -3,8 +3,8 @@ package sourcelogin
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/i18n"
 	"AynaLivePlayer/pkg/logger"
@@ -49,7 +49,7 @@ func (w *SourceLogin) Name() string {
 
 func (w *SourceLogin) Enable() error {
 	config.LoadConfig(w)
-	gui.AddConfigLayout(w)
+	config2.AddConfigLayout(w)
 	return nil
 }
 

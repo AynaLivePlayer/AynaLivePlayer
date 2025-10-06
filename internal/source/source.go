@@ -16,8 +16,10 @@ func loadMediaProvider() {
 	kugou.UseInstrumental()
 	miaosic.RegisterProvider(local.NewLocal(sourceCfg.LocalSourcePath))
 	if sourceCfg.QQChannel == "wechat" {
+		log.Info("qqmusic: using wechat login channel")
 		qq.UseWechatLogin()
 	} else {
+		log.Infof("qqmusic: using qq login channel")
 		qq.UseQQLogin()
 	}
 }

@@ -3,7 +3,7 @@ package durationmgmt
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
+	config2 "AynaLivePlayer/gui/views/config"
 
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -42,7 +42,7 @@ func (d *MaxDuration) Name() string {
 
 func (d *MaxDuration) Enable() error {
 	config.LoadConfig(d)
-	gui.AddConfigLayout(d)
+	config2.AddConfigLayout(d)
 	global.EventBus.Subscribe("",
 		events.PlayerPropertyDurationUpdate,
 		"plugin.maxduration.duration",

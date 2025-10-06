@@ -50,7 +50,7 @@ type ErrorUpdateEvent struct {
 //	Value    model.PlayerPropertyValue
 //}
 //
-//type LiveRoomStatusUpdateEvent struct {
+//type UpdateLiveRoomStatusData struct {
 //	RoomTitle string
 //	Status    bool
 //}

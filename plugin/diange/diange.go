@@ -4,8 +4,8 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -129,8 +129,8 @@ func (c *Diange) OnSave() {
 
 func (d *Diange) Enable() error {
 	config.LoadConfig(d)
-	gui.AddConfigLayout(d)
-	gui.AddConfigLayout(&blacklist{})
+	config2.AddConfigLayout(d)
+	config2.AddConfigLayout(&blacklist{})
 	global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.diange.message",

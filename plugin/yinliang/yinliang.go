@@ -3,8 +3,8 @@ package yinliang
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -65,7 +65,7 @@ func (y *Yinliang) Enable() error {
 		y.MaxVolume = 0
 	}
 
-	gui.AddConfigLayout(y)
+	config2.AddConfigLayout(y)
 
 	_ = global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,

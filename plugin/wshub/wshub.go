@@ -3,8 +3,8 @@ package wshub
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -46,7 +46,7 @@ func (w *WsHub) Enable() error {
 	// todo: should pass EnableWsHubControl to client instead of using global variable
 	globalEnableWsHubControl = w.EnableWsHubControl
 	w.server = newWsServer(&w.Port, &w.LocalHostOnly)
-	gui.AddConfigLayout(w)
+	config2.AddConfigLayout(w)
 	w.registerEvents()
 	w.log.Info("webinfo loaded")
 	if w.Enabled {

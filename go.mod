@@ -8,7 +8,7 @@ replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
 	github.com/AynaLivePlayer/miaosic v0.2.3 => ./pkg/miaosic // submodule
 
-	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
+	github.com/saltosystems/winrt-go => github.com/AynaLivePlayer/winrt-go v0.0.0-20250902062117-902ba325aee0
 )
 
 require (
@@ -23,6 +23,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/gorilla/websocket v1.5.3
+	github.com/k0kubun/pp/v3 v3.5.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/saltosystems/winrt-go v0.0.0-20241223121953-98e32661f6ff

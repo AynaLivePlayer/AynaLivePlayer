@@ -37,6 +37,7 @@ func Initialize() {
 
 	loadMediaProvider()
 	handleSearch()
+	handleInfo()
 	createLyricLoader()
 
 	_ = global.EventBus.Publish(

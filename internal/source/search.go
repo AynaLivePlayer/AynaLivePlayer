@@ -10,8 +10,8 @@ import (
 
 func handleSearch() {
 	err := global.EventBus.Subscribe("",
-		events.SearchCmd, "internal.media_provider.search_handler", func(event *eventbus.Event) {
-			data := event.Data.(events.SearchCmdEvent)
+		events.CmdMiaosicSearch, "internal.media_provider.search_handler", func(event *eventbus.Event) {
+			data := event.Data.(events.CmdMiaosicSearchData)
 			log.Infof("Search %s using %s", data.Keyword, data.Provider)
 			searchResult, err := miaosic.SearchByProvider(data.Provider, data.Keyword, 1, 10)
 			if err != nil {
@@ -26,8 +26,8 @@ func handleSearch() {
 				}
 			}
 			_ = global.EventBus.Reply(
-				event, events.SearchResultUpdate,
-				events.SearchResultUpdateEvent{
+				event, events.ReplyMiaosicSearch,
+				events.ReplyMiaosicSearchData{
 					Medias: medias,
 				})
 		})

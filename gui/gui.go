@@ -3,7 +3,16 @@ package gui
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
+	"AynaLivePlayer/gui/gctx"
 	"AynaLivePlayer/gui/gutil"
+	configView "AynaLivePlayer/gui/views/config"
+	"AynaLivePlayer/gui/views/history"
+	"AynaLivePlayer/gui/views/liverooms"
+	"AynaLivePlayer/gui/views/player"
+	"AynaLivePlayer/gui/views/playlists"
+	"AynaLivePlayer/gui/views/search"
+	"AynaLivePlayer/gui/views/systray"
+	"AynaLivePlayer/gui/views/updater"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -18,11 +27,6 @@ import (
 	_logger "AynaLivePlayer/pkg/logger"
 )
 
-var App fyne.App
-var MainWindow fyne.Window
-var playerWindow fyne.Window
-var playerWindowHandle uintptr
-
 var logger _logger.ILogger = nil
 
 func black_magic() {
@@ -31,48 +35,48 @@ func black_magic() {
 
 func Initialize() {
 	logger = global.Logger.WithPrefix("GUI")
+	gctx.Logger = logger
 	black_magic()
 	logger.Info("Initializing GUI")
+
 	if config.General.CustomFonts != "" {
 		_ = os.Setenv("FYNE_FONT", config.GetAssetPath(config.General.CustomFonts))
 	}
-	App = app.NewWithID(config.ProgramName)
-	//App.Settings().SetTheme(&myTheme{})
-	MainWindow = App.NewWindow(getAppTitle())
+
+	mainApp := app.NewWithID(config.ProgramName)
+	MainWindow := mainApp.NewWindow(getAppTitle())
+
+	gctx.Context = gctx.NewGuiContext(mainApp, MainWindow)
+	gctx.Context.Init()
+
+	gctx.Context.OnMainWindowClosing(func() {
+		_ = config.SaveToConfigFile(config.ConfigPath)
+		logger.Infof("config saved to %s", config.ConfigPath)
+	})
+
+	updater.CreateUpdaterPopUp()
 
 	tabs := container.NewAppTabs(
-		container.NewTabItem(i18n.T("gui.tab.player"),
-			container.NewBorder(nil, createPlayControllerV2(), nil, nil, createPlaylist()),
-		),
-		container.NewTabItem(i18n.T("gui.tab.search"),
-			container.NewBorder(createSearchBar(), nil, nil, nil, createSearchList()),
-		),
-		container.NewTabItem(i18n.T("gui.tab.room"),
-			container.NewBorder(nil, nil, createRoomSelector(), nil, createRoomController()),
-		),
-		container.NewTabItem(i18n.T("gui.tab.playlist"),
-			container.NewBorder(nil, nil, createPlaylists(), nil, createPlaylistMedias()),
-		),
-		container.NewTabItem(i18n.T("gui.tab.history"),
-			container.NewBorder(nil, nil, nil, nil, createHistoryList()),
-		),
-		container.NewTabItem(i18n.T("gui.tab.config"),
-			createConfigLayout(),
-		),
+		container.NewTabItem(i18n.T("gui.tab.player"), player.CreateView()),
+		container.NewTabItem(i18n.T("gui.tab.search"), search.CreateView()),
+		container.NewTabItem(i18n.T("gui.tab.room"), liverooms.CreateView()),
+		container.NewTabItem(i18n.T("gui.tab.playlist"), playlists.CreateView()),
+		container.NewTabItem(i18n.T("gui.tab.history"), history.CreateView()),
+		container.NewTabItem(i18n.T("gui.tab.config"), configView.CreateView()),
 	)
 
 	tabs.SetTabLocation(container.TabLocationTop)
 	MainWindow.SetIcon(resource.ImageIcon)
 	MainWindow.SetContent(tabs)
-	//MainWindow.Resize(fyne.NewSize(1280, 720))
 	MainWindow.Resize(fyne.NewSize(config.General.Width, config.General.Height))
+	MainWindow.SetFixedSize(config.General.FixedSize)
 
 	// todo: fix, window were created even if not show. this block gui from closing
 	// i can't create sub window before the main window shows.
 	// setupPlayerWindow()
 
 	// register error
-	global.EventBus.Subscribe(eventChannel, 
+	global.EventBus.Subscribe(gctx.EventChannel,
 		events.ErrorUpdate, "gui.show_error", gutil.ThreadSafeHandler(func(e *eventbus.Event) {
 			err := e.Data.(events.ErrorUpdateEvent).Error
 			logger.Warnf("gui received error event: %v, %v", err, err == nil)
@@ -82,23 +86,7 @@ func Initialize() {
 			dialog.ShowError(err, MainWindow)
 		}))
 
-	checkUpdate()
-	MainWindow.SetFixedSize(config.General.FixedSize)
 	if config.General.ShowSystemTray {
-		setupSysTray()
-	} else {
-		MainWindow.SetCloseIntercept(
-			func() {
-				// todo: save twice i don;t care
-				_ = config.SaveToConfigFile(config.ConfigPath)
-				MainWindow.Close()
-			})
+		systray.SetupSysTray()
 	}
-	MainWindow.SetOnClosed(func() {
-		logger.Infof("GUI closing")
-		if playerWindow != nil {
-			logger.Infof("player window closing")
-			playerWindow.Close()
-		}
-	})
 }

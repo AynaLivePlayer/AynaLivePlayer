@@ -1,9 +1,11 @@
 package main
 
 import (
+	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
 	"AynaLivePlayer/gui"
+	"AynaLivePlayer/gui/gctx"
 	"AynaLivePlayer/internal"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -41,7 +43,7 @@ var Log = &_LogConfig{
 
 func setupGlobal() {
 	//global.EventManager = event.NewManger(128, 16)
-	global.EventBus = eventbus.New()
+	global.EventBus = eventbus.New(eventbus.WithMaxWorkerSize(len(events.EventsMapping)))
 	global.Logger = loggerRepo.NewZapColoredLogger(Log.Path, !*dev)
 	global.Logger.SetLogLevel(Log.Level)
 }
@@ -78,13 +80,13 @@ func main() {
 		<-quit
 	} else {
 		gui.Initialize()
-		gui.MainWindow.ShowAndRun()
+		gctx.Context.Window.ShowAndRun()
 	}
 	global.Logger.Info("closing internal server")
 	internal.Stop()
 	global.Logger.Infof("closing event manager")
-	//global.EventManager.Stop()
 	_ = global.EventBus.Stop()
+	_ = global.EventBus.Wait()
 	if *dev {
 		global.Logger.Infof("saving translation")
 		i18n.SaveTranslation()

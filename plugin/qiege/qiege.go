@@ -3,8 +3,8 @@ package qiege
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
@@ -44,7 +44,7 @@ func (d *Qiege) Name() string {
 
 func (d *Qiege) Enable() error {
 	config.LoadConfig(d)
-	gui.AddConfigLayout(d)
+	config2.AddConfigLayout(d)
 	global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.qiege.message",
