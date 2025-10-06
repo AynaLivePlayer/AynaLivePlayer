@@ -33,7 +33,7 @@ type PlayControllerContainer struct {
 	ButtonLrc     *widget.Button
 	ButtonPlayer  *widget.Button
 	LrcWindowOpen bool
-	CurrentTime   *widget.Label
+	CurrentTime   *component.LabelFixedSize
 	TotalTime     *widget.Label
 }
 
@@ -64,6 +64,12 @@ func registerPlayControllerHandler() {
 			createLyricWindowV2().Show()
 		}
 	}
+
+	gctx.Context.OnMainWindowClosing(func() {
+		if lyricWindow != nil {
+			lyricWindow.Close()
+		}
+	})
 
 	PlayController.ButtonPlayer.OnTapped = func() {
 		showPlayerWindow()
@@ -220,12 +226,12 @@ func createPlayControllerV2() fyne.CanvasObject {
 	controls.SeparatorThickness = 0
 
 	PlayController.Progress = component.NewSliderPlus(0, 1000)
-	PlayController.CurrentTime = widget.NewLabel("00:00")
+	PlayController.CurrentTime = component.NewLabelFixedSize(widget.NewLabel("00:00"))
 	PlayController.TotalTime = widget.NewLabel("00:00")
 	progressItem := container.NewBorder(nil, nil,
-		nil,
+		PlayController.CurrentTime,
 		PlayController.TotalTime,
-		component.NewFixedHSplitContainer(PlayController.CurrentTime, PlayController.Progress, 0.1))
+		PlayController.Progress)
 
 	PlayController.Title = widget.NewLabel("Title")
 	PlayController.Title.Truncation = fyne.TextTruncateClip
