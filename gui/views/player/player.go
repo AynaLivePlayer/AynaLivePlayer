@@ -12,7 +12,7 @@ func CreateView() fyne.CanvasObject {
 	gctx.Context.OnMainWindowClosing(func() {
 		if playerWindow != nil {
 			gctx.Logger.Infof("closing player window")
-			playerWindow.Close()
+			go playerWindow.Close()
 		}
 	})
 	return container.NewBorder(nil, createPlayControllerV2(), nil, nil, createPlaylist())

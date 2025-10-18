@@ -16,8 +16,8 @@ func SetupSysTray() {
 			}))
 		desk.SetSystemTrayMenu(m)
 		desk.SetSystemTrayIcon(resource.ImageIcon)
+		gctx.Context.Window.SetCloseIntercept(func() {
+			gctx.Context.Window.Hide()
+		})
 	}
-	gctx.Context.Window.SetCloseIntercept(func() {
-		gctx.Context.Window.Hide()
-	})
 }

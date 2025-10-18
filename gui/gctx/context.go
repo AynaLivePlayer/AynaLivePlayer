@@ -32,7 +32,8 @@ func NewGuiContext(app fyne.App, mainWindow fyne.Window) *GuiContext {
 
 func (c *GuiContext) Init() {
 	c.Window.SetOnClosed(func() {
-		for _, f := range c.onMainWindowClosing {
+		for idx, f := range c.onMainWindowClosing {
+			Logger.Debugf("runing gui closing handler #%d", idx)
 			f()
 		}
 	})
