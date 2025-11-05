@@ -8,7 +8,7 @@ replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
 	github.com/AynaLivePlayer/miaosic v0.2.3 => ./pkg/miaosic // submodule
 
-	github.com/saltosystems/winrt-go => github.com/AynaLivePlayer/winrt-go v0.0.0-20250902062117-902ba325aee0
+	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
 )
 
 require (
