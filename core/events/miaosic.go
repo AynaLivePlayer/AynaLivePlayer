@@ -12,7 +12,7 @@ const ReplyMiaosicGetMediaInfo = "reply.miaosic.getMediaInfo"
 
 type ReplyMiaosicGetMediaInfoData struct {
 	Info  miaosic.MediaInfo `json:"info"`
-	Error error
+	Error error             `json:"error"`
 }
 
 const CmdMiaosicGetMediaUrl = "cmd.miaosic.getMediaUrl"
@@ -26,5 +26,31 @@ const ReplyMiaosicGetMediaUrl = "reply.miaosic.getMediaUrl"
 
 type ReplyMiaosicGetMediaUrlData struct {
 	Urls  []miaosic.MediaUrl `json:"urls"`
-	Error error
+	Error error              `json:"error"`
+}
+
+const CmdMiaosicQrLogin = "cmd.miaosic.qrLogin"
+
+type CmdMiaosicQrLoginData struct {
+	Provider string `json:"provider"`
+}
+
+const ReplyMiaosicQrLogin = "reply.miaosic.qrLogin"
+
+type ReplyMiaosicQrLoginData struct {
+	Session miaosic.QrLoginSession `json:"session"`
+	Error   error                  `json:"error"`
+}
+
+const CmdMiaosicQrLoginVerify = "cmd.miaosic.qrLoginVerify"
+
+type CmdMiaosicQrLoginVerifyData struct {
+	Session miaosic.QrLoginSession `json:"session"`
+}
+
+const ReplyMiaosicQrLoginVerify = "reply.miaosic.qrLoginVerify"
+
+type ReplyMiaosicQrLoginVerifyData struct {
+	Result miaosic.QrLoginResult `json:"result"`
+	Error  error                 `json:"error"`
 }

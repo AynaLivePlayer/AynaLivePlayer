@@ -17,7 +17,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"time"
 )
 
 var dev = flag.Bool("dev", false, "dev")
@@ -68,19 +67,14 @@ func main() {
 	global.Logger.Info("================Program Start================")
 	global.Logger.Infof("================Current Version: %s================", model.Version(config.Version))
 	internal.Initialize()
-	go func() {
-		// temporary fix for gui not render correctly.
-		// wait until gui rendered then start event dispatching
-		time.Sleep(1 * time.Second)
-		//global.EventManager.Start()
-		_ = global.EventBus.Start()
-	}()
 	if *headless || config.Experimental.Headless {
 		quit := make(chan os.Signal)
 		signal.Notify(quit, os.Interrupt)
+		_ = global.EventBus.Start()
 		<-quit
 	} else {
 		gui.Initialize()
+		_ = global.EventBus.Start()
 		gctx.Context.Window.ShowAndRun()
 	}
 	global.Logger.Info("closing internal server")

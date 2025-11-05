@@ -76,6 +76,7 @@ func (w *SourceLogin) Description() string {
 	return i18n.T("plugin.sourcelogin.description")
 }
 
+// todo: fix using fyne async update ui
 func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 	if w.panel != nil {
 		return w.panel
