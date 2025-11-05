@@ -45,6 +45,45 @@ func handleSourceLogin() {
 				})
 		})
 	if err != nil {
-		log.ErrorW("Subscribe search event failed", "error", err)
+		log.ErrorW("Subscribe miaosic qrlogin failed", "error", err)
+	}
+	err = global.EventBus.Subscribe("",
+		events.CmdMiaosicQrLoginVerify, "internal.media_provider.qrloginverify_handler", func(event *eventbus.Event) {
+			data := event.Data.(events.CmdMiaosicQrLoginVerifyData)
+			log.Infof("trying login verify %s", data.Provider)
+			pvdr, ok := miaosic.GetProvider(data.Provider)
+			if !ok {
+				_ = global.EventBus.Reply(
+					event, events.ReplyMiaosicQrLoginVerify,
+					events.ReplyMiaosicQrLoginVerifyData{
+						Result: miaosic.QrLoginResult{},
+						Error:  miaosic.ErrorNoSuchProvider,
+					})
+				return
+			}
+			loginable, ok := pvdr.(miaosic.Loginable)
+			if !ok {
+				_ = global.EventBus.Reply(
+					event, events.ReplyMiaosicQrLoginVerify,
+					events.ReplyMiaosicQrLoginVerifyData{
+						Result: miaosic.QrLoginResult{},
+						Error:  miaosic.ErrNotImplemented,
+					})
+				return
+			}
+			var result miaosic.QrLoginResult
+			res, err := loginable.QrLoginVerify(&data.Session)
+			if err == nil && res != nil {
+				result = *res
+			}
+			_ = global.EventBus.Reply(
+				event, events.ReplyMiaosicQrLoginVerify,
+				events.ReplyMiaosicQrLoginVerifyData{
+					Result: result,
+					Error:  err,
+				})
+		})
+	if err != nil {
+		log.ErrorW("Subscribe miaosic qrloginverify failed", "error", err)
 	}
 }
