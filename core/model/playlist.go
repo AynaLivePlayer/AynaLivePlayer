@@ -13,9 +13,8 @@ const (
 type PlaylistID string
 
 const (
-	PlaylistIDPlayer  PlaylistID = "player"
-	PlaylistIDSystem  PlaylistID = "system"
-	PlaylistIDHistory PlaylistID = "history"
+	PlaylistIDPlayer PlaylistID = "player"
+	PlaylistIDSystem PlaylistID = "system"
 )
 
 type PlaylistInfo struct {

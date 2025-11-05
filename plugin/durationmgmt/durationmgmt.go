@@ -3,8 +3,8 @@ package durationmgmt
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
-	"AynaLivePlayer/gui/xfyne"
+	config2 "AynaLivePlayer/gui/views/config"
+
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -42,7 +42,7 @@ func (d *MaxDuration) Name() string {
 
 func (d *MaxDuration) Enable() error {
 	config.LoadConfig(d)
-	gui.AddConfigLayout(d)
+	config2.AddConfigLayout(d)
 	global.EventBus.Subscribe("",
 		events.PlayerPropertyDurationUpdate,
 		"plugin.maxduration.duration",
@@ -91,7 +91,7 @@ func (d *MaxDuration) CreatePanel() fyne.CanvasObject {
 	if d.panel != nil {
 		return d.panel
 	}
-	maxDurationInput := xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MaxDuration))))
+	maxDurationInput := widget.NewEntryWithData(binding.IntToString(binding.BindInt(&d.MaxDuration)))
 	skipOnPlayCheckbox := widget.NewCheckWithData(i18n.T("plugin.maxduration.enable"), binding.BindBool(&d.SkipOnPlay))
 	skipOnReachCheckbox := widget.NewCheckWithData(i18n.T("plugin.maxduration.enable"), binding.BindBool(&d.SkipOnReach))
 	d.panel = container.New(

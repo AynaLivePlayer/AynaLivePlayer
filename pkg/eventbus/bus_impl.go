@@ -3,7 +3,6 @@ package eventbus
 import (
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -24,8 +23,8 @@ type task struct {
 // bus implements Bus.
 type bus struct {
 	// configuration
-	workerCount int
-	queueSize   int
+	maxWorkerSize int
+	queueSize     int
 
 	// workers
 	queues []chan task
@@ -39,9 +38,10 @@ type bus struct {
 	drainedCh chan struct{}
 
 	// routing & bookkeeping
-	mu       sync.RWMutex
-	handlers map[string]map[string]handlerRec // eventId -> handlerName -> handlerRec
-	pending  []*Event                         // events published before Start()
+	mu          sync.RWMutex
+	handlers    map[string]map[string]handlerRec // eventId -> handlerName -> handlerRec
+	workerIdxes map[string]int                   // eventId -> workerIdx
+	pending     []*Event                         // events published before Start()
 
 	// rendezvous for Call/EchoId
 	waitMu     sync.Mutex
@@ -57,30 +57,37 @@ type bus struct {
 // workerCount >= 1, queueSize >= 1.
 func New(opts ...Option) Bus {
 	option := options{
-		log:        Log,
-		workerSize: 10,
-		queueSize:  100,
+		log:           Log,
+		maxWorkerSize: 10,
+		queueSize:     100,
 	}
 	for _, opt := range opts {
 		opt(&option)
 	}
 	b := &bus{
-		workerCount: option.workerSize,
-		queueSize:   option.queueSize,
-		queues:      make([]chan task, option.workerSize),
-		stopCh:      make(chan struct{}),
-		drainedCh:   make(chan struct{}),
-		handlers:    make(map[string]map[string]handlerRec),
-		pending:     make([]*Event, 0, 16),
-		echoWaiter:  make(map[string]chan *Event),
-		log:         option.log,
+		maxWorkerSize: option.maxWorkerSize,
+		queueSize:     option.queueSize,
+		queues:        make([]chan task, 0, option.maxWorkerSize),
+		stopCh:        make(chan struct{}),
+		drainedCh:     make(chan struct{}),
+		handlers:      make(map[string]map[string]handlerRec),
+		workerIdxes:   make(map[string]int),
+		pending:       make([]*Event, 0, 16),
+		echoWaiter:    make(map[string]chan *Event),
+		log:           option.log,
 	}
-	for i := 0; i < option.workerSize; i++ {
-		q := make(chan task, option.queueSize)
-		b.queues[i] = q
-		go b.workerLoop(q)
+	for i := 0; i < option.maxWorkerSize; i++ {
+		b.addWorker()
 	}
 	return b
+}
+
+func (b *bus) addWorker() {
+	b.mu.Lock()
+	q := make(chan task, b.queueSize)
+	b.queues = append(b.queues, q)
+	go b.workerLoop(q)
+	b.mu.Unlock()
 }
 
 func (b *bus) workerLoop(q chan task) {
@@ -145,18 +152,13 @@ func (b *bus) Wait() error {
 	select {
 	case <-done:
 		return nil
-	case <-b.drainedCh:
-		// Stopped
-		<-done
-		return nil
 	}
 }
 
 func (b *bus) Stop() error {
 	b.stopOnce.Do(func() {
 		b.stopping.Store(true)
-		close(b.stopCh)    // signal workers to stop immediately
-		close(b.drainedCh) // allow Wait() to proceed
+		close(b.stopCh) // signal workers to stop immediately
 	})
 	return nil
 }
@@ -171,27 +173,17 @@ func (b *bus) Subscribe(channel string, eventId, handlerName string, fn HandlerF
 	if m == nil {
 		m = make(map[string]handlerRec)
 		b.handlers[eventId] = m
+		b.workerIdxes[eventId] = len(b.workerIdxes) % b.maxWorkerSize // assign a worker index for this eventId
 	}
 	m[handlerName] = handlerRec{name: handlerName, fn: fn, channel: channel}
 	return nil
 }
 
 func (b *bus) SubscribeAny(eventId, handlerName string, fn HandlerFunc) error {
-	if eventId == "" || handlerName == "" || fn == nil {
-		return errors.New("invalid Subscribe args")
-	}
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	m := b.handlers[eventId]
-	if m == nil {
-		m = make(map[string]handlerRec)
-		b.handlers[eventId] = m
-	}
-	m[handlerName] = handlerRec{name: handlerName, fn: fn, channel: ""}
-	return nil
+	return b.Subscribe("", eventId, handlerName, fn)
 }
 
-func (b *bus) SubscribeOnce(eventId, handlerName string, fn HandlerFunc) error {
+func (b *bus) SubscribeOnce(channel, eventId, handlerName string, fn HandlerFunc) error {
 	if eventId == "" || handlerName == "" || fn == nil {
 		return errors.New("invalid SubscribeOnce args")
 	}
@@ -201,8 +193,9 @@ func (b *bus) SubscribeOnce(eventId, handlerName string, fn HandlerFunc) error {
 	if m == nil {
 		m = make(map[string]handlerRec)
 		b.handlers[eventId] = m
+		b.workerIdxes[eventId] = len(b.workerIdxes) % b.maxWorkerSize // assign a worker index for this eventId
 	}
-	m[handlerName] = handlerRec{name: handlerName, fn: fn, once: true}
+	m[handlerName] = handlerRec{channel: channel, name: handlerName, fn: fn, once: true}
 	return nil
 }
 
@@ -225,6 +218,10 @@ func (b *bus) Publish(eventId string, data interface{}) error {
 	return b.PublishEvent(&Event{Id: eventId, Data: data})
 }
 
+func (b *bus) PublishToChannel(channel string, eventId string, data interface{}) error {
+	return b.PublishEvent(&Event{Id: eventId, Channel: channel, Data: data})
+}
+
 func (b *bus) PublishEvent(ev *Event) error {
 	if ev == nil || ev.Id == "" {
 		return errors.New("invalid PublishEvent args")
@@ -242,6 +239,10 @@ func (b *bus) PublishEvent(ev *Event) error {
 			case ch <- ev:
 			default:
 			}
+			// in this case, we found this event belong to local call
+			// so we don't need to dispatch this event to other subscriber
+			b.waitMu.Unlock()
+			return nil
 		}
 		b.waitMu.Unlock()
 	}
@@ -281,7 +282,7 @@ func (b *bus) PublishEvent(ev *Event) error {
 
 	// Enqueue each handler on its shard (worker) based on (eventId, handlerName).
 	for _, h := range hs {
-		idx := shardIndex(b.workerCount, ev.Id, h.name)
+		idx := b.shardIndex(ev.Id, h.name)
 		b.wg.Add(1)
 		select {
 		case b.queues[idx] <- task{ev: cloneEvent(ev), h: h}:
@@ -296,7 +297,7 @@ func (b *bus) PublishEvent(ev *Event) error {
 // Call publishes a request and waits for a response event with the same EchoId.
 // NOTE: Handlers should reply by publishing an Event with the SAME EchoId.
 // Use Reply helper below.
-func (b *bus) Call(eventId string, data interface{}, subEvtId string) (*Event, error) {
+func (b *bus) Call(eventId string, subEvtId string, data interface{}) (*Event, error) {
 	if eventId == "" {
 		return nil, errors.New("empty eventId")
 	}
@@ -322,9 +323,18 @@ func (b *bus) Call(eventId string, data interface{}, subEvtId string) (*Event, e
 		return resp, nil
 	case <-timeout:
 		return nil, errors.New("call timeout")
-	case <-b.drainedCh:
+	case <-b.stopCh:
 		return nil, errors.New("bus stopped")
 	}
+}
+
+func (b *bus) Reply(req *Event, eventId string, data interface{}) error {
+	return b.PublishEvent(&Event{
+		Id:      eventId,
+		Channel: req.Channel,
+		EchoId:  req.EchoId,
+		Data:    data,
+	})
 }
 
 func (b *bus) nextEchoId() string {
@@ -332,12 +342,18 @@ func (b *bus) nextEchoId() string {
 	return fmt.Sprintf("echo-%d-%d", time.Now().UnixNano(), x)
 }
 
-func shardIndex(n int, eventId, handlerName string) int {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(eventId))
-	_, _ = h.Write([]byte{0})
-	_, _ = h.Write([]byte(handlerName))
-	return int(h.Sum32() % uint32(n))
+func (b *bus) shardIndex(eventId, handlerName string) int {
+	val, _ := b.workerIdxes[eventId]
+	return val
+	// what if two different eventId and handlerName produce same shard index?
+	// and one handler happens to call another event synchronously?
+	// well, in that case, the second event will be blocked until the first one finishes
+	// which cause deadlock if the first one is waiting for the second one to finish
+	//h := fnv.New32a()
+	//_, _ = h.Write([]byte(eventId))
+	//_, _ = h.Write([]byte{0})
+	//_, _ = h.Write([]byte(handlerName))
+	//return int(h.Sum32() % uint32(n))
 }
 
 func cloneEvent(e *Event) *Event {

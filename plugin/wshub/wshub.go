@@ -3,9 +3,9 @@ package wshub
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
-	"AynaLivePlayer/gui/xfyne"
+	config2 "AynaLivePlayer/gui/views/config"
+
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -46,7 +46,7 @@ func (w *WsHub) Enable() error {
 	// todo: should pass EnableWsHubControl to client instead of using global variable
 	globalEnableWsHubControl = w.EnableWsHubControl
 	w.server = newWsServer(&w.Port, &w.LocalHostOnly)
-	gui.AddConfigLayout(w)
+	config2.AddConfigLayout(w)
 	w.registerEvents()
 	w.log.Info("webinfo loaded")
 	if w.Enabled {
@@ -104,9 +104,9 @@ func (w *WsHub) CreatePanel() fyne.CanvasObject {
 	freshStatusText()
 	serverPort := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.wshub.port")), nil,
-		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port)))),
+		widget.NewEntryWithData(binding.IntToString(binding.BindInt(&w.Port))),
 	)
-	serverUrl := xfyne.EntryDisableUndoRedo(widget.NewEntry())
+	serverUrl := widget.NewEntry()
 	serverUrl.SetText(w.server.getWsUrl())
 	serverUrl.Disable()
 	serverPreview := container.NewBorder(nil, nil,
@@ -175,7 +175,7 @@ func (w *WsHub) registerEvents() {
 	for eid, _ := range events.EventsMapping {
 		eventCache = append(eventCache, &EventData{})
 		currentIdx := i
-		global.EventBus.Subscribe("", eid,
+		global.EventBus.Subscribe(eventChannel, eid,
 			"plugin.wshub.event."+string(eid),
 			func(e *eventbus.Event) {
 				ed := EventData{

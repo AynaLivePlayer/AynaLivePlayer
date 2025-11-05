@@ -2,14 +2,14 @@ package events
 
 import "github.com/AynaLivePlayer/miaosic"
 
-const PlayerLyricRequestCmd = "cmd.player.lyric.request"
+const CmdGetCurrentLyric = "cmd.player.lyric.request"
 
-type PlayerLyricRequestCmdEvent struct {
+type CmdGetCurrentLyricData struct {
 }
 
-const PlayerLyricReload = "update.player.lyric.reload"
+const UpdateCurrentLyric = "update.player.lyric.reload"
 
-type PlayerLyricReloadEvent struct {
+type UpdateCurrentLyricData struct {
 	Lyrics miaosic.Lyrics
 }
 

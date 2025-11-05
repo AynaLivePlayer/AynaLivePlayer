@@ -95,6 +95,7 @@ func createPlaylistManager() {
 					})
 				return
 			}
+			// todo: use eventbus instead
 			getPlaylist, err := miaosic.GetPlaylist(pl.Meta)
 			if err != nil {
 				_ = global.EventBus.Publish(
@@ -156,6 +157,7 @@ func createPlaylistManager() {
 					})
 				return
 			}
+			// todo: use eventbus instead
 			pl, err := miaosic.GetPlaylist(meta)
 			if err != nil {
 				_ = global.EventBus.Publish(

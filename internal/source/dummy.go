@@ -4,6 +4,7 @@ import (
 	"github.com/AynaLivePlayer/miaosic"
 )
 
+// dummySource is placeholder source for bypassing copyright requirement
 type dummySource struct{}
 
 func (d *dummySource) GetName() string {

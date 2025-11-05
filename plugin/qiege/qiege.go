@@ -3,9 +3,9 @@ package qiege
 import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
-	"AynaLivePlayer/gui/xfyne"
+	config2 "AynaLivePlayer/gui/views/config"
+
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -44,7 +44,7 @@ func (d *Qiege) Name() string {
 
 func (d *Qiege) Enable() error {
 	config.LoadConfig(d)
-	gui.AddConfigLayout(d)
+	config2.AddConfigLayout(d)
 	global.EventBus.Subscribe("",
 		events.LiveRoomMessageReceive,
 		"plugin.qiege.message",
@@ -121,7 +121,7 @@ func (d *Qiege) CreatePanel() fyne.CanvasObject {
 	)
 	qgShortCut := container.NewBorder(nil, nil,
 		widget.NewLabel(i18n.T("plugin.qiege.custom_cmd")), nil,
-		xfyne.EntryDisableUndoRedo(widget.NewEntryWithData(binding.BindString(&d.CustomCMD))),
+		widget.NewEntryWithData(binding.BindString(&d.CustomCMD)),
 	)
 	d.panel = container.NewVBox(dgPerm, qgShortCut)
 	return d.panel

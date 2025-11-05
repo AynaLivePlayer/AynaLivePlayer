@@ -8,13 +8,13 @@ import (
 )
 
 var EventsMapping = map[string]any{
-	LiveRoomAddCmd:                      LiveRoomAddCmdEvent{},
+	CmdLiveRoomAdd:                      CmdLiveRoomAddData{},
 	LiveRoomProviderUpdate:              LiveRoomProviderUpdateEvent{},
-	LiveRoomRemoveCmd:                   LiveRoomRemoveCmdEvent{},
-	LiveRoomRoomsUpdate:                 LiveRoomRoomsUpdateEvent{},
-	LiveRoomStatusUpdate:                LiveRoomStatusUpdateEvent{},
-	LiveRoomConfigChangeCmd:             LiveRoomConfigChangeCmdEvent{},
-	LiveRoomOperationCmd:                LiveRoomOperationCmdEvent{},
+	CmdLiveRoomRemove:                   CmdLiveRoomRemoveData{},
+	UpdateLiveRoomRooms:                 UpdateLiveRoomRoomsData{},
+	UpdateLiveRoomStatus:                UpdateLiveRoomStatusData{},
+	CmdLiveRoomConfigChange:             CmdLiveRoomConfigChangeData{},
+	CmdLiveRoomOperation:                CmdLiveRoomOperationData{},
 	PlayerVolumeChangeCmd:               PlayerVolumeChangeCmdEvent{},
 	PlayerPlayCmd:                       PlayerPlayCmdEvent{},
 	PlayerPlayErrorUpdate:               PlayerPlayErrorUpdateEvent{},
@@ -22,8 +22,8 @@ var EventsMapping = map[string]any{
 	PlayerToggleCmd:                     PlayerToggleCmdEvent{},
 	PlayerSetPauseCmd:                   PlayerSetPauseCmdEvent{},
 	PlayerPlayNextCmd:                   PlayerPlayNextCmdEvent{},
-	PlayerLyricRequestCmd:               PlayerLyricRequestCmdEvent{},
-	PlayerLyricReload:                   PlayerLyricReloadEvent{},
+	CmdGetCurrentLyric:                  CmdGetCurrentLyricData{},
+	UpdateCurrentLyric:                  UpdateCurrentLyricData{},
 	PlayerLyricPosUpdate:                PlayerLyricPosUpdateEvent{},
 	PlayerPlayingUpdate:                 PlayerPlayingUpdateEvent{},
 	PlayerPropertyPauseUpdate:           PlayerPropertyPauseUpdateEvent{},
@@ -44,13 +44,13 @@ var EventsMapping = map[string]any{
 	PlaylistManagerAddPlaylistCmd:       PlaylistManagerAddPlaylistCmdEvent{},
 	PlaylistManagerRemovePlaylistCmd:    PlaylistManagerRemovePlaylistCmdEvent{},
 	MediaProviderUpdate:                 MediaProviderUpdateEvent{},
-	SearchCmd:                           SearchCmdEvent{},
-	SearchResultUpdate:                  SearchResultUpdateEvent{},
+	CmdMiaosicSearch:                    CmdMiaosicSearchData{},
+	ReplyMiaosicSearch:                  ReplyMiaosicSearchData{},
 	GUISetPlayerWindowOpenCmd:           GUISetPlayerWindowOpenCmdEvent{},
 }
 
 func init() {
-	for _, v := range []model.PlaylistID{model.PlaylistIDSystem, model.PlaylistIDPlayer, model.PlaylistIDHistory} {
+	for _, v := range []model.PlaylistID{model.PlaylistIDSystem, model.PlaylistIDPlayer} {
 		EventsMapping[PlaylistDetailUpdate(v)] = PlaylistDetailUpdateEvent{}
 		EventsMapping[PlaylistMoveCmd(v)] = PlaylistMoveCmdEvent{}
 		EventsMapping[PlaylistSetIndexCmd(v)] = PlaylistSetIndexCmdEvent{}

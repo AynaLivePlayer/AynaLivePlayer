@@ -49,7 +49,7 @@ func (c *wsClient) start() {
 			return
 		}
 		if globalEnableWsHubControl {
-			_ = global.EventBus.Publish(data.EventID, actualEventData)
+			_ = global.EventBus.PublishToChannel(eventChannel, data.EventID, actualEventData)
 		}
 	}
 }

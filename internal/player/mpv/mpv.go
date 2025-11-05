@@ -199,16 +199,20 @@ func registerCmdHandler() {
 			})
 		mediaInfo := evnt.Data.(events.PlayerPlayCmdEvent).Media.Info
 		media := evnt.Data.(events.PlayerPlayCmdEvent).Media
-		if m, err := miaosic.GetMediaInfo(media.Info.Meta); err == nil {
-			media.Info = m
+		resp, err := global.EventBus.Call(events.CmdMiaosicGetMediaInfo, events.ReplyMiaosicGetMediaInfo,
+			events.CmdMiaosicGetMediaInfoData{Meta: media.Info.Meta})
+		if err == nil && resp.Data.(events.ReplyMiaosicGetMediaInfoData).Error == nil {
+			media.Info = resp.Data.(events.ReplyMiaosicGetMediaInfoData).Info
 		}
 		_ = global.EventBus.Publish(events.PlayerPlayingUpdate, events.PlayerPlayingUpdateEvent{
 			Media:   media,
 			Removed: false,
 		})
 		log.Infof("[MPV Player] Play media %s", mediaInfo.Title)
-		mediaUrls, err := miaosic.GetMediaUrl(mediaInfo.Meta, miaosic.QualityAny)
-		if err != nil || len(mediaUrls) == 0 {
+		resp, err = global.EventBus.Call(events.CmdMiaosicGetMediaUrl, events.ReplyMiaosicGetMediaUrl,
+			events.CmdMiaosicGetMediaUrlData{Meta: media.Info.Meta, Quality: miaosic.QualityAny})
+		mediaUrls := resp.Data.(events.ReplyMiaosicGetMediaUrlData)
+		if err != nil || mediaUrls.Error != nil || len(mediaUrls.Urls) == 0 {
 			log.Warn("[MPV PlayControl] get media url failed ", mediaInfo.Meta.ID(), err)
 			if err := libmpv.Command([]string{"stop"}); err != nil {
 				log.Error("[MPV PlayControl] failed to stop", err)
@@ -220,7 +224,7 @@ func registerCmdHandler() {
 				})
 			return
 		}
-		mediaUrl := mediaUrls[0]
+		mediaUrl := mediaUrls.Urls[0]
 		if val, ok := mediaUrl.Header["User-Agent"]; ok {
 			log.Debug("[MPV PlayControl] set user-agent for mpv player")
 			err := libmpv.SetPropertyString("user-agent", val)

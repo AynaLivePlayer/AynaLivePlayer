@@ -10,8 +10,6 @@ import (
 )
 
 func Initialize() {
-	handleSearch()
-	createLyricLoader()
 	handlePlayNext()
 }
 

@@ -4,8 +4,8 @@ import (
 	"AynaLivePlayer/core/events"
 	"AynaLivePlayer/core/model"
 	"AynaLivePlayer/global"
-	"AynaLivePlayer/gui"
 	"AynaLivePlayer/gui/component"
+	config2 "AynaLivePlayer/gui/views/config"
 	"AynaLivePlayer/pkg/config"
 	"AynaLivePlayer/pkg/eventbus"
 	"AynaLivePlayer/pkg/i18n"
@@ -92,7 +92,7 @@ func (t *TextInfo) Enable() (err error) {
 	config.LoadConfig(t)
 	t.reloadTemplates()
 	t.registerHandlers()
-	gui.AddConfigLayout(t)
+	config2.AddConfigLayout(t)
 	return nil
 }
 
