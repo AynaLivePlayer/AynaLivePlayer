@@ -1,12 +1,12 @@
 module AynaLivePlayer
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.24.4
 
 replace (
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0 => ./pkg/liveroom-sdk // submodule
-	github.com/AynaLivePlayer/miaosic v0.2.3 => ./pkg/miaosic // submodule
+	github.com/AynaLivePlayer/miaosic v0.2.5 => ./pkg/miaosic // submodule
 
 	github.com/saltosystems/winrt-go => github.com/go-musicfox/winrt-go v0.1.4 // winrt with media foundation
 )
@@ -14,7 +14,7 @@ replace (
 require (
 	fyne.io/fyne/v2 v2.7.0
 	github.com/AynaLivePlayer/liveroom-sdk v0.1.0
-	github.com/AynaLivePlayer/miaosic v0.2.3
+	github.com/AynaLivePlayer/miaosic v0.2.5
 	github.com/adrg/libvlc-go/v3 v3.1.6
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
@@ -32,8 +32,8 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	go.uber.org/zap v1.27.0
-	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
-	golang.org/x/sys v0.34.0
+	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
+	golang.org/x/sys v0.37.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -74,16 +74,16 @@ require (
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
-	github.com/spf13/cast v1.9.2 // indirect
+	github.com/spf13/cast v1.10.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
-	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/image v0.24.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
