@@ -60,7 +60,7 @@ func (w *SourceLogin) Disable() error {
 		if p, ok := miaosic.GetProvider(pname); ok {
 			pl, ok2 := p.(miaosic.Loginable)
 			if ok2 {
-				w.log.Info("save session for %s", pname)
+				w.log.Infof("save session for %s", pname)
 				w.sessions[pname] = pl.SaveSession()
 			}
 		}
@@ -129,7 +129,9 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}
-			currentUser.SetText(i18n.T("plugin.sourcelogin.current_user.notlogin"))
+			fyne.DoAndWait(func() {
+				currentUser.SetText(i18n.T("plugin.sourcelogin.current_user.notlogin"))
+			})
 			w.sessions[providerChoice.Selected] = ""
 		},
 	)
@@ -147,7 +149,9 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 			if providerChoice.Selected == "" {
 				return
 			}
-			qrStatus.SetText("")
+			fyne.DoAndWait(func() {
+				qrStatus.SetText("")
+			})
 			w.log.Info("getting a new qr code for login")
 			pvdr, _ := miaosic.GetProvider(providerChoice.Selected)
 			provider := pvdr.(miaosic.Loginable)
@@ -165,9 +169,11 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 				return
 			}
 			//w.log.Debug("create img from raw data")
-			pic := canvas.NewImageFromReader(bytes.NewReader(data), "qrcode")
-			qrcodeImg.Resource = pic.Resource
-			qrcodeImg.Refresh()
+			fyne.DoAndWait(func() {
+				pic := canvas.NewImageFromReader(bytes.NewReader(data), "qrcode")
+				qrcodeImg.Resource = pic.Resource
+				qrcodeImg.Refresh()
+			})
 		},
 	)
 	finishQrBtn := component.NewAsyncButton(
@@ -189,12 +195,16 @@ func (w *SourceLogin) CreatePanel() fyne.CanvasObject {
 					events.ErrorUpdateEvent{Error: err})
 				return
 			}
-			qrStatus.SetText(result.Message)
+			fyne.DoAndWait(func() {
+				qrStatus.SetText(result.Message)
+			})
 			if result.Success {
 				currentLoginSession = nil
-				qrcodeImg.Resource = resource.ImageEmptyQrCode
-				qrcodeImg.Refresh()
-				providerChoice.OnChanged(currentProvider)
+				fyne.DoAndWait(func() {
+					qrcodeImg.Resource = resource.ImageEmptyQrCode
+					qrcodeImg.Refresh()
+					providerChoice.OnChanged(currentProvider)
+				})
 				w.sessions[currentProvider] = provider.SaveSession()
 			}
 		},
