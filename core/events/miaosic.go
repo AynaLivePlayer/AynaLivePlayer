@@ -45,7 +45,8 @@ type ReplyMiaosicQrLoginData struct {
 const CmdMiaosicQrLoginVerify = "cmd.miaosic.qrLoginVerify"
 
 type CmdMiaosicQrLoginVerifyData struct {
-	Session miaosic.QrLoginSession `json:"session"`
+	Provider string                 `json:"provider"`
+	Session  miaosic.QrLoginSession `json:"session"`
 }
 
 const ReplyMiaosicQrLoginVerify = "reply.miaosic.qrLoginVerify"

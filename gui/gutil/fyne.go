@@ -19,3 +19,8 @@ func RunInFyneThread(fn func()) {
 	//fn()
 	fyne.Do(fn)
 }
+
+func RunInFyneThreadAndWait(fn func()) {
+	//fn()
+	fyne.DoAndWait(fn)
+}
